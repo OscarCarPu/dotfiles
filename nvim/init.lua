@@ -5,6 +5,7 @@ vim.opt.shiftwidth = 2
 vim.opt.expandtab = true
 vim.opt.smartindent = true
 vim.g.mapleader = " "
+vim.opt.clipboard = "unnamedplus"
 
 -- lazy.nvim
 local lazypath = vim.fn.stdpath('data') .. "/lazy/lazy.nvim"
@@ -67,6 +68,14 @@ vim.keymap.set("n","<leader>fb",telescope.buffers, {})
 -- Nvim Tree
 require("nvim-tree").setup({
   view = { width = 30 },
+  filters = {
+    dotfiles = false,
+    git_ignored = false
+  },
+  git = {
+    enable = true,
+    ignore = false
+  },
   renderer = { icons = { show = {
     file = true,
     folder = true,
