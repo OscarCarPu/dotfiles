@@ -10,6 +10,8 @@
         "clock"
     ],
     "modules-right": [
+        "pulseaudio#speaker",
+        "pulseaudio#mic",
         "network",
         "cpu",
         "memory",
@@ -31,6 +33,28 @@
         "format": "{:%H:%M:%S}",
         "tooltip-format": "<big>{:%Y %B}</big>\n<tt><small>{calendar}</small></tt>",
         "format-alt": "{:%Y-%m-%d %H:%M:%S}"
+    },
+    "pulseaudio#speaker": {
+      "format": "{icon}  {volume}%",
+      "format-muted": " Muted",
+      "on-scroll-up": "pactl set-sink-volume @DEFAULT_SINK@ +2%",
+      "on-scroll-down": "pactl set-sink-volume @DEFAULT_SINK@ -2%",
+      "on-click": "pactl set-sink-mute @DEFAULT_SINK@ toggle",
+      "on-click-middle": "pavucontrol",
+      "tooltip": true,
+      "format-icons": {
+        "default": ["", "", ""]
+      },
+    },
+    "pulseaudio#mic": {
+      "format-source": " {volume}%",
+      "format-source-muted": "  Muted",
+      "format": "{format_source}",
+      "on-scroll-up": "pactl set-source-volume @DEFAULT_SOURCE@ +2%",
+      "on-scroll-down": "pactl set-source-volume @DEFAULT_SOURCE@ -2%",
+      "on-click": "pactl set-source-mute @DEFAULT_SOURCE@ toggle",
+      "tooltip": true,
+      "on-click-middle": "pavucontrol",
     },
     "cpu": {
         "format": "{usage}% ",
