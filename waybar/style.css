@@ -5,7 +5,7 @@
 }
 
 window#waybar {
-    background-color: rgba(29, 31,33, 0.8);
+    background-color: rgba(29, 31, 33, 0.8);
     color: #cdd6f4;
     transition-property: background-color;
     transition-duration: .5s;
@@ -15,24 +15,12 @@ window#waybar.hidden {
     opacity: 0.2;
 }
 
-window#waybar.termite {
-    background-color: #3F3F3F;
-}
-
-window#waybar.chromium {
-    background-color: #000000;
-    border: none;
-}
-
 button {
-    /* Use box-shadow instead of border so the text isn't offset */
     box-shadow: inset 0 -3px transparent;
-    /* Avoid rounded borders under each button name */
     border: none;
     border-radius: 0;
 }
 
-/* https://github.com/Alexays/Waybar/wiki/FAQ#the-workspace-buttons-have-a-strange-hover-effect */
 button:hover {
     background: inherit;
     box-shadow: inset 0 -3px #ffffff;
@@ -40,7 +28,7 @@ button:hover {
 
 /* you can set a style on hover for any module like this */
 #pulseaudio:hover {
-    background-color: #a37800;
+    background-color: #a37800; /* Example hover color */
 }
 
 #workspaces button {
@@ -68,55 +56,55 @@ button:hover {
     background-color: #eb4d4b;
 }
 
-#mode {
-    background-color: #64727D;
-    box-shadow: inset 0 -3px #ffffff;
-}
-
 #clock,
 #battery,
 #cpu,
 #memory,
-#disk,
-#temperature,
-#backlight,
 #network,
 #pulseaudio,
-#wireplumber,
-#custom-media,
-#tray,
-#mode,
-#idle_inhibitor,
-#scratchpad,
-#power-profiles-daemon,
-#mpd,
-#custom-power {
+#custom-power,
+#hyprland-window { /* Added hyprland-window for consistency */
     padding: 0 10px;
-    background-color: #2e3440;
+    background-color: #2e3440; /* A darker, more consistent background */
     margin: 0 2px;
+    border-radius: 4px; /* Slightly rounded corners for modules */
 }
 
-#window,
-#workspaces {
+#hyprland-window {
+    margin: 0 4px;
+    background-color: transparent; /* Make the window title background transparent */
+    padding: 0; /* Remove padding for the window module */
+}
+
+#hyprland-workspaces { /* Style the workspaces module as well */
     margin: 0 4px;
 }
 
-#pulseaudio {
-    color: #a6e3a1;
+#pulseaudio#speaker,
+#pulseaudio#mic { /* Specific styles for speaker and mic */
+    background-color: #a6e3a1; /* Light green for audio modules */
+    color: #2e3440; /* Dark text for contrast */
+}
+
+#pulseaudio#speaker.muted,
+#pulseaudio#mic.muted {
+    background-color: #90b1b1;
+    color: #2a5c45;
 }
 
 #clock {
-    background-color: #64727D;
+    background-color: #64727D; /* A distinct color for the clock */
+    color: #cdd6f4;
 }
 
 #battery {
-    background-color: #ffffff;
-    color: #000000;
+    background-color: #5d6d7e; /* A calm grey-blue for battery */
+    color: #ffffff;
 }
 
 #battery.charging, #battery.plugged {
     color: #ffffff;
-    background-color: #26A65B;
+    background-color: #26A65B; /* Green for charging */
 }
 
 @keyframes blink {
@@ -126,7 +114,6 @@ button:hover {
     }
 }
 
-/* Using steps() instead of linear as a timing function to limit cpu usage */
 #battery.critical:not(.charging) {
     background-color: #f53c3c;
     color: #ffffff;
@@ -137,183 +124,26 @@ button:hover {
     animation-direction: alternate;
 }
 
-#power-profiles-daemon {
-    padding-right: 15px;
-}
-
-#power-profiles-daemon.performance {
-    background-color: #f53c3c;
-    color: #ffffff;
-}
-
-#power-profiles-daemon.balanced {
-    background-color: #2980b9;
-    color: #ffffff;
-}
-
-#power-profiles-daemon.power-saver {
-    background-color: #2ecc71;
-    color: #000000;
-}
-
-label:focus {
-    background-color: #000000;
-}
-
 #cpu {
-    background-color: #2ecc71;
+    background-color: #2ecc71; /* Bright green for CPU */
     color: #000000;
 }
 
 #memory {
-    background-color: #9b59b6;
-}
-
-#disk {
-    background-color: #964B00;
-}
-
-#backlight {
-    background-color: #90b1b1;
+    background-color: #9b59b6; /* Purple for memory */
+    color: #ffffff; /* White text for contrast */
 }
 
 #network {
-    background-color: #2980b9;
+    background-color: #2980b9; /* Blue for network */
+    color: #ffffff;
 }
 
 #network.disconnected {
-    background-color: #f53c3c;
+    background-color: #f53c3c; /* Red for disconnected network */
 }
 
-#pulseaudio {
-    background-color: #f1c40f;
-    color: #000000;
-}
-
-#pulseaudio.muted {
-    background-color: #90b1b1;
-    color: #2a5c45;
-}
-
-#wireplumber {
-    background-color: #fff0f5;
-    color: #000000;
-}
-
-#wireplumber.muted {
-    background-color: #f53c3c;
-}
-
-#custom-media {
-    background-color: #66cc99;
-    color: #2a5c45;
-    min-width: 100px;
-}
-
-#custom-media.custom-spotify {
-    background-color: #66cc99;
-}
-
-#custom-media.custom-vlc {
-    background-color: #ffa000;
-}
-
-#temperature {
-    background-color: #f0932b;
-}
-
-#temperature.critical {
-    background-color: #eb4d4b;
-}
-
-#tray {
-    background-color: #2980b9;
-}
-
-#tray > .passive {
-    -gtk-icon-effect: dim;
-}
-
-#tray > .needs-attention {
-    -gtk-icon-effect: highlight;
-    background-color: #eb4d4b;
-}
-
-#idle_inhibitor {
-    background-color: #2d3436;
-}
-
-#idle_inhibitor.activated {
-    background-color: #ecf0f1;
-    color: #2d3436;
-}
-
-#mpd {
-    background-color: #66cc99;
-    color: #2a5c45;
-}
-
-#mpd.disconnected {
-    background-color: #f53c3c;
-}
-
-#mpd.stopped {
-    background-color: #90b1b1;
-}
-
-#mpd.paused {
-    background-color: #51a37a;
-}
-
-#language {
-    background: #00b093;
-    color: #740864;
-    padding: 0 5px;
-    margin: 0 5px;
-    min-width: 16px;
-}
-
-#keyboard-state {
-    background: #97e1ad;
-    color: #000000;
-    padding: 0 0px;
-    margin: 0 5px;
-    min-width: 16px;
-}
-
-#keyboard-state > label {
-    padding: 0 5px;
-}
-
-#keyboard-state > label.locked {
-    background: rgba(0, 0, 0, 0.2);
-}
-
-#scratchpad {
-    background: rgba(0, 0, 0, 0.2);
-}
-
-#scratchpad.empty {
-	background-color: transparent;
-}
-
-#privacy {
-    padding: 0;
-}
-
-#privacy-item {
-    padding: 0 5px;
-    color: white;
-}
-
-#privacy-item.screenshare {
-    background-color: #cf5700;
-}
-
-#privacy-item.audio-in {
-    background-color: #1ca000;
-}
-
-#privacy-item.audio-out {
-    background-color: #0069d4;
+#custom-power {
+    background-color: #e74c3c; /* Red for power button */
+    color: #ffffff;
 }
