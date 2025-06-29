@@ -13,6 +13,7 @@
         "pulseaudio#speaker",
         "pulseaudio#mic",
         "network",
+        "custom/brightness",
         "cpu",
         "memory",
         "battery",
@@ -56,6 +57,15 @@
       "on-click": "pactl set-source-mute @DEFAULT_SOURCE@ toggle",
       "tooltip": true,
       "on-click-middle": "pavucontrol",
+    },
+    "custom/brightness": {
+      "format": "{}",
+      "exec": "~/.config/hypr/scripts/brightness.sh get",
+      "return-type": "json",
+      "interval": 1,
+      "on-scroll-up": "~/.config/hypr/scripts/brightness.sh up",
+      "on-scroll-down": "~/.config/hypr/scripts/brightness.sh down",
+      "tooltip": false
     },
     "cpu": {
         "format": "{usage}% ",

@@ -61,6 +61,7 @@ button:hover {
 #cpu,
 #memory,
 #network,
+#custom-brightness,
 #pulseaudio,
 #custom-power,
 #hyprland-window { /* Added hyprland-window for consistency */
