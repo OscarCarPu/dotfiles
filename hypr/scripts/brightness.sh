@@ -12,7 +12,7 @@ get)
    BRIGHTNESS=$(brightnessctl -d "$BRIGHTNESS_DEVICE" get)
    MAX_BRIGHTNESS=$(brightnessctl -d "$BRIGHTNESS_DEVICE" max)
    PERCENTAGE=$((BRIGHTNESS * 100 / MAX_BRIGHTNESS))
-   echo "{\"text\": \"󰌵 $PERCENTAGE%\", \"class\": \"brightness\"}"
+   echo "$PERCENTAGE"
   ;;
 *)
   echo "Uso: $0 [up|down|get]"
