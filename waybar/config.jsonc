@@ -32,7 +32,7 @@
     "clock": {
         "timezone": "Europe/Madrid",
         "interval": 1,
-        "format": "{:%H:%M:%S}",
+        "format": "{:%m-%d %H:%M}",
         "tooltip-format": "<big>{:%Y %B}</big>\n<tt><small>{calendar}</small></tt>",
         "format-alt": "{:%Y-%m-%d %H:%M:%S}"
     },
