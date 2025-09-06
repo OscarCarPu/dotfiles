@@ -8,4 +8,9 @@ return {
       }
     end,
   },
+  {
+    "OXY2DEV/markview.nvim",
+    dependencies = { "nvim-treesitter/nvim-treesitter" },
+    config = function() require("markview").setup {} end,
+  },
 }

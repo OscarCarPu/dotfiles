@@ -6,6 +6,7 @@ return {
       "lua",
       "vim",
       "jinja",
+      "latex",
       -- add more arguments for adding more treesitter parsers
     },
     highlight = {
