@@ -1,0 +1,3 @@
+skip_dir = ".*\.git|venv|node_modules"
+skip_file = ".*\.tmp"
+sync_dir = "~/Files"
