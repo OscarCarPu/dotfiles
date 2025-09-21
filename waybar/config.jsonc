@@ -57,7 +57,7 @@
         "format-disconnected": "Disconnected ⚠",
         "max-length": 80,
         "on-click": "nm-applet --indicator",
-        "format-alt": "{ifname}"
+        "format-alt": "{essid}"
     },
     "custom/brightness": {
         "format": "󰖨 {}%",
