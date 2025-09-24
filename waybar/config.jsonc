@@ -56,7 +56,7 @@
         "format-linked": "{ifname} (No IP) ",
         "format-disconnected": "Disconnected ⚠",
         "max-length": 80,
-        "on-click": "nm-applet --indicator",
+        "on-click-right": "nm-connection-editor",
         "format-alt": "{essid}"
     },
     "custom/brightness": {
