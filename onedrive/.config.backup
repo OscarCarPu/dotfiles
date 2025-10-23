@@ -1,3 +1,0 @@
-skip_dir = ".*\.git|venv|node_modules"
-skip_file = "~*|.~*|*.tmp|*.swp|*.partial"
-sync_dir = "~/Files"

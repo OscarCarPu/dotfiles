@@ -1,3 +1,19 @@
+# Hypr wallpapers and state
 hypr/wallpapers/*
 hypr/wallpapers_index.txt
 hypr/wallpaper_index.txt
+
+# OneDrive sensitive and state files
+onedrive/refresh_token
+onedrive/items.sqlite3
+onedrive/.config.backup
+onedrive/.config.hash
+onedrive/.sync_list.hash
+
+# Backup files
+*.backup
+*~
+
+# Cache and state files
+.cache/
+*.log
