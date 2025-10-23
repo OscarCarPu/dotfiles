@@ -1,0 +1,24 @@
+* {
+  font-size: 14px;
+}
+
+.notification {
+  background: rgba(30, 30, 30, 0.95);
+  border-radius: 5px;
+  margin: 6px;
+  padding: 10px;
+}
+
+.summary {
+  font-weight: bold;
+  color: rgba(202, 151, 33, 1);
+}
+
+.body {
+  color: #e0e0e0;
+}
+
+.control-center {
+  background: rgba(30, 30, 30, 0.95);
+  border-radius: 5px;
+}
