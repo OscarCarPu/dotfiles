@@ -1,3 +1,35 @@
+:root {
+    /* Color palette */
+    --bg-primary: rgba(29, 31, 33, 0.8);
+    --bg-module: #2e3440;
+    --bg-clock: #64727D;
+    --bg-battery: #5d6d7e;
+    --bg-battery-charging: #26A65B;
+    --bg-battery-critical: #f53c3c;
+    --bg-cpu: #2ecc71;
+    --bg-memory: #9b59b6;
+    --bg-network: #2980b9;
+    --bg-network-disconnected: #f53c3c;
+    --bg-audio: #a6e3a1;
+    --bg-audio-muted: #90b1b1;
+    --bg-power: #e74c3c;
+
+    --text-primary: #cdd6f4;
+    --text-dark: #2e3440;
+    --text-audio-muted: #2a5c45;
+    --text-white: #ffffff;
+    --text-black: #000000;
+
+    --workspace-color: #89b4fa;
+    --workspace-active: #fab387;
+    --workspace-urgent: #eb4d4b;
+
+    /* Spacing */
+    --module-padding: 0 10px;
+    --module-margin: 0 2px;
+    --module-radius: 4px;
+}
+
 * {
     border-radius: 0;
     font-family: "FiraCode Nerd Font", "Symbols Nerd Font", "Font Awesome 6 Free", sans-serif;
@@ -5,8 +37,8 @@
 }
 
 window#waybar {
-    background-color: rgba(29, 31, 33, 0.8);
-    color: #cdd6f4;
+    background-color: var(--bg-primary);
+    color: var(--text-primary);
     transition-property: background-color;
     transition-duration: .5s;
 }
@@ -34,7 +66,7 @@ button:hover {
 #workspaces button {
     padding: 0 5px;
     background-color: transparent;
-    color: #89b4fa;
+    color: var(--workspace-color);
     border-bottom: 1px solid transparent;
 }
 
@@ -43,17 +75,17 @@ button:hover {
 }
 
 #workspaces button.active {
-    color: #fab387;
-    border-bottom: 2px solid #fab387;
+    color: var(--workspace-active);
+    border-bottom: 2px solid var(--workspace-active);
 }
 
 #workspaces button.focused {
-    background-color: #64727D;
-    box-shadow: inset 0 -3px #ffffff;
+    background-color: var(--bg-clock);
+    box-shadow: inset 0 -3px var(--text-white);
 }
 
 #workspaces button.urgent {
-    background-color: #eb4d4b;
+    background-color: var(--workspace-urgent);
 }
 
 #clock,
@@ -64,11 +96,11 @@ button:hover {
 #custom-brightness,
 #pulseaudio,
 #custom-power,
-#hyprland-window { /* Added hyprland-window for consistency */
-    padding: 0 10px;
-    background-color: #2e3440; /* A darker, more consistent background */
-    margin: 0 2px;
-    border-radius: 4px; /* Slightly rounded corners for modules */
+#hyprland-window {
+    padding: var(--module-padding);
+    background-color: var(--bg-module);
+    margin: var(--module-margin);
+    border-radius: var(--module-radius);
 }
 
 #hyprland-window {
@@ -82,42 +114,42 @@ button:hover {
 }
 
 #pulseaudio#speaker,
-#pulseaudio#mic { /* Specific styles for speaker and mic */
-    background-color: #a6e3a1; /* Light green for audio modules */
-    color: #2e3440; /* Dark text for contrast */
+#pulseaudio#mic {
+    background-color: var(--bg-audio);
+    color: var(--text-dark);
 }
 
 #pulseaudio#speaker.muted,
 #pulseaudio#mic.muted {
-    background-color: #90b1b1;
-    color: #2a5c45;
+    background-color: var(--bg-audio-muted);
+    color: var(--text-audio-muted);
 }
 
 #clock {
-    background-color: #64727D; /* A distinct color for the clock */
-    color: #cdd6f4;
+    background-color: var(--bg-clock);
+    color: var(--text-primary);
 }
 
 #battery {
-    background-color: #5d6d7e; /* A calm grey-blue for battery */
-    color: #ffffff;
+    background-color: var(--bg-battery);
+    color: var(--text-white);
 }
 
 #battery.charging, #battery.plugged {
-    color: #ffffff;
-    background-color: #26A65B; /* Green for charging */
+    color: var(--text-white);
+    background-color: var(--bg-battery-charging);
 }
 
 @keyframes blink {
     to {
-        background-color: #ffffff;
-        color: #000000;
+        background-color: var(--text-white);
+        color: var(--text-black);
     }
 }
 
 #battery.critical:not(.charging) {
-    background-color: #f53c3c;
-    color: #ffffff;
+    background-color: var(--bg-battery-critical);
+    color: var(--text-white);
     animation-name: blink;
     animation-duration: 0.5s;
     animation-timing-function: steps(12);
@@ -126,25 +158,25 @@ button:hover {
 }
 
 #cpu {
-    background-color: #2ecc71; /* Bright green for CPU */
-    color: #000000;
+    background-color: var(--bg-cpu);
+    color: var(--text-black);
 }
 
 #memory {
-    background-color: #9b59b6; /* Purple for memory */
-    color: #ffffff; /* White text for contrast */
+    background-color: var(--bg-memory);
+    color: var(--text-white);
 }
 
 #network {
-    background-color: #2980b9; /* Blue for network */
-    color: #ffffff;
+    background-color: var(--bg-network);
+    color: var(--text-white);
 }
 
 #network.disconnected {
-    background-color: #f53c3c; /* Red for disconnected network */
+    background-color: var(--bg-network-disconnected);
 }
 
 #custom-power {
-    background-color: #e74c3c; /* Red for power button */
-    color: #ffffff;
+    background-color: var(--bg-power);
+    color: var(--text-white);
 }

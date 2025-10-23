@@ -1,22 +1,49 @@
 #!/bin/bash
+set -euo pipefail
 
-WALLPAPER_DIR="$HOME/.config/hypr/wallpapers"
-INDEX_FILE="$HOME/.config/hypr/wallpaper_index.txt"
+WALLPAPER_DIR="$HOME/Files/Imágenes/Wallpapers"
 
-if [ -d "$WALLPAPER_DIR" ] && [ "$(ls -A "$WALLPAPER_DIR")" ]; then
-    WALLPAPERS=( $(ls -1 "$WALLPAPER_DIR") )
-    NUM_WALLPAPERS=${#WALLPAPERS[@]}
-    CURRENT_INDEX=0
-    if [ -f "$INDEX_FILE" ]; then
-        CURRENT_INDEX=$(cat "$INDEX_FILE")
-    fi
-    NEXT_INDEX=$(( (CURRENT_INDEX + 1) % NUM_WALLPAPERS ))
-    NEXT_WALLPAPER="${WALLPAPERS[$NEXT_INDEX]}"
-    WALLPAPER_PATH="$WALLPAPER_DIR/$NEXT_WALLPAPER"
-
-    swaybg -i "$WALLPAPER_PATH" -m fit -c "#000000" &
-
-    pgrep swaybg | grep -v "$!" | xargs kill
-
-    echo "$NEXT_INDEX" > "$INDEX_FILE"
+# Verify swaybg is installed
+if ! command -v swaybg &> /dev/null; then
+    echo "Error: swaybg not found" >&2
+    exit 1
 fi
+
+# Check if wallpaper directory exists
+if [ ! -d "$WALLPAPER_DIR" ]; then
+    echo "Error: Wallpaper directory not found: $WALLPAPER_DIR" >&2
+    exit 1
+fi
+
+# Get sorted list of wallpapers
+mapfile -t WALLPAPERS < <(find "$WALLPAPER_DIR" -maxdepth 1 -type f \( -iname "*.jpg" -o -iname "*.png" -o -iname "*.jpeg" \) | sort)
+
+NUM_WALLPAPERS=${#WALLPAPERS[@]}
+
+if [ "$NUM_WALLPAPERS" -eq 0 ]; then
+    echo "Error: No wallpapers found in $WALLPAPER_DIR" >&2
+    exit 1
+fi
+
+# Find current wallpaper by checking swaybg process
+CURRENT_WALLPAPER=$(pgrep -a swaybg | grep -oP '(?<=-i )[^ ]+' | head -1 || echo "")
+
+# Find next wallpaper in sequence
+NEXT_WALLPAPER="${WALLPAPERS[0]}"
+
+if [ -n "$CURRENT_WALLPAPER" ]; then
+    for i in "${!WALLPAPERS[@]}"; do
+        if [ "${WALLPAPERS[$i]}" = "$CURRENT_WALLPAPER" ]; then
+            NEXT_INDEX=$(( (i + 1) % NUM_WALLPAPERS ))
+            NEXT_WALLPAPER="${WALLPAPERS[$NEXT_INDEX]}"
+            break
+        fi
+    done
+fi
+
+# Kill old swaybg instances
+pkill -x swaybg 2>/dev/null || true
+sleep 0.1
+
+# Start new wallpaper with fill mode to always show properly
+swaybg -i "$NEXT_WALLPAPER" -m fill &

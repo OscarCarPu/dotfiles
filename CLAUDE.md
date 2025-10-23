@@ -6,20 +6,25 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 This is a personal dotfiles repository for an Arch Linux system running Hyprland (Wayland compositor). The configuration manages a dual-monitor desktop environment with custom keybindings, scripts, and integrations.
 
+**Important**: All paths reference `~/dotfiles/` directly (not `~/.config/`). The configuration runs from the repository directory without requiring symlinks.
+
 ## Architecture
 
 ### Core Components
 
 **Hyprland Configuration** (`hypr/`)
-- Main config: `hypr/hyprland.conf` - Central Hyprland configuration with monitor setup, keybindings, window rules, and startup programs
-- Scripts directory: `hypr/scripts/` - Utility scripts for system management
-- Wallpapers: `hypr/wallpapers/` - Wallpaper images with rotation tracking via `wallpaper_index.txt`
+- Main config: `hypr/hyprland.conf` - Central Hyprland configuration with monitor setup, keybindings, window rules, startup programs, and misc settings (VRR, power management, window swallowing)
+- Scripts directory: `hypr/scripts/` - Utility scripts for system management with proper error handling
 
 **Waybar** (`waybar/`)
 - Status bar configuration for Hyprland
 - `config.jsonc` defines modules (workspaces, clock, CPU, memory, network, brightness, audio, battery)
 - Custom modules integrate with hypr scripts (brightness control)
-- `style.css` provides styling
+- `style.css` provides styling with CSS variables for easy theme customization
+
+**Neovim Configuration** (`nvim/`)
+- LazyVim-based configuration
+- Custom plugins for DBML and additional functionality
 
 **SwayNC** (`swaync/`)
 - Notification daemon configuration for Wayland
@@ -40,15 +45,16 @@ This is a personal dotfiles repository for an Arch Linux system running Hyprland
 **Startup Services** (auto-launched via `exec-once`):
 - Waybar status bar
 - SwayNC notification daemon
-- Wallpaper rotation script
-- Brightness monitoring loop (60s interval)
+- Automatic wallpaper rotation (every 60 seconds)
+- Battery notification monitoring (every 30 seconds)
 - OneDrive background sync
 
 **Key Scripts**:
-- `brightness.sh` - Controls Intel backlight via brightnessctl (up/down/get modes)
-- `set_wallpaper.sh` - Rotates wallpapers using swaybg with index tracking
-- `onedrive_sync.sh` - Triggers OneDrive sync in background
-- `shutdown.sh` - Interactive shutdown with system update workflow (OneDrive sync → pacman → yay → shutdown prompt)
+- `brightness.sh` - Controls Intel backlight via brightnessctl with error handling (up/down/get modes)
+- `set_wallpaper.sh` - Automatically rotates wallpapers from `~/Files/Imágenes/Wallpapers` using swaybg. Detects current wallpaper and cycles alphabetically without requiring index files
+- `battery_notify.sh` - Monitors battery and sends notifications at 15% and 10% with state tracking to prevent duplicates
+- `onedrive_sync.sh` - Triggers OneDrive sync with logging to `~/.cache/onedrive_sync.log`
+- `shutdown.sh` - Interactive shutdown with comprehensive error handling for system updates (OneDrive sync → pacman → yay → shutdown prompt)
 
 ### Key Bindings
 
@@ -88,9 +94,11 @@ bash hypr/scripts/set_wallpaper.sh
 ```
 
 **Script Testing**:
-- Scripts use standard bash - test with `bash -n <script>` for syntax
+- Scripts use bash with `set -euo pipefail` for safety - test with `bash -n <script>` for syntax
+- All scripts include error handling and dependency checks
 - Brightness script requires `brightnessctl` and Intel backlight device
-- Wallpaper script requires `swaybg` and populated `hypr/wallpapers/` directory
+- Wallpaper script requires `swaybg` and wallpapers in `~/Files/Imágenes/Wallpapers/`
+- Run `./scripts/check_dependencies.sh` to verify all required packages are installed
 
 ## Dependencies
 
@@ -104,30 +112,47 @@ bash hypr/scripts/set_wallpaper.sh
 - wl-clipboard - Wayland clipboard
 - wofi - Application launcher
 - kitty - Terminal emulator
-- onedrive - OneDrive sync client
-- pacman, yay - Package managers
+- google-chrome - Web browser
+- libnotify, libpulse - System libraries
+
+**Optional/AUR packages**:
+- onedrive-abraunegg - OneDrive sync client
+- yay - AUR helper
+- spotify - Music player
+- wlogout - Logout menu (referenced in waybar)
+- neovim - Text editor
+
+Run `./scripts/check_dependencies.sh` to check which packages are installed.
 
 ## Configuration Locations
 
-This dotfiles repo expects to be deployed with configs linked to standard XDG locations:
-- Hyprland: `~/.config/hypr/` → `dotfiles/hypr/`
-- Waybar: `~/.config/waybar/` → `dotfiles/waybar/`
-- SwayNC: `~/.config/swaync/` → `dotfiles/swaync/`
-- OneDrive: `~/.config/onedrive/` → `dotfiles/onedrive/`
+This dotfiles repository runs directly from `~/dotfiles/` without requiring symlinks. All paths in configurations and scripts reference `~/dotfiles/` directly:
+- Hyprland config: `~/dotfiles/hypr/hyprland.conf`
+- Scripts: `~/dotfiles/hypr/scripts/`
+- Waybar: `~/dotfiles/waybar/`
+- SwayNC: `~/dotfiles/swaync/`
+- Neovim: `~/dotfiles/nvim/`
+- OneDrive: `~/dotfiles/onedrive/`
 
-Scripts reference paths as `~/.config/hypr/scripts/` - maintain these paths when modifying.
+**Installation**: Run `./scripts/install.sh` to set up the environment and check dependencies.
 
 ## Important Patterns
 
 **Path References**:
-- Scripts use absolute paths with `$HOME` or `~` expansion
-- Hyprland config uses `~/.config/hypr/scripts/` for script paths
+- All scripts use absolute paths with `$HOME` or `~` expansion
+- All configurations reference `~/dotfiles/` directly (not `~/.config/`)
+- Wallpapers stored in `~/Files/Imágenes/Wallpapers/` (synced via OneDrive)
 - OneDrive syncs to `~/Files` (not `~/OneDrive`)
 
-**State Files**:
-- `wallpaper_index.txt` - Tracks current wallpaper rotation position
-- `onedrive/items.sqlite3` - OneDrive sync state database
-- `onedrive/refresh_token` - Authentication token (sensitive)
+**State Files** (gitignored):
+- `~/.cache/battery_notify_state` - Battery notification state tracking
+- `~/.cache/onedrive_sync.log` - OneDrive sync logs
+- `onedrive/items.sqlite3` - OneDrive sync state database (sensitive)
+- `onedrive/refresh_token` - Authentication token (SENSITIVE - never commit!)
+
+**Security**:
+- `.gitignore` excludes sensitive OneDrive files and state files
+- All scripts include input validation and error handling
 
 **Window Rules**:
 - Kitty terminals with `kitty_float` title are floating/centered

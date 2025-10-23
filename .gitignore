@@ -1,7 +1,4 @@
-# Hypr wallpapers and state
-hypr/wallpapers/*
-hypr/wallpapers_index.txt
-hypr/wallpaper_index.txt
+# Hypr state files
 
 # OneDrive sensitive and state files
 onedrive/refresh_token
