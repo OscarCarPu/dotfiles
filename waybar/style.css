@@ -1,34 +1,26 @@
-:root {
-    /* Color palette */
-    --bg-primary: rgba(29, 31, 33, 0.8);
-    --bg-module: #2e3440;
-    --bg-clock: #64727D;
-    --bg-battery: #5d6d7e;
-    --bg-battery-charging: #26A65B;
-    --bg-battery-critical: #f53c3c;
-    --bg-cpu: #2ecc71;
-    --bg-memory: #9b59b6;
-    --bg-network: #2980b9;
-    --bg-network-disconnected: #f53c3c;
-    --bg-audio: #a6e3a1;
-    --bg-audio-muted: #90b1b1;
-    --bg-power: #e74c3c;
+@define-color bg-primary rgba(29, 31, 33, 0.8);
+@define-color bg-module #2e3440;
+@define-color bg-clock #64727D;
+@define-color bg-battery #5d6d7e;
+@define-color bg-battery-charging #26A65B;
+@define-color bg-battery-critical #f53c3c;
+@define-color bg-cpu #2ecc71;
+@define-color bg-memory #9b59b6;
+@define-color bg-network #2980b9;
+@define-color bg-network-disconnected #f53c3c;
+@define-color bg-audio #a6e3a1;
+@define-color bg-audio-muted #90b1b1;
+@define-color bg-power #e74c3c;
 
-    --text-primary: #cdd6f4;
-    --text-dark: #2e3440;
-    --text-audio-muted: #2a5c45;
-    --text-white: #ffffff;
-    --text-black: #000000;
+@define-color text-primary #cdd6f4;
+@define-color text-dark #2e3440;
+@define-color text-audio-muted #2a5c45;
+@define-color text-white #ffffff;
+@define-color text-black #000000;
 
-    --workspace-color: #89b4fa;
-    --workspace-active: #fab387;
-    --workspace-urgent: #eb4d4b;
-
-    /* Spacing */
-    --module-padding: 0 10px;
-    --module-margin: 0 2px;
-    --module-radius: 4px;
-}
+@define-color workspace-color #89b4fa;
+@define-color workspace-active #fab387;
+@define-color workspace-urgent #eb4d4b;
 
 * {
     border-radius: 0;
@@ -37,8 +29,8 @@
 }
 
 window#waybar {
-    background-color: var(--bg-primary);
-    color: var(--text-primary);
+    background-color: @bg-primary;
+    color: @text-primary;
     transition-property: background-color;
     transition-duration: .5s;
 }
@@ -66,7 +58,7 @@ button:hover {
 #workspaces button {
     padding: 0 5px;
     background-color: transparent;
-    color: var(--workspace-color);
+    color: @workspace-color;
     border-bottom: 1px solid transparent;
 }
 
@@ -75,17 +67,17 @@ button:hover {
 }
 
 #workspaces button.active {
-    color: var(--workspace-active);
-    border-bottom: 2px solid var(--workspace-active);
+    color: @workspace-active;
+    border-bottom: 2px solid @workspace-active;
 }
 
 #workspaces button.focused {
-    background-color: var(--bg-clock);
-    box-shadow: inset 0 -3px var(--text-white);
+    background-color: @bg-clock;
+    box-shadow: inset 0 -3px @text-white;
 }
 
 #workspaces button.urgent {
-    background-color: var(--workspace-urgent);
+    background-color: @workspace-urgent;
 }
 
 #clock,
@@ -97,10 +89,10 @@ button:hover {
 #pulseaudio,
 #custom-power,
 #hyprland-window {
-    padding: var(--module-padding);
-    background-color: var(--bg-module);
-    margin: var(--module-margin);
-    border-radius: var(--module-radius);
+    padding: 0 10px;
+    background-color: @bg-module;
+    margin: 0 2px;
+    border-radius: 4px;
 }
 
 #hyprland-window {
@@ -115,41 +107,41 @@ button:hover {
 
 #pulseaudio#speaker,
 #pulseaudio#mic {
-    background-color: var(--bg-audio);
-    color: var(--text-dark);
+    background-color: @bg-audio;
+    color: @text-dark;
 }
 
 #pulseaudio#speaker.muted,
 #pulseaudio#mic.muted {
-    background-color: var(--bg-audio-muted);
-    color: var(--text-audio-muted);
+    background-color: @bg-audio-muted;
+    color: @text-audio-muted;
 }
 
 #clock {
-    background-color: var(--bg-clock);
-    color: var(--text-primary);
+    background-color: @bg-clock;
+    color: @text-primary;
 }
 
 #battery {
-    background-color: var(--bg-battery);
-    color: var(--text-white);
+    background-color: @bg-battery;
+    color: @text-white;
 }
 
 #battery.charging, #battery.plugged {
-    color: var(--text-white);
-    background-color: var(--bg-battery-charging);
+    color: @text-white;
+    background-color: @bg-battery-charging;
 }
 
 @keyframes blink {
     to {
-        background-color: var(--text-white);
-        color: var(--text-black);
+        background-color: @text-white;
+        color: @text-black;
     }
 }
 
 #battery.critical:not(.charging) {
-    background-color: var(--bg-battery-critical);
-    color: var(--text-white);
+    background-color: @bg-battery-critical;
+    color: @text-white;
     animation-name: blink;
     animation-duration: 0.5s;
     animation-timing-function: steps(12);
@@ -158,25 +150,25 @@ button:hover {
 }
 
 #cpu {
-    background-color: var(--bg-cpu);
-    color: var(--text-black);
+    background-color: @bg-cpu;
+    color: @text-black;
 }
 
 #memory {
-    background-color: var(--bg-memory);
-    color: var(--text-white);
+    background-color: @bg-memory;
+    color: @text-white;
 }
 
 #network {
-    background-color: var(--bg-network);
-    color: var(--text-white);
+    background-color: @bg-network;
+    color: @text-white;
 }
 
 #network.disconnected {
-    background-color: var(--bg-network-disconnected);
+    background-color: @bg-network-disconnected;
 }
 
 #custom-power {
-    background-color: var(--bg-power);
-    color: var(--text-white);
+    background-color: @bg-power;
+    color: @text-white;
 }

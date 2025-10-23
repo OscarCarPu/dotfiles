@@ -28,10 +28,10 @@ fi
 # Find current wallpaper by checking swaybg process
 CURRENT_WALLPAPER=$(pgrep -a swaybg | grep -oP '(?<=-i )[^ ]+' | head -1 || echo "")
 
-# Find next wallpaper in sequence
-NEXT_WALLPAPER="${WALLPAPERS[0]}"
-
+# Find next wallpaper
 if [ -n "$CURRENT_WALLPAPER" ]; then
+    # If a wallpaper is currently set, cycle to the next one in sequence
+    NEXT_WALLPAPER="${WALLPAPERS[0]}"
     for i in "${!WALLPAPERS[@]}"; do
         if [ "${WALLPAPERS[$i]}" = "$CURRENT_WALLPAPER" ]; then
             NEXT_INDEX=$(( (i + 1) % NUM_WALLPAPERS ))
@@ -39,11 +39,15 @@ if [ -n "$CURRENT_WALLPAPER" ]; then
             break
         fi
     done
+else
+    # If no wallpaper is set, start with a random one
+    RANDOM_INDEX=$(( RANDOM % NUM_WALLPAPERS ))
+    NEXT_WALLPAPER="${WALLPAPERS[$RANDOM_INDEX]}"
 fi
 
 # Kill old swaybg instances
 pkill -x swaybg 2>/dev/null || true
 sleep 0.1
 
-# Start new wallpaper with fill mode to always show properly
-swaybg -i "$NEXT_WALLPAPER" -m fill &
+# Start new wallpaper with fit mode to show entire image
+swaybg -i "$NEXT_WALLPAPER" -m fit &
