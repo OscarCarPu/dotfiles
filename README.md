@@ -5,11 +5,17 @@ Personal dotfiles for Arch Linux with Hyprland (Wayland compositor) desktop envi
 ## Overview
 
 This repository contains configuration files for:
-- **Hyprland**: Wayland compositor with dual-monitor setup
-- **Waybar**: Status bar with system monitoring
-- **SwayNC**: Notification daemon
-- **Neovim**: Text editor (LazyVim-based config)
-- **OneDrive**: Cloud storage sync
+- **Hyprland**: Wayland compositor with dual-monitor setup and custom keybindings
+- **Waybar**: Status bar with system monitoring modules
+- **SwayNC**: Notification daemon for Wayland
+- **Neovim**: LazyVim-based configuration with Python LSP and GitHub Copilot
+- **OneDrive**: Cloud storage sync to `~/Files`
+
+## Documentation
+
+Detailed documentation is available in the [`docs/`](docs/) folder:
+- **[Neovim Setup Guide](docs/nvim-setup.md)** - Python autocompletion, GitHub Copilot, and editor configuration
+- **[Neovim Overview](docs/nvim-overview.md)** - LazyVim introduction and getting started
 
 ## System Configuration
 
@@ -25,18 +31,34 @@ This repository contains configuration files for:
 - Spanish keyboard layout
 - Custom shutdown workflow with system updates
 
+### Neovim Features
+- **LazyVim** distribution with sensible defaults
+- **Python Development**: Pyright LSP, Black formatter, Ruff linter, debugpy
+- **GitHub Copilot**: AI-powered code suggestions (disabled by default, enable with `:Copilot enable`)
+- **Smart Quote Auto-pairing**: Third consecutive quote doesn't auto-pair (perfect for Python docstrings)
+- **Line Wrapping**: Enabled by default with word-boundary breaks
+- **Tab Size**: 4 spaces (optimized for Python)
+
+See [Neovim Setup Guide](docs/nvim-setup.md) for detailed configuration and usage.
+
 ## Installation
 
 ### Prerequisites
 
 Install required packages:
 ```bash
+# Core system packages
 sudo pacman -S hyprland waybar swaync kitty brightnessctl swaybg \
                grim slurp wl-clipboard wofi google-chrome
+
+# Neovim and development tools
+sudo pacman -S neovim nodejs npm python-pip
 
 # AUR packages
 yay -S onedrive-abraunegg
 ```
+
+For Neovim setup (Python LSP, GitHub Copilot), see [Neovim Setup Guide](docs/nvim-setup.md).
 
 ### Setup
 
@@ -115,8 +137,21 @@ hyprctl reload
 ├── onedrive/
 │   ├── config                 # OneDrive configuration
 │   └── sync_list              # Sync filter (currently empty)
-├── nvim/                      # Neovim LazyVim config
-└── CLAUDE.md                  # AI assistant instructions
+├── nvim/                      # Neovim LazyVim configuration
+│   ├── lua/
+│   │   ├── config/            # Base configuration (options, keymaps, autocmds)
+│   │   └── plugins/           # Plugin configurations
+│   │       ├── python.lua     # Python LSP and tools
+│   │       ├── ai.lua         # GitHub Copilot setup
+│   │       ├── editor.lua     # Editor behavior (smart quotes)
+│   │       └── dbml.lua       # DBML language support
+│   └── init.lua               # Neovim entry point
+├── docs/                      # Documentation
+│   ├── README.md              # Documentation index
+│   ├── nvim-setup.md          # Neovim setup guide
+│   └── nvim-overview.md       # LazyVim overview
+├── CLAUDE.md                  # AI assistant instructions
+└── README.md                  # This file
 ```
 
 ## Scripts
@@ -198,6 +233,12 @@ View sync logs:
 ```bash
 tail -f ~/.cache/onedrive_sync.log
 ```
+
+### Neovim Issues
+For Neovim-specific troubleshooting (LSP, Copilot, plugins), see:
+- [Neovim Setup Guide - Troubleshooting](docs/nvim-setup.md#troubleshooting)
+- Check Neovim health: `:checkhealth`
+- Check Copilot status: `:Copilot status`
 
 ## License
 
