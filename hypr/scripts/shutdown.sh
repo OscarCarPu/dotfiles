@@ -5,6 +5,26 @@ set -euo pipefail
 kitty --title "System Update" -e bash -c "
 set -e
 
+# Prompt for action choice
+echo '=== System Update & Power Management ==='
+echo '1. Shutdown (sync, update, then shutdown)'
+echo '2. Update only (sync and update, no shutdown)'
+echo '3. Reboot (sync, update, then reboot)'
+echo
+read -p 'Select option (1/2/3): ' ACTION_CHOICE
+
+case \"\$ACTION_CHOICE\" in
+    1|2|3)
+        ;;
+    *)
+        echo 'Invalid option. Exiting.'
+        read -p 'Press Enter to exit'
+        exit 1
+        ;;
+esac
+
+echo
+
 # Prompt for password once at the beginning
 echo '=== Authentication Required ==='
 sudo -v || {
@@ -48,11 +68,23 @@ fi
 echo
 
 echo '=== All updates complete ==='
-read -p 'Press Enter to shutdown or close this window to cancel: '
 
 # Kill the sudo keeper process
 kill \$SUDO_KEEPER_PID 2>/dev/null || true
 
-# Use sudo for poweroff to ensure it works without additional prompts
-sudo systemctl poweroff
+# Perform action based on user choice
+case \"\$ACTION_CHOICE\" in
+    1)
+        read -p 'Press Enter to shutdown or close this window to cancel: '
+        sudo systemctl poweroff
+        ;;
+    2)
+        echo 'Updates complete. You can close this window.'
+        read -p 'Press Enter to exit'
+        ;;
+    3)
+        read -p 'Press Enter to reboot or close this window to cancel: '
+        sudo systemctl reboot
+        ;;
+esac
 "
