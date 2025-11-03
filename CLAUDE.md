@@ -24,7 +24,7 @@ This is a personal dotfiles repository for an Arch Linux system running Hyprland
 
 **Neovim Configuration** (`nvim/`)
 - LazyVim-based configuration
-- Custom plugins for DBML and additional functionality
+- Custom plugins for DBML support
 
 **SwayNC** (`swaync/`)
 - Notification daemon configuration for Wayland
