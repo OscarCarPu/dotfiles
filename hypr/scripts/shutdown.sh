@@ -50,7 +50,7 @@ fi
 echo
 
 echo '=== Running system updates (pacman) ==='
-sudo pacman -Syu || {
+sudo pacman -Syu --noconfirm || {
     echo 'Error: pacman update failed'
     read -p 'Press Enter to continue anyway or close to cancel'
 }
@@ -58,7 +58,7 @@ echo
 
 echo '=== Running AUR updates (yay) ==='
 if command -v yay &> /dev/null; then
-    yay -Syu || {
+    yay -Syu --noconfirm || {
         echo 'Error: yay update failed'
         read -p 'Press Enter to continue anyway or close to cancel'
     }
@@ -75,7 +75,7 @@ kill \$SUDO_KEEPER_PID 2>/dev/null || true
 # Perform action based on user choice
 case \"\$ACTION_CHOICE\" in
     1)
-        read -p 'Press Enter to shutdown or close this window to cancel: '
+        echo 'Shutting down...'
         sudo systemctl poweroff
         ;;
     2)
@@ -83,7 +83,7 @@ case \"\$ACTION_CHOICE\" in
         read -p 'Press Enter to exit'
         ;;
     3)
-        read -p 'Press Enter to reboot or close this window to cancel: '
+        echo 'Rebooting...'
         sudo systemctl reboot
         ;;
 esac
