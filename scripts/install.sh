@@ -10,9 +10,9 @@ NC='\033[0m' # No Color
 
 DOTFILES_DIR="$HOME/dotfiles"
 
-echo -e "${BLUE}╔════════════════════════════════════════╗${NC}"
-echo -e "${BLUE}║  Dotfiles Installation Script         ║${NC}"
-echo -e "${BLUE}╔════════════════════════════════════════╗${NC}"
+echo -e "${BLUE}========================================${NC}"
+echo -e "${BLUE}  Dotfiles Installation Script${NC}"
+echo -e "${BLUE}========================================${NC}"
 echo
 
 # Check if running from the dotfiles directory
@@ -37,15 +37,20 @@ fi
 
 echo
 echo -e "${YELLOW}Step 2: Creating necessary directories...${NC}"
-mkdir -p "$HOME/.cache"
-mkdir -p "$HOME/Files/Imágenes/Wallpapers"
-echo -e "${GREEN}✓${NC} Directories created"
+if mkdir -p "$HOME/.cache" "$HOME/Files/Imágenes/Wallpapers"; then
+    echo -e "${GREEN}✓${NC} Directories created"
+else
+    echo -e "${RED}✗${NC} Failed to create directories"
+    exit 1
+fi
 
 echo
 echo -e "${YELLOW}Step 3: Making scripts executable...${NC}"
-chmod +x "$DOTFILES_DIR/hypr/scripts/"*.sh
-chmod +x "$DOTFILES_DIR/scripts/"*.sh
-echo -e "${GREEN}✓${NC} Scripts are executable"
+if chmod +x "$DOTFILES_DIR/hypr/scripts/"*.sh "$DOTFILES_DIR/scripts/"*.sh 2>/dev/null; then
+    echo -e "${GREEN}✓${NC} Scripts are executable"
+else
+    echo -e "${YELLOW}!${NC} Warning: Some scripts may not have been made executable"
+fi
 
 echo
 echo -e "${YELLOW}Step 4: OneDrive configuration${NC}"
@@ -74,9 +79,9 @@ else
 fi
 
 echo
-echo -e "${GREEN}╔════════════════════════════════════════╗${NC}"
-echo -e "${GREEN}║  Installation Complete!                ║${NC}"
-echo -e "${GREEN}╚════════════════════════════════════════╝${NC}"
+echo -e "${GREEN}========================================${NC}"
+echo -e "${GREEN}  Installation Complete!${NC}"
+echo -e "${GREEN}========================================${NC}"
 echo
 echo "Next steps:"
 echo "  1. Log out and select Hyprland from your display manager"
