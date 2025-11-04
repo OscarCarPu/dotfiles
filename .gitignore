@@ -1,4 +1,5 @@
 # Hypr state files
+hypr/wallpaper_index.json
 
 # OneDrive sensitive and state files
 onedrive/refresh_token
@@ -14,3 +15,6 @@ onedrive/.sync_list.hash
 # Cache and state files
 .cache/
 *.log
+
+# Battery notification state
+battery_notify_state

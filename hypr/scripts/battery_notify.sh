@@ -1,13 +1,28 @@
 #!/bin/bash
+set -euo pipefail
 
 # Battery notification script - alerts at 15% and 10%
 # Prevents duplicate notifications by tracking state
 
 STATE_FILE="$HOME/.cache/battery_notify_state"
 
+# Find first available battery
+BATTERY_PATH=""
+for bat in /sys/class/power_supply/BAT*; do
+    if [ -d "$bat" ]; then
+        BATTERY_PATH="$bat"
+        break
+    fi
+done
+
 # Get current battery percentage
-BATTERY_PERCENTAGE=$(cat /sys/class/power_supply/BAT*/capacity 2>/dev/null | head -1)
-BATTERY_STATUS=$(cat /sys/class/power_supply/BAT*/status 2>/dev/null | head -1)
+if [ -n "$BATTERY_PATH" ] && [ -f "$BATTERY_PATH/capacity" ]; then
+    BATTERY_PERCENTAGE=$(<"$BATTERY_PATH/capacity")
+    BATTERY_STATUS=$(<"$BATTERY_PATH/status")
+else
+    BATTERY_PERCENTAGE=""
+    BATTERY_STATUS=""
+fi
 
 # Exit if battery info unavailable
 if [ -z "$BATTERY_PERCENTAGE" ]; then
@@ -16,7 +31,7 @@ fi
 
 # Read previous state
 if [ -f "$STATE_FILE" ]; then
-    PREVIOUS_STATE=$(cat "$STATE_FILE")
+    PREVIOUS_STATE=$(<"$STATE_FILE")
 else
     PREVIOUS_STATE="OK"
 fi
@@ -48,6 +63,7 @@ if [ "$CURRENT_STATE" != "$PREVIOUS_STATE" ]; then
             ;;
     esac
 
-    # Update state file
+    # Update state file - ensure directory exists
+    mkdir -p "$(dirname "$STATE_FILE")"
     echo "$CURRENT_STATE" > "$STATE_FILE"
 fi

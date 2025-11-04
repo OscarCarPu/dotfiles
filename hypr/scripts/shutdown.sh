@@ -13,15 +13,12 @@ echo '3. Reboot (sync, update, then reboot)'
 echo
 read -p 'Select option (1/2/3): ' ACTION_CHOICE
 
-case \"\$ACTION_CHOICE\" in
-    1|2|3)
-        ;;
-    *)
-        echo 'Invalid option. Exiting.'
-        read -p 'Press Enter to exit'
-        exit 1
-        ;;
-esac
+# Validate input
+if [[ ! \"\$ACTION_CHOICE\" =~ ^[123]\$ ]]; then
+    echo 'Invalid option. Exiting.'
+    read -p 'Press Enter to exit'
+    exit 1
+fi
 
 echo
 
@@ -34,9 +31,9 @@ sudo -v || {
 }
 
 # Keep sudo credentials alive in background
-while true; do sudo -n true; sleep 50; kill -0 \"\$\$\" 2>/dev/null || exit; done &
+(while true; do sudo -n true 2>/dev/null || exit; sleep 50; done) &
 SUDO_KEEPER_PID=\$!
-trap 'kill \$SUDO_KEEPER_PID 2>/dev/null || true' EXIT
+trap 'kill \$SUDO_KEEPER_PID 2>/dev/null || true; wait \$SUDO_KEEPER_PID 2>/dev/null || true' EXIT
 
 echo
 echo '=== Syncing OneDrive ==='
@@ -69,8 +66,11 @@ echo
 
 echo '=== All updates complete ==='
 
-# Kill the sudo keeper process
-kill \$SUDO_KEEPER_PID 2>/dev/null || true
+# Kill the sudo keeper process gracefully
+if [ -n "\${SUDO_KEEPER_PID:-}" ] && kill -0 \$SUDO_KEEPER_PID 2>/dev/null; then
+    kill \$SUDO_KEEPER_PID 2>/dev/null || true
+    wait \$SUDO_KEEPER_PID 2>/dev/null || true
+fi
 
 # Perform action based on user choice
 case \"\$ACTION_CHOICE\" in
