@@ -15,9 +15,9 @@ MISSING_AUR=()
 
 # Function to check if command exists
 check_command() {
-    local cmd=$1
-    local package=${2:-$1}
-    local is_aur=${3:-false}
+    local cmd="${1:?Command name required}"
+    local package="${2:-$1}"
+    local is_aur="${3:-false}"
 
     if command -v "$cmd" &> /dev/null; then
         echo -e "${GREEN}✓${NC} $cmd"
