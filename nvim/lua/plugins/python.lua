@@ -37,6 +37,12 @@ return {
   },
 
   -- Configure formatters for Python
+  -- Note: Black will read settings from pyproject.toml in the project root
+  -- Black may exceed line-length for long strings - split them manually:
+  --   result = (
+  --       f"Part 1 {var1} "
+  --       f"Part 2 {var2}"
+  --   )
   {
     "stevearc/conform.nvim",
     opts = {
