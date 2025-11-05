@@ -20,11 +20,14 @@ return {
         },
         -- Configure ruff-lsp for linting (includes E501 line-too-long)
         ruff_lsp = {
-          settings = {
-            lineLength = 100,
-            lint = {
-              select = { "E", "F", "W" }, -- Enable pycodestyle errors, pyflakes, warnings
-              -- E501 is line-too-long - will show warnings for lines > 100 chars
+          init_options = {
+            settings = {
+              -- Ruff settings - will also read from pyproject.toml
+              lineLength = 100,
+              lint = {
+                select = ["E", "F", "W"], -- pycodestyle errors, pyflakes, warnings
+                -- E501 is line-too-long - shows errors for lines > 100 chars
+              },
             },
           },
         },
@@ -39,6 +42,7 @@ return {
       ensure_installed = {
         "pyright", -- Python LSP
         "ruff", -- Fast Python linter & formatter (replaces black, isort, flake8)
+        "ruff-lsp", -- Ruff language server for real-time linting
         "debugpy", -- Python debugger
       },
     },
