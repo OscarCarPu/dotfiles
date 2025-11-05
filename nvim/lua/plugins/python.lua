@@ -25,7 +25,7 @@ return {
               -- Ruff settings - will also read from pyproject.toml
               lineLength = 100,
               lint = {
-                select = ["E", "F", "W"], -- pycodestyle errors, pyflakes, warnings
+                select = { "E", "F", "W" }, -- pycodestyle errors, pyflakes, warnings
                 -- E501 is line-too-long - shows errors for lines > 100 chars
               },
             },
