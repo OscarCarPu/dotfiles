@@ -30,7 +30,26 @@ return {
         "pyright", -- Python LSP
         "ruff-lsp", -- Fast Python linter
         "black", -- Python formatter
+        "isort", -- Python import sorter
         "debugpy", -- Python debugger
+      },
+    },
+  },
+
+  -- Configure formatters for Python
+  {
+    "stevearc/conform.nvim",
+    opts = {
+      formatters_by_ft = {
+        python = { "isort", "black" },
+      },
+      formatters = {
+        black = {
+          prepend_args = { "--line-length", "100" },
+        },
+        isort = {
+          prepend_args = { "--profile", "black" },
+        },
       },
     },
   },
