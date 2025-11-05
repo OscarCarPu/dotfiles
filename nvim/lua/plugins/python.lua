@@ -38,17 +38,15 @@ return {
     opts = {
       ensure_installed = {
         "pyright", -- Python LSP
-        "ruff-lsp", -- Fast Python linter
-        "black", -- Python formatter
-        "isort", -- Python import sorter
+        "ruff", -- Fast Python linter & formatter (replaces black, isort, flake8)
         "debugpy", -- Python debugger
       },
     },
   },
 
-  -- Configure formatters for Python
-  -- NOTE: Auto-format on save is DISABLED for Python because Black collapses
-  -- long strings to exceed 100 chars, breaking flake8 E501 compliance.
+  -- Configure Ruff formatter for Python
+  -- NOTE: Auto-format on save is DISABLED for Python because Ruff (like Black)
+  -- collapses long strings to exceed 100 chars, breaking E501 compliance.
   --
   -- MANUAL FORMATTING:
   --   - Format entire file: <leader>cf (LazyVim default)
@@ -56,14 +54,20 @@ return {
   --
   -- WORKFLOW:
   --   1. Write/edit code normally
-  --   2. Manually format when ready: <leader>cf
+  --   2. Manually format when ready: <leader>cf (runs ruff format)
   --   3. If ruff-lsp shows E501 errors (red squiggles on long lines):
   --      - Split long strings:
   --        result = (
   --            f"Part 1 {var1} "
   --            f"Part 2 {var2}"
   --        )
-  --   4. Format again to ensure isort + black are applied
+  --   4. Format again: <leader>cf
+  --
+  -- Benefits of Ruff:
+  --   - 10-100x faster than black + isort + flake8
+  --   - Single tool for formatting + linting + import sorting
+  --   - Black-compatible formatting style
+  --   - Industry standard (used by FastAPI, pandas, pydantic)
   {
     "stevearc/conform.nvim",
     opts = function(_, opts)
@@ -75,16 +79,16 @@ return {
         return { timeout_ms = 500, lsp_fallback = true }
       end
 
-      -- Configure formatters
+      -- Configure Ruff formatter
       opts.formatters_by_ft = opts.formatters_by_ft or {}
-      opts.formatters_by_ft.python = { "isort", "black" }
+      opts.formatters_by_ft.python = { "ruff_format", "ruff_organize_imports" }
 
       opts.formatters = opts.formatters or {}
-      opts.formatters.black = {
+      opts.formatters.ruff_format = {
         prepend_args = { "--line-length", "100" },
       }
-      opts.formatters.isort = {
-        prepend_args = { "--profile", "black" },
+      opts.formatters.ruff_organize_imports = {
+        prepend_args = { "--select", "I" },
       }
 
       return opts
