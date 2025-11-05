@@ -1,19 +1,31 @@
 # Python tooling configuration for dotfiles repository
+# Using Ruff - a fast, all-in-one tool that replaces black, isort, and flake8
 
-[tool.black]
+[tool.ruff]
 line-length = 100
-target-version = ['py311']
-# Black may still exceed line-length for strings by design
+target-version = "py311"
+
+# Ruff formatter (Black-compatible)
+[tool.ruff.format]
+quote-style = "double"
+indent-style = "space"
+line-ending = "auto"
+
+# Ruff linter rules
+[tool.ruff.lint]
+# Enable: pycodestyle errors (E), Pyflakes (F), warnings (W), isort (I)
+select = ["E", "F", "W", "I"]
+ignore = []
+
+# Ruff import sorting (replaces isort)
+[tool.ruff.lint.isort]
+known-first-party = []
+force-single-line = false
+
+# NOTE: Ruff (like Black) may exceed line-length for strings by design
 # To keep strings under 100 chars, split long f-strings into multiple parts:
 # Example:
 #   result = (
 #       f"Long string part 1 {var1} "
 #       f"and part 2 {var2}"
 #   )
-
-[tool.isort]
-profile = "black"
-line_length = 100
-
-[tool.ruff]
-line-length = 100
