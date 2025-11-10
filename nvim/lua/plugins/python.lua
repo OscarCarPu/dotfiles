@@ -28,33 +28,33 @@ return {
     opts = {
       ensure_installed = {
         "pyright", -- Python LSP
-        "ruff-lsp", -- Fast Python linter
-        "black", -- Python formatter
-        "isort", -- Python import sorter
+        "ruff", -- Fast Python linter and formatter (replaces black, isort, flake8)
         "debugpy", -- Python debugger
       },
     },
   },
 
-  -- Configure formatters for Python
-  -- Note: Black will read settings from pyproject.toml in the project root
-  -- Black may exceed line-length for long strings - split them manually:
-  --   result = (
-  --       f"Part 1 {var1} "
-  --       f"Part 2 {var2}"
-  --   )
+  -- Configure ruff as formatter and linter for Python
+  -- Ruff combines black, isort, flake8, and more in a single fast tool
+  -- Note: Ruff reads line-length=100 from pyproject.toml automatically
   {
     "stevearc/conform.nvim",
     opts = {
       formatters_by_ft = {
-        python = { "isort", "black" },
+        python = { "ruff_organize_imports", "ruff_format" },
       },
-      formatters = {
-        black = {
-          prepend_args = { "--line-length", "100" },
-        },
-        isort = {
-          prepend_args = { "--profile", "black" },
+      -- No need to configure formatters here - ruff reads from pyproject.toml
+    },
+  },
+
+  -- Configure ruff linter
+  -- Note: Ruff LSP reads configuration from pyproject.toml automatically
+  {
+    "neovim/nvim-lspconfig",
+    opts = {
+      servers = {
+        ruff_lsp = {
+          -- Configuration is read from pyproject.toml
         },
       },
     },

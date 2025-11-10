@@ -17,3 +17,7 @@ line_length = 100
 
 [tool.ruff]
 line-length = 100
+
+[tool.ruff.lint]
+# Enable line-too-long checks (E501)
+extend-select = ["E501"]
