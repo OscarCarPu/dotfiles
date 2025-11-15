@@ -7,6 +7,17 @@ vim.opt.shiftwidth = 4
 vim.opt.tabstop = 4
 vim.opt.softtabstop = 4
 
+-- HTML-specific settings (2 spaces for HTML)
+vim.api.nvim_create_autocmd({ "FileType" }, {
+  pattern = { "html", "htm", "htmldjango" },
+  callback = function()
+    vim.bo.shiftwidth = 2
+    vim.bo.tabstop = 2
+    vim.bo.softtabstop = 2
+    vim.bo.expandtab = true
+  end,
+})
+
 -- Enable line wrapping
 vim.opt.wrap = true -- Wrap long lines
 vim.opt.linebreak = true -- Break lines at word boundaries
