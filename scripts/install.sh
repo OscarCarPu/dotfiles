@@ -37,7 +37,7 @@ fi
 
 echo
 echo -e "${YELLOW}Step 2: Creating necessary directories...${NC}"
-if mkdir -p "$HOME/.cache" "$HOME/Files/Imágenes/Wallpapers"; then
+if mkdir -p "$HOME/.cache" "$HOME/.config" "$HOME/Files/Imágenes/Wallpapers"; then
     echo -e "${GREEN}✓${NC} Directories created"
 else
     echo -e "${RED}✗${NC} Failed to create directories"
@@ -45,7 +45,16 @@ else
 fi
 
 echo
-echo -e "${YELLOW}Step 3: Making scripts executable...${NC}"
+echo -e "${YELLOW}Step 3: Setting up symlinks...${NC}"
+# Chromium flags need to be symlinked to ~/.config/
+if ln -sf "$DOTFILES_DIR/chromium/chromium-flags.conf" "$HOME/.config/chromium-flags.conf"; then
+    echo -e "${GREEN}✓${NC} Chromium flags symlinked"
+else
+    echo -e "${YELLOW}!${NC} Warning: Could not create chromium-flags.conf symlink"
+fi
+
+echo
+echo -e "${YELLOW}Step 4: Making scripts executable...${NC}"
 if chmod +x "$DOTFILES_DIR/hypr/scripts/"*.sh "$DOTFILES_DIR/scripts/"*.sh 2>/dev/null; then
     echo -e "${GREEN}✓${NC} Scripts are executable"
 else
@@ -53,7 +62,7 @@ else
 fi
 
 echo
-echo -e "${YELLOW}Step 4: OneDrive configuration${NC}"
+echo -e "${YELLOW}Step 5: OneDrive configuration${NC}"
 if [ -f "$DOTFILES_DIR/onedrive/refresh_token" ]; then
     echo -e "${GREEN}✓${NC} OneDrive already configured"
 else
@@ -69,7 +78,7 @@ else
 fi
 
 echo
-echo -e "${YELLOW}Step 5: Checking wallpapers...${NC}"
+echo -e "${YELLOW}Step 6: Checking wallpapers...${NC}"
 WALLPAPER_COUNT=$(find "$HOME/Files/Imágenes/Wallpapers" -type f \( -iname "*.jpg" -o -iname "*.png" -o -iname "*.jpeg" \) 2>/dev/null | wc -l)
 if [ "$WALLPAPER_COUNT" -gt 0 ]; then
     echo -e "${GREEN}✓${NC} Found $WALLPAPER_COUNT wallpaper(s)"

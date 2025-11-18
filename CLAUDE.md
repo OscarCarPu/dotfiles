@@ -30,6 +30,13 @@ This is a personal dotfiles repository for an Arch Linux system running Hyprland
 - Notification daemon configuration for Wayland
 - Minimal config with timeout settings
 
+**Chromium** (`chromium/`)
+- Browser flags optimized for Wayland + Intel graphics
+- `chromium-flags.conf` symlinked to `~/.config/chromium-flags.conf`
+- Wayland/Ozone platform configuration
+- Intel GPU hardware acceleration (VaapiVideo)
+- Performance optimizations (disabled GPU vsync, driver workarounds)
+
 **OneDrive Sync** (`onedrive/`)
 - Configuration for OneDrive client
 - Syncs to `~/Files` directory
@@ -126,21 +133,23 @@ Run `./scripts/check_dependencies.sh` to check which packages are installed.
 
 ## Configuration Locations
 
-This dotfiles repository runs directly from `~/dotfiles/` without requiring symlinks. All paths in configurations and scripts reference `~/dotfiles/` directly:
+This dotfiles repository runs directly from `~/dotfiles/` with minimal symlinks:
 - Hyprland config: `~/dotfiles/hypr/hyprland.conf`
 - Scripts: `~/dotfiles/hypr/scripts/`
 - Waybar: `~/dotfiles/waybar/`
 - SwayNC: `~/dotfiles/swaync/`
 - Neovim: `~/dotfiles/nvim/`
 - OneDrive: `~/dotfiles/onedrive/`
+- Chromium: `~/dotfiles/chromium/` (symlinked to `~/.config/chromium-flags.conf`)
 
-**Installation**: Run `./scripts/install.sh` to set up the environment and check dependencies.
+**Installation**: Run `./scripts/install.sh` to set up the environment, create symlinks, and check dependencies.
 
 ## Important Patterns
 
 **Path References**:
 - All scripts use absolute paths with `$HOME` or `~` expansion
-- All configurations reference `~/dotfiles/` directly (not `~/.config/`)
+- Most configurations reference `~/dotfiles/` directly (not `~/.config/`)
+- Exception: `chromium-flags.conf` symlinked to `~/.config/` (required by Chromium)
 - Wallpapers stored in `~/Files/Imágenes/Wallpapers/` (synced via OneDrive)
 - OneDrive syncs to `~/Files` (not `~/OneDrive`)
 
