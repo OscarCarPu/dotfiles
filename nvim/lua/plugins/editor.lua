@@ -24,4 +24,16 @@ return {
       },
     },
   },
+  -- Configure Snacks file explorer to show gitignored files
+  {
+    "folke/snacks.nvim",
+    opts = {
+      explorer = {
+        filters = {
+          git_ignored = false,
+          hidden = false,
+        },
+      },
+    },
+  },
 }
