@@ -26,6 +26,11 @@ This is a personal dotfiles repository for an Arch Linux system running Hyprland
 - LazyVim-based configuration
 - Custom plugins for DBML support
 
+**Kitty Terminal** (`kitty/`)
+- Terminal emulator configuration
+- `kitty.conf` with font settings optimized for DVI-I-1 monitor (font size 10)
+- Should be symlinked to `~/.config/kitty/kitty.conf`
+
 **SwayNC** (`swaync/`)
 - Notification daemon configuration for Wayland
 - Minimal config with timeout settings
@@ -139,6 +144,7 @@ This dotfiles repository runs directly from `~/dotfiles/` with minimal symlinks:
 - Waybar: `~/dotfiles/waybar/`
 - SwayNC: `~/dotfiles/swaync/`
 - Neovim: `~/dotfiles/nvim/`
+- Kitty: `~/dotfiles/kitty/` (symlinked to `~/.config/kitty/kitty.conf`)
 - OneDrive: `~/dotfiles/onedrive/`
 - Chromium: `~/dotfiles/chromium/` (symlinked to `~/.config/chromium-flags.conf`)
 
