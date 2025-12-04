@@ -30,17 +30,6 @@ return {
     },
   },
 
-  -- Additional Rust tools
-  {
-    "mason-org/mason.nvim",
-    opts = {
-      ensure_installed = {
-        "rust-analyzer", -- Rust LSP
-        "codelldb", -- Rust debugger
-      },
-    },
-  },
-
   -- Configure rustfmt as formatter for Rust
   -- Note: rustfmt reads configuration from rustfmt.toml or .rustfmt.toml automatically
   {
