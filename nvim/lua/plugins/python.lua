@@ -22,18 +22,6 @@ return {
     },
   },
 
-  -- Additional Python tools
-  {
-    "mason-org/mason.nvim",
-    opts = {
-      ensure_installed = {
-        "pyright", -- Python LSP
-        "ruff", -- Fast Python linter and formatter (replaces black, isort, flake8)
-        "debugpy", -- Python debugger
-      },
-    },
-  },
-
   -- Configure ruff as formatter and linter for Python
   -- Ruff combines black, isort, flake8, and more in a single fast tool
   -- Note: Ruff reads line-length=100 from pyproject.toml automatically
