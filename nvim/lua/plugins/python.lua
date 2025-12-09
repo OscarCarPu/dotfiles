@@ -14,6 +14,7 @@ return {
                 autoSearchPaths = true,
                 useLibraryCodeForTypes = true,
                 diagnosticMode = "workspace",
+                autoImportCompletions = true,
               },
             },
           },
