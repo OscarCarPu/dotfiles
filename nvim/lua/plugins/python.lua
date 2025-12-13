@@ -15,6 +15,9 @@ return {
                 useLibraryCodeForTypes = true,
                 diagnosticMode = "workspace",
                 autoImportCompletions = true,
+                diagnosticSeverityOverrides = {
+                  reportUnusedParameter = "warning",
+                },
               },
             },
           },
