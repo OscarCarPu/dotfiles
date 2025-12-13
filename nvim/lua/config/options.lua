@@ -61,12 +61,15 @@ vim.diagnostic.config({
     wrap_at = 80, -- Alternative wrap configuration
   },
   virtual_text = {
-    -- Truncate long virtual text messages to prevent overflow
+    -- Show source and error code for easier suppression with noqa/type: ignore
     format = function(diagnostic)
-      if #diagnostic.message > 80 then
-        return diagnostic.message:sub(1, 77) .. "..."
+      local code = diagnostic.code and string.format("[%s]", diagnostic.code) or ""
+      local source = diagnostic.source and string.format("(%s)", diagnostic.source) or ""
+      local msg = diagnostic.message
+      if #msg > 60 then
+        msg = msg:sub(1, 57) .. "..."
       end
-      return diagnostic.message
+      return string.format("%s %s %s", source, code, msg)
     end,
     -- Alternative: you can also add a prefix and spacing
     prefix = "●",
