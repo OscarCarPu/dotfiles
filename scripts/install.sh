@@ -53,6 +53,14 @@ else
     echo -e "${YELLOW}!${NC} Warning: Could not create chromium-flags.conf symlink"
 fi
 
+# WirePlumber config for auto-switching audio devices
+mkdir -p "$HOME/.config/wireplumber/wireplumber.conf.d"
+if ln -sf "$DOTFILES_DIR/wireplumber/"*.conf "$HOME/.config/wireplumber/wireplumber.conf.d/" 2>/dev/null; then
+    echo -e "${GREEN}✓${NC} WirePlumber config symlinked"
+else
+    echo -e "${YELLOW}!${NC} Warning: Could not create wireplumber config symlinks"
+fi
+
 echo
 echo -e "${YELLOW}Step 4: Making scripts executable...${NC}"
 if chmod +x "$DOTFILES_DIR/hypr/scripts/"*.sh "$DOTFILES_DIR/scripts/"*.sh 2>/dev/null; then
