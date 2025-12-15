@@ -22,10 +22,26 @@ get_dock_state() {
 }
 
 refresh_audio() {
-    sleep 2  # Wait for device to fully initialize
-    systemctl --user restart wireplumber pipewire pipewire-pulse
-    sleep 1
-    notify-send -t 3000 "Audio" "Dock audio refreshed" 2>/dev/null || true
+    sleep 3  # Wait for device to fully initialize
+
+    # Try to set dock as default sink without restarting PipeWire
+    DOCK_SINK=$(pactl list short sinks 2>/dev/null | grep -i "USB3.1_Universal_Docking" | cut -f2)
+
+    if [[ -n "$DOCK_SINK" ]]; then
+        pactl set-default-sink "$DOCK_SINK"
+        notify-send -t 3000 "Audio" "Switched to dock audio" 2>/dev/null || true
+    else
+        # Only restart if dock sink not found (needs re-detection)
+        systemctl --user restart wireplumber pipewire pipewire-pulse
+        sleep 2
+        DOCK_SINK=$(pactl list short sinks 2>/dev/null | grep -i "USB3.1_Universal_Docking" | cut -f2)
+        if [[ -n "$DOCK_SINK" ]]; then
+            pactl set-default-sink "$DOCK_SINK"
+            notify-send -t 3000 "Audio" "Dock audio detected and set" 2>/dev/null || true
+        else
+            notify-send -t 3000 "Audio" "Dock audio not found" 2>/dev/null || true
+        fi
+    fi
 }
 
 # Initial state

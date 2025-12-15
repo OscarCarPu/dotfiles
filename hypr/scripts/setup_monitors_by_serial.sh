@@ -32,7 +32,3 @@ if echo "$MONITORS" | jq -e '.[] | select(.name=="eDP-1")' > /dev/null 2>&1; the
     hyprctl keyword monitor "eDP-1,1920x1080@60,3000x840,1"
 fi
 
-# Assign default workspaces to monitors
-hyprctl keyword workspace "1, monitor:$LEFTMOST_PORT, default:true"
-hyprctl keyword workspace "2, monitor:eDP-1, default:true"
-hyprctl keyword workspace "3, monitor:$MIDDLE_PORT, default:true"
