@@ -14,8 +14,8 @@ vim.api.nvim_create_autocmd("LspAttach", {
     vim.diagnostic.config({
       virtual_text = {
         format = function(diagnostic)
-          -- Calculate max width based on screen size and cursor position
-          local max_width = 40 -- Conservative default
+          -- Truncate long messages
+          local max_width = 40
           if #diagnostic.message > max_width then
             return diagnostic.message:sub(1, max_width - 3) .. "..."
           end

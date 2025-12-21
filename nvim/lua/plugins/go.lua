@@ -3,7 +3,7 @@
 return {
   -- Ensure Go tools are installed via Mason
   {
-    "williamboman/mason.nvim",
+    "mason-org/mason.nvim",
     opts = {
       ensure_installed = {
         "goimports",
