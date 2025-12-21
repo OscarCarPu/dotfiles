@@ -17,7 +17,9 @@ return {
                 autoImportCompletions = true,
                 diagnosticSeverityOverrides = {
                   reportUnusedParameter = "warning",
+                  reportUnusedVariable = "none",
                 },
+                enableTypeIgnoreComments = true,
               },
             },
           },
