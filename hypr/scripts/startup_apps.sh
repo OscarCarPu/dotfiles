@@ -9,7 +9,7 @@ sleep 5
 
 # Open Chromium with Gmail, vida.lab-ocp.com, and Gemini on workspace 1
 hyprctl dispatch workspace 1
-chromium "https://mail.google.com" "https://vida.lab-ocp.com" "https://gemini.google.com" &
+chromium "https://mail.google.com" "https://vida.lab-ocp.com" "https://gemini.google.com" "https://web.whatsapp.com/" &
 
 # Wait for browser to start
 sleep 3
