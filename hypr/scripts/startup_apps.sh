@@ -8,7 +8,7 @@ set -euo pipefail
 sleep 5
 
 # Open Chromium with Gmail, vida.lab-ocp.com, and Gemini on workspace 1
-hyprctl dispatch workspace 1
+hyprctl dispatch workspace 3
 chromium "https://mail.google.com" "https://vida.lab-ocp.com" "https://gemini.google.com" "https://web.whatsapp.com/" &
 
 # Wait for browser to start
@@ -20,4 +20,4 @@ spotify &
 
 # Return to workspace 1
 sleep 2
-hyprctl dispatch workspace 1
+hyprctl dispatch workspace 3
