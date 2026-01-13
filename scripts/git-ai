@@ -1,0 +1,126 @@
+#!/bin/bash
+
+# 0. Check Dependencies
+if ! command -v jq &> /dev/null; then
+    echo "❌ Error: 'jq' is not installed."
+    echo "Install it with: sudo dnf install jq (or sudo apt install jq)"
+    exit 1
+fi
+
+if [ -z "$GROQ_API_KEY" ]; then
+    echo "❌ Error: GROQ_API_KEY is missing."
+    echo "Please export your key: export GROQ_API_KEY=\"gsk_...\""
+    exit 1
+fi
+
+# 1. Check if there are staged changes
+if git diff --cached --quiet; then
+    echo "Error: No staged changes to commit."
+    exit 1
+fi
+
+# 2. Gather Context
+# A. Get the file changes summary
+DIFF_STAT=$(git diff --cached --stat)
+
+# B. Get the detailed diff (FULL CONTEXT for Groq)
+DIFF_DETAILED=$(git diff --cached -U1 -- . \
+    ':(exclude)package-lock.json' \
+    ':(exclude)yarn.lock' \
+    ':(exclude)*.lock' \
+    ':(exclude)*.svg' \
+    ':(exclude)*.min.js')
+
+# C. Get Project Structure
+PROJECT_STRUCTURE=$(tree -L 2 --gitignore -I '.git|node_modules|dist|build|coverage' --noreport)
+
+# 3. Define the Dynamic Prompt
+PROMPT="Role: Senior Developer.
+Task: Write a Conventional Commit message for the diff below.
+
+CONTEXT:
+Project Structure:
+$PROJECT_STRUCTURE
+
+Files Changed:
+$DIFF_STAT
+
+Rules:
+1. Analyze the complexity:
+   - If the change is ATOMIC (affects one logic path or is a simple fix): Write ONLY a single Subject Line (max 50 chars).
+   - If the change is COMPLEX (affects multiple components or requires explanation): Write a Subject Line, a BLANK LINE, and a bulleted list of details.
+
+2. Format:
+   <type>: <subject>
+   
+   - <detail 1>
+   - <detail 2>
+
+3. Style:
+   - Imperative mood ('Add' not 'Added').
+   - Use the Project Structure to identify components (e.g., 'auth:', 'frontend:', 'ci:').
+   - CRITICAL: Output ONLY the raw commit message. Do not use Markdown code blocks (no \`\`\`). No conversational text.
+
+DIFF:
+$DIFF_DETAILED
+"
+
+# 4. Run Groq API with a spinner
+echo -n "Thinking (Cloud)..."
+(
+  while :; do
+    for c in / - \\ \|; do
+      echo -ne "\b$c"
+      sleep 0.1
+    done
+  done
+) &
+SPINNER_PID=$!
+
+# Prepare JSON payload
+JSON_PROMPT=$(echo "$PROMPT" | jq -R -s '.')
+
+# Execute Request (llama-3.3-70b-versatile)
+RESPONSE=$(curl -s -X POST "https://api.groq.com/openai/v1/chat/completions" \
+     -H "Authorization: Bearer $GROQ_API_KEY" \
+     -H "Content-Type: application/json" \
+     -d "{
+       \"model\": \"llama-3.3-70b-versatile\",
+       \"messages\": [{\"role\": \"user\", \"content\": $JSON_PROMPT}],
+       \"temperature\": 0.1
+     }")
+
+# Kill spinner
+kill $SPINNER_PID
+echo -ne "\b \n"
+
+# 5. Extract and Clean Output
+if [ -z "$RESPONSE" ]; then
+    echo "❌ Error: No response from Groq API."
+    exit 1
+fi
+
+# Check for API errors
+API_ERROR=$(echo "$RESPONSE" | jq -r '.error.message // empty')
+if [ ! -z "$API_ERROR" ]; then
+    echo "❌ API Error: $API_ERROR"
+    exit 1
+fi
+
+# Extract content
+MSG=$(echo "$RESPONSE" | jq -r '.choices[0].message.content')
+
+# Clean up:
+# 1. Remove markdown code blocks (```) if the AI added them
+# 2. Trim leading/trailing whitespace
+MSG=$(echo "$MSG" | sed -e 's/^```.*//g' -e 's/```$//g' | sed -e 's/^[[:space:]]*//' -e 's/[[:space:]]*$//')
+
+# Final check
+if [ -z "$MSG" ] || [ "$MSG" == "null" ]; then
+    echo "❌ Error: Model returned an empty string."
+    exit 1
+fi
+
+# 6. Commit
+# The -e flag opens the editor so you can review the multi-line message
+git commit -e -m "$MSG"
