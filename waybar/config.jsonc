@@ -61,10 +61,10 @@
     },
     "custom/brightness": {
         "format": "󰖨 {}%",
-        "exec": "~/dotfiles/hypr/scripts/brightness.sh get",
+        "exec": "~/.dotfiles/hypr/scripts/brightness.sh get",
         "interval": 5,
-        "on-scroll-up": "~/dotfiles/hypr/scripts/brightness.sh up",
-        "on-scroll-down": "~/dotfiles/hypr/scripts/brightness.sh down",
+        "on-scroll-up": "~/.dotfiles/hypr/scripts/brightness.sh up",
+        "on-scroll-down": "~/.dotfiles/hypr/scripts/brightness.sh down",
         "tooltip": false
     },
     "pulseaudio#speaker": {
