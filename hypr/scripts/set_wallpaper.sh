@@ -1,12 +1,12 @@
 #!/bin/bash
 set -euo pipefail
 
-WALLPAPER_DIR="$HOME/Files/Imágenes/Wallpapers"
+WALLPAPER_DIR="$HOME/media/images/main"
 CACHE_DIR="$HOME/.cache"
 WALLPAPER_STATE_FILE="$CACHE_DIR/wallpaper_state"
 
 # Verify swaybg is installed
-if ! command -v swaybg &> /dev/null; then
+if ! command -v swaybg &>/dev/null; then
     echo "Error: swaybg not found" >&2
     exit 1
 fi
@@ -44,7 +44,7 @@ sleep 0.1
 
 # Set random wallpaper for each monitor
 for monitor in "${MONITORS[@]}"; do
-    RANDOM_INDEX=$(( RANDOM % NUM_WALLPAPERS ))
+    RANDOM_INDEX=$((RANDOM % NUM_WALLPAPERS))
     SELECTED_WALLPAPER="${WALLPAPERS[$RANDOM_INDEX]}"
 
     if [ ! -f "$SELECTED_WALLPAPER" ]; then
@@ -61,4 +61,4 @@ done
     for monitor in "${MONITORS[@]}"; do
         echo "monitor=$monitor"
     done
-} > "$WALLPAPER_STATE_FILE"
+} >"$WALLPAPER_STATE_FILE"
