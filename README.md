@@ -45,8 +45,8 @@ chmod +x ./install.sh
 
 # More docs 
 
-- *Neovim*: [Neovim](#docs/nvim.md)
-- *System*: [System](#docs/system.md)
+- *Neovim*: [Neovim](nvim/README.md)
+- *System*: [System](docs/system.md)
 
 # Essential keybands and commands
 
