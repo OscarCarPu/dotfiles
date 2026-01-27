@@ -9,7 +9,7 @@ sleep 5
 
 # Open Chromium with Gmail, vida.lab-ocp.com, and Gemini on workspace 1
 hyprctl dispatch workspace 3
-chromium "https://mail.google.com" "https://vida.lab-ocp.com" "https://gv.lab-ocp.com" "https://gemini.google.com" "https://web.whatsapp.com/" &
+chromium "https://mail.google.com" "https://app.clockify.me/tracker" "https://gemini.google.com" "https://web.whatsapp.com/" &
 
 # Wait for browser to start
 sleep 3
