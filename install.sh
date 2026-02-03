@@ -7,6 +7,7 @@ declare -A DOTFILES=(
     ["nvim"]="$HOME/.config/nvim"
     ["waybar"]="$HOME/.config/waybar"
     ["swaync"]="$HOME/.config/swaync"
+    ["wireplumber"]="$HOME/.config/wireplumber"
     ["scripts"]="$HOME/.local/bin"
 )
 
