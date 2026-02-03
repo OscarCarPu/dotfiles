@@ -22,14 +22,20 @@ Based on [NvChad v2.5](https://github.com/NvChad/NvChad) with the **oxocarbon** 
 | **nvim-tree** | File explorer sidebar, opens on startup |
 | **supermaven** | AI code completion |
 | **conform.nvim** | Code formatting (stylua for Lua) |
-| **nvim-lspconfig** | LSP support (HTML, CSS) |
-| **nvim-treesitter** | Syntax highlighting (vim, lua, vimdoc, html, css) |
+| **nvim-lspconfig** | LSP support (HTML, CSS, Go) |
+| **nvim-treesitter** | Syntax highlighting (vim, lua, vimdoc, html, css, go) |
 
 ## Editor Settings
 
 - **Indentation**: 4 spaces (tabs expanded)
 - **Word wrap**: Enabled with line break
 - **Cursor line**: Full line + number highlight
+
+## Go
+
+- **LSP**: gopls with staticcheck and gofumpt enabled
+- **Auto-import**: Organizes imports automatically on save
+- Config: `configs/go.lua`
 
 ## File Explorer
 
