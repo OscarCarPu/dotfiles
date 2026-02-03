@@ -6,7 +6,7 @@
 local M = {}
 
 M.base46 = {
-	theme = "tokyonight",
+	theme = "oxocarbon",
 
 	-- hl_override = {
 	-- 	Comment = { italic = true },
@@ -16,7 +16,7 @@ M.base46 = {
 
 -- M.nvdash = { load_on_startup = true }
 M.ui = {
-  theme = "tokyonight"
+  theme = "oxocarbon"
 }
 
 return M
