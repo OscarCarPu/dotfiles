@@ -4,6 +4,17 @@
 - So you just import its modules , like `require "nvchad.options" , require "nvchad.mappings"`
 - So you can delete the .git from this repo ( when you clone it locally ) or fork it :)
 
+# Formatting
+
+Format-on-save is enabled via [conform.nvim](https://github.com/stevearc/conform.nvim) with a 250ms timeout and LSP fallback.
+
+| Language | Formatters          |
+|----------|---------------------|
+| Lua      | stylua              |
+| Go       | gofumpt, goimports  |
+
+Go files also auto-organize imports on save via a `BufWritePre` autocmd in `lua/configs/go.lua`.
+
 # Credits
 
 1) Lazyvim starter https://github.com/LazyVim/starter as nvchad's starter was inspired by Lazyvim's . It made a lot of things easier!
