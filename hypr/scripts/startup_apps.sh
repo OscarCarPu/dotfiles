@@ -1,23 +1,95 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-# Startup script to open default browser with tabs and Spotify on different workspaces
+# Startup script with boot mode selection popup
 # Called from hyprland.conf exec-once
 
-# Delay to ensure Hyprland is fully loaded
-sleep 5
+# =============================================================================
+# OPTION FUNCTIONS
+# Define function as: name|Label Text
+# =============================================================================
 
-# Open Chromium with Gmail, vida.lab-ocp.com, and Gemini on workspace 1
-hyprctl dispatch workspace 3
-chromium "https://mail.google.com" "https://app.clockify.me/tracker" "https://gemini.google.com" "https://web.whatsapp.com/" &
+normal_setup() {
+    hyprctl dispatch workspace 2
+    chromium \
+        "https://mail.google.com" \
+        "https://app.clockify.me/tracker" \
+        "https://gemini.google.com" \
+        "https://web.whatsapp.com/" &
+    sleep 1
 
-# Wait for browser to start
-sleep 3
+    hyprctl dispatch workspace 3
+    spotify &
+    sleep 1
 
-# Open Spotify on workspace 2
-hyprctl dispatch workspace 2
-spotify &
+    hyprctl dispatch workspace 2
+}
 
-# Return to workspace 1
+learn_go() {
+    hyprctl dispatch workspace 2
+    chromium \
+        "https://mail.google.com" \
+        "https://app.clockify.me/tracker" \
+        "https://gemini.google.com" \
+        "https://web.whatsapp.com/" \
+        "https://quii.gitbook.io/learn-go-with-tests" &
+    sleep 0.5
+    kitty --directory ~/dev/play/go/learn-tests/ &
+    sleep 1
+
+    hyprctl dispatch workspace 3
+    spotify &
+    sleep 1
+
+    hyprctl dispatch workspace 2
+}
+
+boot_windows() {
+    kitty -e winboot &
+}
+
+# =============================================================================
+# ENABLED OPTIONS
+# Add/remove entries to enable/disable options: "function_name|Display Label"
+# =============================================================================
+
+ENABLED_OPTIONS=(
+    "normal_setup|Normal Setup"
+    "learn_go|Learn Go"
+    "boot_windows|Boot Windows"
+)
+
+# =============================================================================
+# MAIN
+# =============================================================================
+
 sleep 2
-hyprctl dispatch workspace 3
+
+# Build numbered menu
+menu=""
+for i in "${!ENABLED_OPTIONS[@]}"; do
+    label="${ENABLED_OPTIONS[$i]#*|}"
+    menu+="$((i + 1))  $label"$'\n'
+done
+menu="${menu%$'\n'}"
+
+# Calculate height (roughly 40px per line + padding)
+line_height=40
+padding=30
+height=$(( ${#ENABLED_OPTIONS[@]} * line_height + padding ))
+
+CHOICE=$(echo "$menu" | wofi --dmenu \
+    --prompt "Boot Mode" \
+    --cache-file /dev/null \
+    --insensitive \
+    --width 300 \
+    --height "$height" \
+    --lines ${#ENABLED_OPTIONS[@]})
+
+# Extract selected number and call corresponding function
+selected_num="${CHOICE%%  *}"
+if [[ "$selected_num" =~ ^[0-9]+$ ]]; then
+    idx=$((selected_num - 1))
+    func_name="${ENABLED_OPTIONS[$idx]%|*}"
+    $func_name
+fi

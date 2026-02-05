@@ -43,17 +43,11 @@ chmod +x ./install.sh
 - configs/chromium-flags.confg -> ~/.config/chromium-flags.confyghb 
 - scripts -> ~/.local/bin
 
-# More docs 
+# More docs
 
+- *Hyprland*: [Hyprland](docs/hyprland.md)
 - *Neovim*: [Neovim](nvim/README.md)
 - *System*: [System](docs/system.md)
-
-# Essential keybands and commands
-
-- `SUPER + E`: Kitty
-- `SUPER + R`: Wofi
-- `SUPER + Q`: Kill active window
-- `SUPER + V`: Shutdown and update menu
 
 # Maintenance
 
