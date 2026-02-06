@@ -11,21 +11,23 @@ set -euo pipefail
 
 normal_setup() {
     hyprctl dispatch workspace 2
+    spotify &
+    sleep 1
+
+    hyprctl dispatch workspace 3
     chromium \
         "https://mail.google.com" \
         "https://app.clockify.me/tracker" \
         "https://gemini.google.com" \
         "https://web.whatsapp.com/" &
     sleep 1
+}
 
+learn_go() {
     hyprctl dispatch workspace 3
     spotify &
     sleep 1
 
-    hyprctl dispatch workspace 2
-}
-
-learn_go() {
     hyprctl dispatch workspace 2
     chromium \
         "https://mail.google.com" \
@@ -36,12 +38,6 @@ learn_go() {
     sleep 0.5
     kitty --directory ~/dev/play/go/learn-tests/ &
     sleep 1
-
-    hyprctl dispatch workspace 3
-    spotify &
-    sleep 1
-
-    hyprctl dispatch workspace 2
 }
 
 boot_windows() {
