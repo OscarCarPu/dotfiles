@@ -32,3 +32,17 @@ if echo "$MONITORS" | jq -e '.[] | select(.name=="eDP-1")' > /dev/null 2>&1; the
     hyprctl keyword monitor "eDP-1,1920x1080@60,3000x840,1"
 fi
 
+# Bind default workspaces: 1=left, 2=middle, 3=right
+hyprctl keyword workspace "1, monitor:$LEFTMOST_PORT, default:true"
+hyprctl keyword workspace "2, monitor:$MIDDLE_PORT, default:true"
+if echo "$MONITORS" | jq -e '.[] | select(.name=="eDP-1")' > /dev/null 2>&1; then
+    hyprctl keyword workspace "3, monitor:eDP-1, default:true"
+fi
+
+# Force-move existing workspaces to the correct monitors
+hyprctl dispatch moveworkspacetomonitor 1 "$LEFTMOST_PORT"
+hyprctl dispatch moveworkspacetomonitor 2 "$MIDDLE_PORT"
+if echo "$MONITORS" | jq -e '.[] | select(.name=="eDP-1")' > /dev/null 2>&1; then
+    hyprctl dispatch moveworkspacetomonitor 3 eDP-1
+fi
+

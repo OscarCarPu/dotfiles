@@ -10,11 +10,11 @@ set -euo pipefail
 # =============================================================================
 
 normal_setup() {
-    hyprctl dispatch workspace 2
+    hyprctl dispatch workspace 3
     spotify &
     sleep 1
 
-    hyprctl dispatch workspace 3
+    hyprctl dispatch workspace 1
     chromium \
         "https://mail.google.com" \
         "https://app.clockify.me/tracker" \
@@ -28,7 +28,7 @@ learn_go() {
     spotify &
     sleep 1
 
-    hyprctl dispatch workspace 2
+    hyprctl dispatch workspace 1
     chromium \
         "https://mail.google.com" \
         "https://app.clockify.me/tracker" \
