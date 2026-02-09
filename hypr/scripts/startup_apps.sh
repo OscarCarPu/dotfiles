@@ -44,6 +44,34 @@ boot_windows() {
     kitty -e winboot &
 }
 
+start_pvz() {
+    hyprctl dispatch workspace 3 
+    spotify &
+    chromium \
+        "https://mail.google.com" \
+        "https://app.clockify.me/tracker" \
+        "https://gemini.google.com" \
+        "https://web.whatsapp.com/" &
+    sleep 1
+
+    hyprctl dispatch workspace 1
+    kitty --directory ~/pvzfusion/ -e ./pvzfusion.sh &
+}
+
+musescore() {
+    hyprctl dispatch workspace 300
+    spotify &
+    chromium \
+        "https://mail.google.com" \
+        "https://app.clockify.me/tracker" \
+        "https://gemini.google.com" \
+        "https://web.whatsapp.com/" &
+    sleep 1
+
+    hyprctl dispatch workspace 1 
+    mscore &
+}
+
 # =============================================================================
 # ENABLED OPTIONS
 # Add/remove entries to enable/disable options: "function_name|Display Label"
@@ -53,6 +81,7 @@ ENABLED_OPTIONS=(
     "normal_setup|Normal Setup"
     "learn_go|Learn Go"
     "boot_windows|Boot Windows"
+    "start_pvz|Start PVZ"
 )
 
 # =============================================================================
