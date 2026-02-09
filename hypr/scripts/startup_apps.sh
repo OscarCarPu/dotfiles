@@ -80,6 +80,7 @@ musescore() {
 ENABLED_OPTIONS=(
     "normal_setup|Normal Setup"
     "learn_go|Learn Go"
+    "musescore|MuseScore"
     "boot_windows|Boot Windows"
     "start_pvz|Start PVZ"
 )
