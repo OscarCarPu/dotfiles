@@ -59,7 +59,7 @@ start_pvz() {
 }
 
 musescore() {
-    hyprctl dispatch workspace 300
+    hyprctl dispatch workspace 3
     spotify &
     chromium \
         "https://mail.google.com" \
