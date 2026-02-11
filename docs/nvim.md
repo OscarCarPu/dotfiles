@@ -8,6 +8,24 @@ Based on [NvChad v2.5](https://github.com/NvChad/NvChad) with the **oxocarbon** 
 |-----|------|--------|
 | `Space + e` | Normal | Toggle file explorer |
 
+### Search (`Space + s`)
+
+| Key | Action |
+|-----|--------|
+| `Space + sg` | Grep (cwd) |
+| `Space + sG` | Grep (root) |
+| `Space + sb` | Fuzzy find in current buffer |
+| `Space + sf` | Find files |
+| `Space + sh` | Help tags |
+| `Space + sk` | Keymaps |
+| `Space + sm` | Marks |
+| `Space + sr` | Resume last search |
+| `Space + sw` | Grep word under cursor |
+| `Space + s"` | Registers |
+| `Space + sd` | Diagnostics |
+| `Space + ss` | Document symbols (LSP) |
+| `Space + sS` | Workspace symbols (LSP) |
+
 ### Supermaven (AI Completion)
 
 | Key | Action |
