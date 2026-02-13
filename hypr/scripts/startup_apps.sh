@@ -23,7 +23,7 @@ normal_setup() {
     sleep 1
 }
 
-learn_go() {
+learn_rust() {
     hyprctl dispatch workspace 3
     spotify &
     sleep 1
@@ -34,28 +34,15 @@ learn_go() {
         "https://app.clockify.me/tracker" \
         "https://gemini.google.com" \
         "https://web.whatsapp.com/" \
-        "https://quii.gitbook.io/learn-go-with-tests" &
-    sleep 0.5
-    kitty --directory ~/dev/play/go/learn-tests/ &
+        "https://doc.rust-lang.org/book/" &
     sleep 1
+
+    kitty --directory ~/dev/play/rust/thebook/ 
 }
+
 
 boot_windows() {
     kitty -e winboot &
-}
-
-start_pvz() {
-    hyprctl dispatch workspace 3 
-    spotify &
-    chromium \
-        "https://mail.google.com" \
-        "https://app.clockify.me/tracker" \
-        "https://gemini.google.com" \
-        "https://web.whatsapp.com/" &
-    sleep 1
-
-    hyprctl dispatch workspace 1
-    kitty --directory ~/pvzfusion/ -e ./pvzfusion.sh &
 }
 
 musescore() {
@@ -79,10 +66,9 @@ musescore() {
 
 ENABLED_OPTIONS=(
     "normal_setup|Normal Setup"
-    "learn_go|Learn Go"
+    "learn_rust|Learn Rust"
     "musescore|MuseScore"
     "boot_windows|Boot Windows"
-    "start_pvz|Start PVZ"
 )
 
 # =============================================================================
