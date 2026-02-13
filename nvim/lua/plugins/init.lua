@@ -28,7 +28,27 @@ return {
         "go",
         "gomod",
         "gosum",
+        "rust",
+        "toml",
       },
     },
+  },
+
+  -- Show gitignored files in nvim-tree
+  {
+    "nvim-tree/nvim-tree.lua",
+    opts = {
+      git = {
+        enable = true,
+        ignore = false,
+      },
+    },
+  },
+
+  -- Rust crate dependency version checking
+  {
+    "saecki/crates.nvim",
+    event = { "BufRead Cargo.toml" },
+    opts = {},
   },
 }
