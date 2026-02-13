@@ -4,16 +4,31 @@
 - So you just import its modules , like `require "nvchad.options" , require "nvchad.mappings"`
 - So you can delete the .git from this repo ( when you clone it locally ) or fork it :)
 
+# File Explorer
+
+nvim-tree is configured to show gitignored files by default (`git.ignore = false`).
+
 # Formatting
 
-Format-on-save is enabled via [conform.nvim](https://github.com/stevearc/conform.nvim) with a 250ms timeout and LSP fallback.
+Format-on-save is enabled via [conform.nvim](https://github.com/stevearc/conform.nvim) with a 500ms timeout and LSP fallback.
 
 | Language | Formatters          |
 |----------|---------------------|
 | Lua      | stylua              |
 | Go       | gofumpt, goimports  |
+| Rust     | rustfmt             |
 
 Go files also auto-organize imports on save via a `BufWritePre` autocmd in `lua/configs/go.lua`.
+
+# Rust
+
+Rust support is configured via:
+
+- **LSP**: `rust-analyzer` with clippy check-on-save, auto-imports grouped by module (`lua/configs/rust.lua`)
+- **Formatting**: `rustfmt` via conform.nvim (format-on-save)
+- **Auto-import**: organizes imports on save via a `BufWritePre` autocmd in `lua/configs/rust.lua`
+- **Crate versions**: [crates.nvim](https://github.com/saecki/crates.nvim) shows dependency versions inline when editing `Cargo.toml`
+- **Treesitter**: `rust` and `toml` parsers for syntax highlighting
 
 # Credits
 
