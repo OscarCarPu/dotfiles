@@ -9,17 +9,25 @@ set -euo pipefail
 # Define function as: name|Label Text
 # =============================================================================
 
+open_web() {
+    chromium \
+        "https://mail.google.com/mail/u/0/" \
+        "https://mail.google.com/mail/u/1/" \
+        "https://mail.google.com/mail/u/4/" \
+        "https://app.clockify.me/tracker" \
+        "https://gemini.google.com" \
+        "https://claude.ai" \
+        "https://web.whatsapp.com/" \
+        "$@" &
+}
+
 normal_setup() {
     hyprctl dispatch workspace 3
     spotify &
     sleep 1
 
     hyprctl dispatch workspace 1
-    chromium \
-        "https://mail.google.com" \
-        "https://app.clockify.me/tracker" \
-        "https://gemini.google.com" \
-        "https://web.whatsapp.com/" &
+    open_web
     sleep 1
 }
 
@@ -29,17 +37,11 @@ learn_rust() {
     sleep 1
 
     hyprctl dispatch workspace 1
-    chromium \
-        "https://mail.google.com" \
-        "https://app.clockify.me/tracker" \
-        "https://gemini.google.com" \
-        "https://web.whatsapp.com/" \
-        "https://doc.rust-lang.org/book/" &
+    open_web "https://doc.rust-lang.org/book/"
     sleep 1
 
-    kitty --directory ~/dev/play/rust/thebook/ 
+    kitty --directory ~/dev/play/rust/thebook/
 }
-
 
 boot_windows() {
     kitty -e winboot &
@@ -48,14 +50,12 @@ boot_windows() {
 musescore() {
     hyprctl dispatch workspace 3
     spotify &
-    chromium \
-        "https://mail.google.com" \
-        "https://app.clockify.me/tracker" \
-        "https://gemini.google.com" \
-        "https://web.whatsapp.com/" &
     sleep 1
 
-    hyprctl dispatch workspace 1 
+    hyprctl dispatch workspace 1
+    open_web
+    sleep 1
+
     mscore &
 }
 
