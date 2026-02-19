@@ -53,11 +53,35 @@ musescore() {
     spotify &
     sleep 1
 
+    open_web
+    sleep 1
+
+    hyprctl dispatch workspace 1
+    mscore &
+}
+
+uoc() {
+    hyprctl dispatch workspace 2
+    spotify &
+    sleep 1
+
     hyprctl dispatch workspace 1
     open_web
     sleep 1
 
-    mscore &
+    hyprctl dispatch workspace 3 
+    chromium \ 
+        "https://aula.uoc.edu/" \
+        "https://aula.uoc.edu/courses/81157" \
+        "https://aula.uoc.edu/courses/80582" \
+        "https://aula.uoc.edu/courses/79678" \
+        "https://aula.uoc.edu/courses/76547" \
+        "https://aula.uoc.edu/courses/80606" \
+        "https://aula.uoc.edu/courses/75777" \
+        "https://aula.uoc.edu/courses/22189"
+    sleep 1
+
+
 }
 
 # =============================================================================
@@ -70,6 +94,7 @@ ENABLED_OPTIONS=(
     "learn_rust|Learn Rust"
     "musescore|MuseScore"
     "boot_windows|Boot Windows"
+    "uoc|UOC"
 )
 
 # =============================================================================
