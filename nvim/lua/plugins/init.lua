@@ -30,6 +30,9 @@ return {
         "gosum",
         "rust",
         "toml",
+        "kotlin",
+        "java",
+        "xml",
       },
     },
   },
@@ -49,6 +52,33 @@ return {
   {
     "saecki/crates.nvim",
     event = { "BufRead Cargo.toml" },
+    opts = {},
+  },
+
+  -- Mason: ensure Android/Java/XML tooling is installed
+  {
+    "williamboman/mason.nvim",
+    opts = {
+      ensure_installed = {
+        "kotlin-language-server",
+        "lemminx",
+      },
+    },
+  },
+
+  -- Enhanced Java LSP support via jdtls
+  {
+    "mfussenegger/nvim-jdtls",
+    ft = "java",
+    config = function()
+      require "configs.java"
+    end,
+  },
+
+  -- Android: build, run, and Logcat in Nvim
+  {
+    "iamironz/android-nvim-plugin",
+    ft = { "kotlin", "java", "xml" },
     opts = {},
   },
 }
