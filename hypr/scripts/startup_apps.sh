@@ -69,8 +69,8 @@ uoc() {
     open_web
     sleep 1
 
-    hyprctl dispatch workspace 3 
-    chromium \ 
+    hyprctl dispatch workspace 3
+    chromium \
         "https://aula.uoc.edu/" \
         "https://aula.uoc.edu/courses/81157" \
         "https://aula.uoc.edu/courses/80582" \
@@ -78,7 +78,7 @@ uoc() {
         "https://aula.uoc.edu/courses/76547" \
         "https://aula.uoc.edu/courses/80606" \
         "https://aula.uoc.edu/courses/75777" \
-        "https://aula.uoc.edu/courses/22189"
+        "https://aula.uoc.edu/courses/22189" &
     sleep 1
 
 
