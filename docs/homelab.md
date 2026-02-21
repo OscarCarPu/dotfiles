@@ -21,13 +21,13 @@
 
 All services run as Docker containers under `~/docker/`.
 
-| Service | Image | Port | Description |
-|---|---|---|---|
-| mosquitto | eclipse-mosquitto:2.0 | 1883, 9001 | MQTT broker (MQTT + WebSockets) |
-| mosquitto-ui | smeagolworms4/mqtt-explorer | 4000 | MQTT Explorer web UI |
-| gv-web | gv-web-gv-web | 3000 | Habits tracker web app |
-| habits_api | gv-api-api | 8080 | Habits tracker API |
-| habits_db | postgres:15-alpine | 5432 | PostgreSQL database |
+| Service | Image | Port | Description | Exported to |
+|---|---|---|---|---|
+| mosquitto | eclipse-mosquitto:2.0 | 1883, 9001 | MQTT broker (MQTT + WebSockets) | |
+| mosquitto-ui | smeagolworms4/mqtt-explorer | 4000 | MQTT Explorer web UI | |
+| gv-web | gv-web-gv-web | 3000 | Habits tracker web app | gv.lab-ocp.com |
+| habits_api | gv-api-api | 8080 | Habits tracker API | gv-api.lab-ocp.com |
+| habits_db | postgres:15-alpine | 5432 | PostgreSQL database | |
 
 ## Mosquitto
 
