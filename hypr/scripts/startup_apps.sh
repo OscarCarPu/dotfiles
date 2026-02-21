@@ -65,12 +65,12 @@ uoc() {
     spotify &
     sleep 1
 
-    hyprctl dispatch workspace 1
-    open_web
-    sleep 1
-
     hyprctl dispatch workspace 3
-    chromium \
+    open_web
+    sleep 3
+
+    hyprctl dispatch workspace 1
+    chromium --new-window \
         "https://aula.uoc.edu/" \
         "https://aula.uoc.edu/courses/81157" \
         "https://aula.uoc.edu/courses/80582" \
