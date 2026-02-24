@@ -23,7 +23,10 @@ open_web() {
 }
 
 normal_setup() {
+    sleep 1
+
     hyprctl dispatch workspace 3
+    sleep 1
     spotify &
     sleep 1
 
@@ -33,11 +36,16 @@ normal_setup() {
 }
 
 learn_rust() {
+    sleep 1
+
     hyprctl dispatch workspace 3
+    sleep 1
+
     spotify &
     sleep 1
 
     hyprctl dispatch workspace 1
+    sleep 1
     open_web "https://doc.rust-lang.org/book/"
     sleep 1
 
@@ -49,7 +57,9 @@ boot_windows() {
 }
 
 musescore() {
+    sleep 1
     hyprctl dispatch workspace 3
+    sleep 1
     spotify &
     sleep 1
 
@@ -57,31 +67,25 @@ musescore() {
     sleep 1
 
     hyprctl dispatch workspace 1
+    sleep 1
     mscore &
 }
 
 uoc() {
-    hyprctl dispatch workspace 2
+    sleep 1
+    hyprctl dispatch workspace 3
+    sleep 1
     spotify &
     sleep 1
 
-    hyprctl dispatch workspace 3
-    open_web
-    sleep 3
-
     hyprctl dispatch workspace 1
-    chromium --new-window \
-        "https://aula.uoc.edu/" \
-        "https://aula.uoc.edu/courses/81157" \
-        "https://aula.uoc.edu/courses/80582" \
-        "https://aula.uoc.edu/courses/79678" \
-        "https://aula.uoc.edu/courses/76547" \
-        "https://aula.uoc.edu/courses/80606" \
-        "https://aula.uoc.edu/courses/75777" \
-        "https://aula.uoc.edu/courses/22189" &
+    sleep 1
+    open_web
     sleep 1
 
-
+    hyprctl dispatch workspace 2
+    sleep 1
+    kitty --directory ~/edu/data-science-degree/ 
 }
 
 # =============================================================================
