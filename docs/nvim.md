@@ -55,6 +55,12 @@ Based on [NvChad v2.5](https://github.com/NvChad/NvChad) with the **oxocarbon** 
 - **Auto-import**: Organizes imports automatically on save
 - Config: `configs/go.lua`
 
+## Kotlin
+
+- **LSP**: kotlin-language-server (diagnostics, completion, go-to-definition)
+- **Formatter / Linter**: ktlint (format on save via conform.nvim, style checking)
+- Config: `configs/kotlin.lua`
+
 ## File Explorer
 
 nvim-tree opens automatically on startup and can be toggled with `Space + e`.

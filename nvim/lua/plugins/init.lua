@@ -61,6 +61,7 @@ return {
     opts = {
       ensure_installed = {
         "kotlin-language-server",
+        "ktlint",
         "lemminx",
       },
     },
