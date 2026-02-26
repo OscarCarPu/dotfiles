@@ -1,0 +1,12 @@
+#!/bin/bash
+
+git rev-parse --verify develop &>/dev/null || { echo "Error: develop branch not found"; exit 1; }
+
+echo "Deploying: develop → main"
+
+git checkout main || exit 1
+git merge develop || exit 1
+git push origin main || exit 1
+git checkout develop
+
+echo "Done!"

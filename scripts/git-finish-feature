@@ -1,0 +1,18 @@
+#!/bin/bash
+
+CURRENT_BRANCH=$(git branch --show-current)
+
+if [[ ! "$CURRENT_BRANCH" =~ ^feature/ ]]; then
+    echo "Error: Not on a feature branch (current: $CURRENT_BRANCH)"
+    exit 1
+fi
+
+echo "Finishing: $CURRENT_BRANCH → develop"
+
+git checkout develop || exit 1
+git merge "$CURRENT_BRANCH" || exit 1
+git push origin develop || exit 1
+git branch -d "$CURRENT_BRANCH" || echo "Warning: Could not delete local branch"
+git push origin --delete "$CURRENT_BRANCH" 2>/dev/null || echo "Note: Remote branch not found or already deleted"
+
+echo "Done!"

@@ -1,0 +1,13 @@
+[user]
+    email = oscarcarballopuebla@gmail.com
+    name = OCP
+[push]
+    autoSetupRemote = true
+[core]
+    pager = less
+[init]
+    defaultBranch = main
+[alias]
+    ai = !git-ai
+    finish-feature = !git-finish-feature
+    deploy = !git-deploy

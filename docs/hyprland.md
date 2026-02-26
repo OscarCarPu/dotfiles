@@ -9,8 +9,35 @@
 | `SUPER + E` | Open Kitty terminal |
 | `SUPER + R` | Open Wofi launcher |
 | `SUPER + Q` | Kill active window |
-| `SUPER + V` | Shutdown and update menu |
+| `SUPER + V` | Power menu (wofi) — shutdown, reboot, or update |
 | `SUPER + SHIFT + N` | Toggle sticky note |
+
+## Power Menu (Super+V)
+
+A wofi selection menu for power actions and system updates.
+
+| Option | Behavior |
+|--------|----------|
+| `⏻  Shutdown` | Immediate shutdown — no terminal opens |
+| `↺  Reboot` | Immediate reboot — no terminal opens |
+| `⟳  Update + Shutdown` | Opens update terminal, then shuts down |
+| `⟳  Update + Reboot` | Opens update terminal, then reboots |
+| `⟳  Update Only` | Opens update terminal, no power action |
+| `×  Cancel` | Dismiss menu |
+
+**Update terminal flow:**
+1. Calculates available updates and starts AI summary fetch in the background
+2. Shows latest Arch Linux news
+3. Lists packages updating (critical ones highlighted in red)
+4. Optionally shows AI summary — already fetched, no waiting
+5. Confirms before running the update
+6. Checks `.pacnew` files after update
+
+**AI summary** requires `GROQ_API_KEY` set in `~/.bashrc`. Uses the LLM's training knowledge — no slow GitHub changelog fetching.
+
+**Source:** [`hypr/scripts/shutdown.sh`](../hypr/scripts/shutdown.sh)
+
+---
 
 ## Sticky Note
 
