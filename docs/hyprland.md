@@ -10,6 +10,25 @@
 | `SUPER + R` | Open Wofi launcher |
 | `SUPER + Q` | Kill active window |
 | `SUPER + V` | Shutdown and update menu |
+| `SUPER + SHIFT + N` | Toggle sticky note |
+
+## Sticky Note
+
+A floating terminal note window (Kitty + micro) pinned across all workspaces.
+
+| Key / Action | Description |
+|---|---|
+| `SUPER + SHIFT + N` | Toggle sticky note open/closed |
+| `SUPER + left-click drag` | Move the note around the screen |
+| `SUPER + SHIFT + 1–8` | Move the note to a specific workspace |
+
+**Notes file:** `~/.sticky-notes.md` (plain Markdown, auto-created on first open)
+
+**Source:** [`hypr/scripts/sticky_note.sh`](../hypr/scripts/sticky_note.sh)
+
+The window is pinned (`pin` rule), so it follows you across workspaces by default. Use `SUPER + SHIFT + number` to unpin it onto a specific workspace if needed.
+
+---
 
 ## Startup Boot Mode Selector
 
