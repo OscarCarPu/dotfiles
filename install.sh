@@ -9,6 +9,7 @@ declare -A DOTFILES=(
     ["swaync"]="$HOME/.config/swaync"
     ["wireplumber"]="$HOME/.config/wireplumber"
     ["scripts"]="$HOME/.local/bin"
+    ["git/.gitconfig"]="$HOME/.gitconfig"
 )
 
 # Check if running from the dotfiles directory

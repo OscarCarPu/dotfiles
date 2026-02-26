@@ -1,64 +1,107 @@
 #!/bin/bash
+
+# --- Power menu via wofi ---
+CHOICE=$(printf "⏻  Shutdown\n↺  Reboot\n⟳  Update + Shutdown\n⟳  Update + Reboot\n⟳  Update Only\n×  Cancel" | \
+    wofi --dmenu --prompt "System" --cache-file /dev/null --lines 6 --insensitive 2>/dev/null) || true
+
+case "$CHOICE" in
+    *"Update + Shutdown"*) POWER_ACTION=poweroff ;;
+    *"Update + Reboot"*)   POWER_ACTION=reboot   ;;
+    *"Update"*)            POWER_ACTION=none      ;;
+    *"Shutdown"*)          systemctl poweroff; exit 0 ;;
+    *"Reboot"*)            systemctl reboot; exit 0   ;;
+    *)                     exit 0 ;;
+esac
+
+# --- Update workflow in Kitty (only reached for Update variants) ---
+INNER_SCRIPT=$(cat << 'INNEREOF'
 set -euo pipefail
 
-# Run in Kitty
-kitty --title "System Update Auditor" bash -c '
-set -e
-
-# Source env vars from bashrc (bypasses interactive guard)
 eval "$(grep -E "^export " ~/.bashrc 2>/dev/null || true)"
 
-# --- Configuration ---
-# Only flag these EXACT package names as critical (regex)
 CRITICAL_PKGS="^(linux|linux-lts|linux-zen|nvidia|mesa|systemd|grub|postgresql|python|glibc|pacman)$"
+TMPFILE=""
+AI_PID=""
 
-echo "=== System Update Auditor ==="
-echo "1. Shutdown after update (or straight away)"
-echo "2. Update only"
-echo "3. Reboot after update (or straight away)"
-echo
-read -p "Select action (1/2/3): " ACTION_CHOICE
+trap 'kill "${AI_PID:-}" 2>/dev/null || true; rm -f "${TMPFILE:-}"' EXIT
 
-# --- Step 1: Check Arch News ---
-# We check news regardless, just in case there is a global alert
-echo -e "\n\033[1;33m[ Latest Arch Linux News ]\033[0m"
-if command -v curl &>/dev/null; then
-    curl -s "https://archlinux.org/feeds/news/" | \
-    grep -oP "(?<=<title>).*?(?=</title>)" | \
-    head -n 4 | tail -n 3 | \
-    sed "s/^/  - /" || echo "  Unable to parse news."
-else
-    echo "  Curl not found, skipping news."
-fi
+echo -e "\033[1;34m=== System Update ===\033[0m"
 
-# --- Step 2: Calculate Updates ---
+# --- Step 0: Get package list & start AI fetch in background immediately ---
 echo -e "\n\033[1;33m[ Calculating Updates... ]\033[0m"
 REPO_UPDATES=$(checkupdates --nocolor 2>/dev/null || true)
 AUR_UPDATES=""
-if command -v yay &> /dev/null; then
+if command -v yay &>/dev/null; then
     AUR_UPDATES=$(yay -Qu --color never 2>/dev/null || true)
 fi
+ALL_UPDATES=$(printf "%s\n%s\n" "$REPO_UPDATES" "$AUR_UPDATES" | sed '/^\s*$/d')
 
-ALL_UPDATES="$REPO_UPDATES
-$AUR_UPDATES"
-ALL_UPDATES=$(echo "$ALL_UPDATES" | sed "/^\s*$/d")
+if [ -n "$ALL_UPDATES" ] && [ -n "${GROQ_API_KEY:-}" ] && command -v jq &>/dev/null; then
+    TMPFILE=$(mktemp /tmp/ai_summary_XXXXXX)
+    PKG_LIST="$ALL_UPDATES"
+    (
+        SYSTEM_PROMPT="You are a concise Arch Linux sysadmin assistant. The user has pending package updates.
+Using your training knowledge, briefly summarize what is notable about these version changes.
+Highlight: security fixes, breaking changes, kernel/driver updates, whether a reboot is needed.
+Be concise: 1-2 sentences per package. Skip trivial patch bumps entirely."
 
-# --- Step 3: Logic Split ---
+        JSON_PAYLOAD=$(jq -n \
+            --arg sys "$SYSTEM_PROMPT" \
+            --arg usr "Packages updating:
+${PKG_LIST}" \
+            '{
+                model: "llama-3.3-70b-versatile",
+                messages: [
+                    {role: "system", content: $sys},
+                    {role: "user", content: $usr}
+                ],
+                temperature: 0.2,
+                max_tokens: 600
+            }')
+
+        RESPONSE=$(curl -s --max-time 20 -X POST "https://api.groq.com/openai/v1/chat/completions" \
+            -H "Authorization: Bearer ${GROQ_API_KEY}" \
+            -H "Content-Type: application/json" \
+            -d "$JSON_PAYLOAD" 2>/dev/null)
+
+        MSG=$(echo "$RESPONSE" | jq -r '.choices[0].message.content // empty' 2>/dev/null)
+        if [ -n "$MSG" ] && [ "$MSG" != "null" ]; then
+            printf "%s" "$MSG"
+        else
+            echo "(AI summary unavailable)"
+        fi
+    ) > "$TMPFILE" 2>&1 &
+    AI_PID=$!
+fi
+
+# --- Step 1: Arch Linux News (fixed with Python XML parser) ---
+echo -e "\n\033[1;33m[ Latest Arch Linux News ]\033[0m"
+python3 -c "
+import xml.etree.ElementTree as ET
+from urllib.request import urlopen
+try:
+    rss = urlopen('https://archlinux.org/feeds/news/', timeout=5).read()
+    root = ET.fromstring(rss)
+    for item in list(root.findall('.//item'))[:3]:
+        t = item.find('title')
+        print(' -', t.text if t is not None else '?')
+except Exception as e:
+    print(' Unable to fetch news:', e)
+" 2>/dev/null || echo "  Unable to fetch news."
+
+# --- Step 2: Package list ---
 if [ -z "$ALL_UPDATES" ]; then
-    # CASE A: No Updates
     echo -e "\n\033[1;32m✓ System is already up to date.\033[0m"
-    sleep 1
 else
-    # CASE B: Updates Found - Run the Audit & Install
-    
-    echo -e "\n\033[1;34m=== Incoming Updates ===\033[0m"
+    echo -e "\n\033[1;34m[ Incoming Updates ]\033[0m"
     CRITICAL_FOUND=false
 
-    while read -r line; do
-        pkg_name=$(echo "$line" | awk "{print \$1}")
-        old_ver=$(echo "$line" | awk "{print \$2}")
-        new_ver=$(echo "$line" | awk "{print \$4}")
-        
+    while IFS= read -r line; do
+        [ -z "$line" ] && continue
+        pkg_name=$(echo "$line" | awk '{print $1}')
+        old_ver=$(echo "$line" | awk '{print $2}')
+        new_ver=$(echo "$line" | awk '{print $4}')
+
         if [[ "$pkg_name" =~ $CRITICAL_PKGS ]]; then
             echo -e "\033[1;31m!! $pkg_name : $old_ver -> $new_ver\033[0m"
             CRITICAL_FOUND=true
@@ -68,176 +111,27 @@ else
     done <<< "$ALL_UPDATES"
 
     echo -e "------------------------"
-
     if [ "$CRITICAL_FOUND" = "true" ]; then
         echo -e "\033[1;31mWARNING: Critical system components are updating.\033[0m"
     fi
 
-    # --- AI Update Summary via Groq ---
-    if [ -z "${GROQ_API_KEY:-}" ]; then
-        echo -e "\n\033[0;90m  (Skipping AI summary: GROQ_API_KEY not set)\033[0m"
-    elif ! command -v jq &>/dev/null; then
-        echo -e "\n\033[0;90m  (Skipping AI summary: jq not installed)\033[0m"
-    else
-        echo -e "\n\033[1;35m[ AI Update Summary ]\033[0m"
-        echo -n "Fetching changelogs..."
-        (while :; do for c in / - \\ \|; do
-            echo -ne "\b$c"
-            sleep 0.1
-        done; done) &
-        SPINNER_PID=$!
-
-        # --- Fetch real changelogs from upstream ---
-        CHANGELOG_DATA=""
-        while read -r line; do
-            pkg_name=$(echo "$line" | awk "{print \$1}")
-            old_ver=$(echo "$line" | awk "{print \$2}")
-            new_ver=$(echo "$line" | awk "{print \$4}")
-
-            # Strip Arch pkgrel suffix (e.g. 0.9.4-1 -> 0.9.4)
-            old_strip=$(echo "$old_ver" | sed "s/-[0-9]*$//")
-            new_strip=$(echo "$new_ver" | sed "s/-[0-9]*$//")
-
-            # Get upstream URL from pacman
-            PKG_URL=$(pacman -Si "$pkg_name" 2>/dev/null | grep -m1 "^URL" | awk "{print \$3}")
-
-            NOTES=""
-            if [[ "${PKG_URL:-}" == *"github.com"* ]]; then
-                # Extract owner/repo from GitHub URL
-                GH_REPO=$(echo "$PKG_URL" | sed "s|https\{0,1\}://github.com/||;s|/$||;s|#.*||;s|/tree/.*||;s|/wiki.*||")
-
-                # Try common tag formats for the new version release notes
-                for tag in "v${new_strip}" "${new_strip}" "${pkg_name}-${new_strip}"; do
-                    NOTES=$(curl -s --max-time 5 \
-                        "https://api.github.com/repos/${GH_REPO}/releases/tags/${tag}" \
-                        | jq -r ".body // empty" 2>/dev/null)
-                    [ -n "$NOTES" ] && break
-                done
-
-                # If no tagged release, try latest release
-                if [ -z "$NOTES" ]; then
-                    NOTES=$(curl -s --max-time 5 \
-                        "https://api.github.com/repos/${GH_REPO}/releases/latest" \
-                        | jq -r "if .tag_name then \"[\(.tag_name)] \" + (.body // \"\") else empty end" 2>/dev/null)
-                fi
-            fi
-
-            # Cap per-package notes to avoid token bloat
-            if [ -n "$NOTES" ]; then
-                NOTES=$(echo "$NOTES" | head -c 1500)
-            fi
-
-            CHANGELOG_DATA="${CHANGELOG_DATA}
-=== ${pkg_name} ${old_strip} -> ${new_strip} ===
-Upstream: ${PKG_URL:-unknown}
-${NOTES:-No release notes found.}
-"
-        done <<< "$ALL_UPDATES"
-
-        kill $SPINNER_PID 2>/dev/null
-        echo -ne "\b \n"
-
-        # --- Send changelogs to Groq for summarization ---
-        echo -n "Summarizing with AI..."
-        (while :; do for c in / - \\ \|; do
-            echo -ne "\b$c"
-            sleep 0.1
-        done; done) &
-        SPINNER_PID=$!
-
-        SYSTEM_PROMPT="You are a concise Arch Linux system administrator assistant.
-You are given real upstream release notes for pending package updates.
-Summarize what actually changed based on the provided notes:
-- Highlight breaking changes, security fixes, new features, and deprecations.
-- Note if a reboot or manual intervention is likely needed.
-- If no release notes were found for a package, say so briefly.
-- Keep it concise: a few bullet points per package. No markdown code blocks."
-
-        # Split changelog data into chunks (~4000 chars each) for token limits
-        CHUNK_SIZE=4000
-        TOTAL_CHARS=${#CHANGELOG_DATA}
-        OFFSET=0
-        CHUNK_NUM=0
-        AI_FULL_MSG=""
-
-        while [ "$OFFSET" -lt "$TOTAL_CHARS" ]; do
-            CHUNK="${CHANGELOG_DATA:$OFFSET:$CHUNK_SIZE}"
-            # Avoid cutting mid-package: extend to next === boundary
-            if [ $((OFFSET + CHUNK_SIZE)) -lt "$TOTAL_CHARS" ]; then
-                REMAINDER="${CHANGELOG_DATA:$((OFFSET + CHUNK_SIZE)):500}"
-                NEXT_BREAK=$(echo "$REMAINDER" | grep -b -m1 "^===" | head -1 | cut -d: -f1)
-                if [ -n "$NEXT_BREAK" ]; then
-                    CHUNK="${CHANGELOG_DATA:$OFFSET:$((CHUNK_SIZE + NEXT_BREAK))}"
-                fi
-            fi
-            ACTUAL_LEN=${#CHUNK}
-            CHUNK_NUM=$((CHUNK_NUM + 1))
-
-            if [ "$TOTAL_CHARS" -gt "$CHUNK_SIZE" ]; then
-                CHUNK_LABEL=" (batch $CHUNK_NUM)"
-            else
-                CHUNK_LABEL=""
-            fi
-
-            USER_PROMPT="Package update changelogs${CHUNK_LABEL}:
-
-${CHUNK}"
-
-            JSON_PAYLOAD=$(jq -n \
-                --arg sys "$SYSTEM_PROMPT" \
-                --arg usr "$USER_PROMPT" \
-                "{
-                    model: \"llama-3.3-70b-versatile\",
-                    messages: [
-                        {role: \"system\", content: \$sys},
-                        {role: \"user\", content: \$usr}
-                    ],
-                    temperature: 0.2,
-                    max_tokens: 1000
-                }")
-
-            AI_RESPONSE=$(curl -s --max-time 15 -X POST "https://api.groq.com/openai/v1/chat/completions" \
-                -H "Authorization: Bearer $GROQ_API_KEY" \
-                -H "Content-Type: application/json" \
-                -d "$JSON_PAYLOAD")
-
-            if [ -z "$AI_RESPONSE" ]; then
-                echo -e "\n\033[1;31m  Error: No response from Groq API\033[0m"
-                break
-            fi
-
-            API_ERROR=$(echo "$AI_RESPONSE" | jq -r ".error.message // empty" 2>/dev/null)
-            if [ -n "$API_ERROR" ]; then
-                echo -e "\n\033[1;31m  Groq API error: $API_ERROR\033[0m"
-                break
-            fi
-
-            AI_MSG=$(echo "$AI_RESPONSE" | jq -r ".choices[0].message.content // empty")
-            if [ -n "$AI_MSG" ] && [ "$AI_MSG" != "null" ]; then
-                AI_FULL_MSG="${AI_FULL_MSG}${AI_MSG}
-"
-            else
-                echo -e "\n\033[1;31m  Error: Empty response from model\033[0m"
-                echo -e "\033[0;90m  Response: $(echo "$AI_RESPONSE" | head -c 200)\033[0m"
-                break
-            fi
-
-            OFFSET=$((OFFSET + ACTUAL_LEN))
-        done
-
-        kill $SPINNER_PID 2>/dev/null
-        echo -ne "\b \n"
-
-        if [ -n "$AI_FULL_MSG" ]; then
-            echo -e "\033[0;36m$AI_FULL_MSG\033[0m"
+    # --- Step 3: AI summary (opt-in, fetched in background since step 0) ---
+    if [ -n "$AI_PID" ]; then
+        echo
+        read -rp "Show AI summary? [y/N]: " AI_CHOICE
+        if [[ "${AI_CHOICE:-}" =~ ^[Yy]$ ]]; then
+            echo -e "\n\033[1;35m[ AI Update Summary ]\033[0m"
+            wait "$AI_PID" 2>/dev/null || true
+            AI_PID=""
+            echo -e "\033[0;36m$(cat "$TMPFILE")\033[0m"
         fi
     fi
 
-    # Confirm Update
+    # --- Step 4: Confirm & run update ---
     echo
-    read -p "Proceed with FULL system update (-Syu)? [y/N]: " CONFIRM
-    if [[ "$CONFIRM" =~ ^[Yy]$ ]]; then
-        echo -e "\n\033[1;32m[ Updating Repositories ]\033[0m"
+    read -rp "Proceed with update? [y/N]: " CONFIRM
+    if [[ "${CONFIRM:-}" =~ ^[Yy]$ ]]; then
+        echo -e "\n\033[1;32m[ Updating System ]\033[0m"
         sudo pacman -Syu
 
         if [ -n "$AUR_UPDATES" ]; then
@@ -245,38 +139,38 @@ ${CHUNK}"
             yay -Su
         fi
 
-        # Check for config merges (only relevant if updates happened)
         if command -v pacdiff &>/dev/null; then
-            PACNEW_COUNT=$(sudo find /etc -name "*.pacnew" | wc -l)
+            PACNEW_COUNT=$(sudo find /etc -name "*.pacnew" 2>/dev/null | wc -l)
             if [ "$PACNEW_COUNT" -gt 0 ]; then
                 echo -e "\n\033[1;33m[ Configuration Merge Check ]\033[0m"
                 echo -e "\033[1;31mFound $PACNEW_COUNT .pacnew files.\033[0m"
-                read -p "Run pacdiff now? [y/N]: " DIFF_CONFIRM
-                if [[ "$DIFF_CONFIRM" =~ ^[Yy]$ ]]; then
+                read -rp "Run pacdiff now? [y/N]: " DIFF_CONFIRM
+                if [[ "${DIFF_CONFIRM:-}" =~ ^[Yy]$ ]]; then
                     sudo pacdiff
                 fi
             fi
         fi
     else
-        echo "Update skipped by user."
+        echo "Update skipped."
     fi
 fi
 
-# --- Step 4: Power Action ---
-# This runs regardless of whether updates were installed or not
-echo -e "\nProcessing Power Action..."
-case "$ACTION_CHOICE" in
-    1) 
-        echo "Shutting down..."
-        sudo systemctl poweroff 
+# --- Step 5: Power action ---
+case "${POWER_ACTION:-none}" in
+    poweroff)
+        echo -e "\nShutting down..."
+        sudo systemctl poweroff
         ;;
-    2) 
-        echo "Done. Press Enter to close window."
-        read 
+    reboot)
+        echo -e "\nRebooting..."
+        sudo systemctl reboot
         ;;
-    3) 
-        echo "Rebooting..."
-        sudo systemctl reboot 
+    *)
+        echo -e "\nDone. Press Enter to close."
+        read -r
         ;;
 esac
-'
+INNEREOF
+)
+
+POWER_ACTION="$POWER_ACTION" kitty --title "System Update" bash -c "$INNER_SCRIPT"
