@@ -38,3 +38,7 @@ Scripts live in `scripts/` (symlinked to `~/.local/bin/`):
 - `scripts/git-ai`
 - `scripts/git-finish-feature`
 - `scripts/git-deploy`
+
+### Things installed 
+
+- imagemagick: editing images
