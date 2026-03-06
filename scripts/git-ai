@@ -75,7 +75,7 @@ PROJECT_STRUCTURE=$(tree -L 2 --gitignore -I '.git|node_modules|dist|build|cover
 build_prompt() {
     local diff_content="$1"
     echo "Role: Senior Developer.
-Task: Write a Conventional  concise and short Commit message for the diff below.
+Task: Write a Conventional  Commit message for the diff below.
 $HINT_SECTION
 CONTEXT:
 Project Structure:
@@ -83,7 +83,7 @@ $PROJECT_STRUCTURE
 Files Changed:
 $DIFF_STAT
 Rules:
-1. Analyze complexity: Atomic = 1 line. Complex = Subject + Bullet points.
+1. Analyze complexity: Analyze complexity by intent, not implementation. If multiple changes serve a single purpose or belong to the same concern, summarize them as one thing. Only use multiple lines when changes serve distinct, independent purposes. Ask: "why was this done?" — if there's one answer, it's one line. If there are multiple answers, use multiple lines.
 2. Format: <type>: <subject>
 3. Style: Imperative mood. No markdown blocks.
 DIFF:
