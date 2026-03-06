@@ -75,7 +75,7 @@ PROJECT_STRUCTURE=$(tree -L 2 --gitignore -I '.git|node_modules|dist|build|cover
 build_prompt() {
     local diff_content="$1"
     echo "Role: Senior Developer.
-Task: Write a Conventional Commit message for the diff below.
+Task: Write a Conventional  concise and short Commit message for the diff below.
 $HINT_SECTION
 CONTEXT:
 Project Structure:
