@@ -16,7 +16,7 @@ open_web() {
         "https://mail.google.com/mail/u/4/" \
         "https://campus.uoc.edu/" \
         "https://aula.uoc.edu/" \
-        "https://app.clockify.me/tracker" \
+        "https://gv.lab-ocp.com/" \
         "https://gemini.google.com" \
         "https://web.whatsapp.com/" \
         "$@" &
