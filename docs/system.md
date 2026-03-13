@@ -39,6 +39,15 @@ Scripts live in `scripts/` (symlinked to `~/.local/bin/`):
 - `scripts/git-finish-feature`
 - `scripts/git-deploy`
 
-### Things installed 
+## File Manager Bookmarks
+
+Custom sidebar locations (Dev, Edu) appear in both Dolphin and GTK file dialogs (Chrome save/open).
+
+- `configs/user-places.xbel` → Dolphin sidebar and KDE/Qt dialogs
+- `configs/gtk-3.0/bookmarks` → GTK dialogs (Chrome, Firefox, etc.)
+
+To add a new location, edit both files.
+
+### Things installed
 
 - imagemagick: editing images

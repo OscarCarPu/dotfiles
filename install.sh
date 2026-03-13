@@ -10,6 +10,8 @@ declare -A DOTFILES=(
     ["wireplumber"]="$HOME/.config/wireplumber"
     ["scripts"]="$HOME/.local/bin"
     ["git/.gitconfig"]="$HOME/.gitconfig"
+    ["configs/user-places.xbel"]="$HOME/.local/share/user-places.xbel"
+    ["configs/gtk-3.0/bookmarks"]="$HOME/.config/gtk-3.0/bookmarks"
 )
 
 # Check if running from the dotfiles directory
