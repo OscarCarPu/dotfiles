@@ -18,7 +18,7 @@ All three commands are available both as `git <cmd>` (via `git-<cmd>` scripts in
 |---|---|
 | `git finish-feature` | Merges current `feature/*` branch into `develop`, pushes, deletes branch locally and remotely |
 | `git deploy` | Merges `develop` into `main`, pushes, returns to `develop` |
-| `git ai` | AI-assisted commit message generation |
+| `git ai [hint]` | AI-assisted commit message generation with optional context hint. Blocks commits missing doc updates for user-facing changes. |
 
 ### Aliases (`~/.gitconfig`)
 
