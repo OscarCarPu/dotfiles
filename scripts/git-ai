@@ -145,5 +145,63 @@ if [ -z "$MSG" ] || [ "$MSG" == "null" ]; then
     exit 1
 fi
 
-# 6. Commit
+# 6. Documentation Check
+STAGED_FILES=$(git diff --cached --name-only)
+DOC_CHECK_PROMPT="Role: Senior Developer reviewing a commit for documentation completeness.
+
+COMMIT MESSAGE:
+$MSG
+
+STAGED FILES:
+$STAGED_FILES
+
+DIFF SUMMARY:
+$DIFF_STAT
+
+Task: Determine if the staged changes require documentation updates that are NOT already included in this commit.
+
+Consider these as documentation: README files, docs/ directories, man pages, inline help text, CHANGELOG, API docs, comments explaining public interfaces, docstrings, and config examples.
+
+Rules:
+- If the changes are ONLY documentation, config, tests, refactoring, or trivial fixes: respond with exactly \"PASS\"
+- If the changes add/remove/change user-facing behavior, CLI flags, APIs, or important workflows AND the commit already includes relevant doc updates: respond with exactly \"PASS\"
+- If the changes add/remove/change user-facing behavior, CLI flags, APIs, or important workflows AND no documentation is being updated: respond with exactly \"FAIL\" followed by a brief explanation of what documentation is missing
+- Output ONLY \"PASS\" or \"FAIL: <reason>\". No other text."
+
+JSON_DOC_PROMPT=$(echo "$DOC_CHECK_PROMPT" | jq -R -s '.')
+
+echo -n "Checking documentation..."
+(while :; do for c in / - \\ \|; do
+    echo -ne "\b$c"
+    sleep 0.1
+done; done) &
+DOC_SPINNER_PID=$!
+
+DOC_RESPONSE=$(curl -s -X POST "https://api.groq.com/openai/v1/chat/completions" \
+    -H "Authorization: Bearer $GROQ_API_KEY" \
+    -H "Content-Type: application/json" \
+    -d "{
+        \"model\": \"llama-3.3-70b-versatile\",
+        \"messages\": [{\"role\": \"user\", \"content\": $JSON_DOC_PROMPT}],
+        \"temperature\": 0.0,
+        \"max_tokens\": 150
+     }")
+
+kill $DOC_SPINNER_PID 2>/dev/null
+echo -ne "\b \n"
+
+DOC_RESULT=$(echo "$DOC_RESPONSE" | jq -r '.choices[0].message.content // empty' | sed -e 's/^[[:space:]]*//' -e 's/[[:space:]]*$//')
+
+if echo "$DOC_RESULT" | grep -qi "^FAIL"; then
+    echo "❌ Documentation missing — commit blocked."
+    echo "📝 $DOC_RESULT"
+    echo ""
+    echo "Commit message would have been:"
+    echo "  $MSG"
+    echo ""
+    echo "Stage documentation updates and try again."
+    exit 1
+fi
+
+# 7. Commit
 git commit -e -m "$MSG"
