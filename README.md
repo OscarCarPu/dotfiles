@@ -40,7 +40,9 @@ chmod +x ./install.sh
 - hypr -> ~/.config/hypr
 - waybar -> ~/.config/waybar
 - swaync -> ~/.config/swaync
-- configs/chromium-flags.confg -> ~/.config/chromium-flags.confyghb 
+- configs/chromium-flags.conf -> ~/.config/chromium-flags.conf
+- configs/user-places.xbel -> ~/.local/share/user-places.xbel
+- configs/gtk-3.0/bookmarks -> ~/.config/gtk-3.0/bookmarks
 - scripts -> ~/.local/bin
 
 # More docs
