@@ -182,26 +182,28 @@ fi
 if [ "$SKIP_DOC_CHECK" = true ]; then
     echo "⏭️  Documentation check skipped (--no-doc-check)"
 else
-STAGED_FILES=$(git diff --cached --name-only)
 DOC_CHECK_PROMPT="Role: Senior Developer reviewing a commit for documentation completeness.
 
 COMMIT MESSAGE:
 $MSG
 
-STAGED FILES:
-$STAGED_FILES
-
-DIFF SUMMARY:
+FILES CHANGED:
 $DIFF_STAT
 
-Task: Determine if the staged changes require documentation updates that are NOT already included in this commit.
+FULL DIFF:
+$DIFF_DETAILED
+
+Task: Analyze the actual code changes and determine if documentation updates are needed and, if present, whether they are accurate and sufficient.
 
 Consider these as documentation: README files, docs/ directories, man pages, inline help text, CHANGELOG, API docs, comments explaining public interfaces, docstrings, and config examples.
 
 Rules:
-- If the changes are ONLY documentation, config, tests, refactoring, or trivial fixes: respond with exactly \"PASS\"
-- If the changes add/remove/change user-facing behavior, CLI flags, APIs, or important workflows AND the commit already includes relevant doc updates: respond with exactly \"PASS\"
-- If the changes add/remove/change user-facing behavior, CLI flags, APIs, or important workflows AND no documentation is being updated: respond with exactly \"FAIL\" followed by a brief explanation of what documentation is missing
+- If the changes are ONLY documentation, config, tests, refactoring, internal logic, or trivial fixes: respond with exactly \"PASS\"
+- If the changes add/remove/change user-facing behavior, CLI flags, APIs, or important workflows:
+  - If no documentation is included and it would clearly benefit users: respond with \"FAIL: <what's missing>\"
+  - If documentation IS included, verify it matches the actual code changes. If it's inaccurate or incomplete: respond with \"FAIL: <what's wrong>\"
+  - If documentation IS included and accurately reflects the changes: respond with \"PASS\"
+- Do NOT demand docs for minor internal changes, variable renames, dependency bumps, or changes that are self-explanatory from the commit message
 - Output ONLY \"PASS\" or \"FAIL: <reason>\". No other text."
 
 JSON_DOC_PROMPT=$(echo "$DOC_CHECK_PROMPT" | jq -R -s '.')
