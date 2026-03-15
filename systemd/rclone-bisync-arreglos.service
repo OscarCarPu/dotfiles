@@ -1,0 +1,8 @@
+[Unit]
+Description=Rclone bisync ~/docs/relamidos/arreglos with Google Drive
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=oneshot
+ExecStart=/usr/bin/rclone bisync /home/ocp/docs/relamidos/arreglos "relamidos-drive:Tía MiLa/arreglos" --verbose
