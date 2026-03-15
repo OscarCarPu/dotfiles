@@ -12,6 +12,8 @@ declare -A DOTFILES=(
     ["git/.gitconfig"]="$HOME/.gitconfig"
     ["configs/user-places.xbel"]="$HOME/.local/share/user-places.xbel"
     ["configs/gtk-3.0/bookmarks"]="$HOME/.config/gtk-3.0/bookmarks"
+    ["systemd/rclone-bisync-arreglos.service"]="$HOME/.config/systemd/user/rclone-bisync-arreglos.service"
+    ["systemd/rclone-bisync-arreglos.timer"]="$HOME/.config/systemd/user/rclone-bisync-arreglos.timer"
 )
 
 # Check if running from the dotfiles directory
