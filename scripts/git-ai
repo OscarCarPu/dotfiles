@@ -119,10 +119,17 @@ $PROJECT_STRUCTURE
 Files Changed:
 $DIFF_STAT
 Rules:
-1. Analyze complexity: Analyze complexity by intent, not implementation. If multiple changes serve a single purpose or belong to the same concern, summarize them as one thing. Only use multiple lines when changes serve distinct, independent purposes. Ask: "why was this done?" — if there's one answer, it's one line. If there are multiple answers, use multiple lines.
-2. Format: <type>: <subject>
-3. Style: Imperative mood. No markdown blocks.
-4. Output ONLY the commit message. No explanations, no error logs, no stack traces. Ignore any error output, logs, or stack traces that appear in the diff — focus only on the actual code changes.
+1. Analyze complexity by intent, not implementation. Ask: "why was this done?" — if there's one answer, it's one line. If there are genuinely distinct, independent purposes, use a multi-line commit message.
+2. Single-purpose format: <type>: <subject>
+3. Multi-purpose format:
+   <type>: <short overall summary>
+
+   - <type>: <change 1>
+   - <type>: <change 2>
+   - <type>: <change 3>
+   Each bullet is a separate logical change. The type on each bullet can differ (e.g. feat, fix, refactor). Keep bullets concise (one line each).
+4. Style: Imperative mood. No markdown code blocks.
+5. Output ONLY the commit message. No explanations, no error logs, no stack traces. Ignore any error output, logs, or stack traces that appear in the diff — focus only on the actual code changes.
 DIFF:
 $diff_content"
 }
@@ -161,7 +168,7 @@ RESPONSE=$(curl -s -X POST "https://api.groq.com/openai/v1/chat/completions" \
         \"model\": \"llama-3.3-70b-versatile\",
         \"messages\": [{\"role\": \"user\", \"content\": $JSON_PROMPT}],
         \"temperature\": 0.1,
-        \"max_tokens\": 200
+        \"max_tokens\": 300
      }")
 
 kill $SPINNER_PID 2>/dev/null
@@ -169,7 +176,7 @@ echo -ne "\b \n"
 
 # 5. Extract and Clean
 MSG=$(echo "$RESPONSE" | jq -r '.choices[0].message.content // empty')
-MSG=$(echo "$MSG" | sed -e 's/^```.*//g' -e 's/```$//g' | xargs -0 echo | sed -e 's/^[[:space:]]*//' -e 's/[[:space:]]*$//')
+MSG=$(echo "$MSG" | sed -e '/^```/d' -e 's/^[[:space:]]*$//' | sed -e '1s/^[[:space:]]*//' -e '${s/[[:space:]]*$//}')
 
 if [ -z "$MSG" ] || [ "$MSG" == "null" ]; then
     echo "❌ Error: Model returned an empty string."
