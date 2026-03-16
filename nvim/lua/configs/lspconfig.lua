@@ -1,6 +1,6 @@
 require("nvchad.configs.lspconfig").defaults()
 
-local servers = { "html", "cssls", "gopls", "rust_analyzer", "kotlin_ls", "lemminx" }
+local servers = { "html", "cssls", "gopls", "rust_analyzer", "kotlin_ls", "lemminx", "svelte" }
 vim.lsp.enable(servers)
 
 require "configs.go"
