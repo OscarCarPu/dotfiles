@@ -26,8 +26,9 @@ All services run as Docker containers under `~/docker/`.
 | mosquitto | eclipse-mosquitto:2.0 | 1883, 9001 | MQTT broker (MQTT + WebSockets) | |
 | mosquitto-ui | smeagolworms4/mqtt-explorer | 4000 | MQTT Explorer web UI | |
 | gv-web | gv-web-gv-web | 3000 | Habits tracker web app | gv.lab-ocp.com |
-| habits_api | gv-api-api | 8080 | Habits tracker API | gv-api.lab-ocp.com |
-| habits_db | postgres:15-alpine | 5432 | PostgreSQL database | |
+| gv_api | gv-api-api | 8080 | Habits tracker API | gv-api.lab-ocp.com |
+| gv_db | postgres:15-alpine | 5432 | PostgreSQL database | |
+| gitea | gitea/gitea:1.25.4 | 3001 | Gitea web app | git.lab-ocp.com |
 
 ## Mosquitto
 
