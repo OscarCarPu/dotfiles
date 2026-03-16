@@ -59,77 +59,71 @@ fi
 
 # 2. Gather Context
 DIFF_STAT=$(git diff --cached --stat)
+FILE_STATUS=$(git diff --cached --name-status)
+
+EXCLUDE_PATTERNS=(
+    ':(exclude)package-lock.json'
+    ':(exclude)yarn.lock'
+    ':(exclude)*.lock'
+    ':(exclude)*.svg'
+    ':(exclude)*.out'
+    ':(exclude)*.log'
+    ':(exclude)*.png'
+    ':(exclude)*.jpg'
+    ':(exclude)*.gif'
+    ':(exclude)*.pdf'
+    ':(exclude)dist/*'
+    ':(exclude)build/*'
+    ':(exclude).next/*'
+)
 
 # Smart diff gathering: reduce context lines based on number of changed files
 CHANGED_FILES=$(git diff --cached --name-only | wc -l)
 
 if [ "$CHANGED_FILES" -gt 20 ]; then
-    # Many files: use minimal context (U0), skip large files
-    DIFF_DETAILED=$(git diff --cached -U0 --diff-filter=d -- . \
-        ':(exclude)package-lock.json' \
-        ':(exclude)yarn.lock' \
-        ':(exclude)*.lock' \
-        ':(exclude)*.svg' \
-        ':(exclude)*.out' \
-        ':(exclude)*.log' \
-        ':(exclude)*.png' \
-        ':(exclude)*.jpg' \
-        ':(exclude)*.gif' \
-        ':(exclude)*.pdf' \
-        ':(exclude)dist/*' \
-        ':(exclude)build/*' \
-        ':(exclude).next/*' | head -c 4000)
+    CONTEXT_LINES="-U0"
+    MAX_CHARS=4000
 elif [ "$CHANGED_FILES" -gt 10 ]; then
-    # Medium files: use minimal context (U0)
-    DIFF_DETAILED=$(git diff --cached -U0 --diff-filter=d -- . \
-        ':(exclude)package-lock.json' \
-        ':(exclude)yarn.lock' \
-        ':(exclude)*.lock' \
-        ':(exclude)*.svg' \
-        ':(exclude)*.out' \
-        ':(exclude)*.log' \
-        ':(exclude)*.png' \
-        ':(exclude)*.jpg' \
-        ':(exclude)dist/*' \
-        ':(exclude)build/*' | head -c 8000)
+    CONTEXT_LINES="-U0"
+    MAX_CHARS=8000
 else
-    # Few files: use standard context (U1)
-    DIFF_DETAILED=$(git diff --cached -U1 --diff-filter=d -- . \
-        ':(exclude)package-lock.json' \
-        ':(exclude)yarn.lock' \
-        ':(exclude)*.lock' \
-        ':(exclude)*.svg' \
-        ':(exclude)*.out' \
-        ':(exclude)*.log' \
-        ':(exclude)*.png' \
-        ':(exclude)*.jpg' | head -c 12000)
+    CONTEXT_LINES="-U1"
+    MAX_CHARS=12000
 fi
+
+DIFF_DETAILED=$(git diff --cached "$CONTEXT_LINES" -- . "${EXCLUDE_PATTERNS[@]}" | head -c "$MAX_CHARS")
 
 PROJECT_STRUCTURE=$(tree -L 2 --gitignore -I '.git|node_modules|dist|build|coverage' --noreport 2>/dev/null || echo "Structure not available")
 
-# 3. Function to build prompt with diff content
-build_prompt() {
-    local diff_content="$1"
-    echo "Role: Senior Developer.
-Task: Write a Conventional  Commit message for the diff below.
-$HINT_SECTION
-CONTEXT:
-Project Structure:
-$PROJECT_STRUCTURE
-Files Changed:
-$DIFF_STAT
-Rules:
-1. Analyze complexity by intent, not implementation. Ask: "why was this done?" — if there's one answer, it's one line. If there are genuinely distinct, independent purposes, use a multi-line commit message.
-2. Single-purpose format: <type>: <subject>
-3. Multi-purpose format:
-   <type>: <short overall summary>
+# 3. Build prompt messages (system + user)
+SYSTEM_PROMPT="You write Conventional Commit messages. Output ONLY the commit message, nothing else.
 
-   - <type>: <change 1>
-   - <type>: <change 2>
-   - <type>: <change 3>
-   Each bullet is a separate logical change. The type on each bullet can differ (e.g. feat, fix, refactor). Keep bullets concise (one line each).
-4. Style: Imperative mood. No markdown code blocks.
-5. Output ONLY the commit message. No explanations, no error logs, no stack traces. Ignore any error output, logs, or stack traces that appear in the diff — focus only on the actual code changes.
+FORMAT:
+- Single logical change: <type>: <subject>
+- Multiple independent changes:
+  <type>: <short overall summary>
+
+  - <type>: <change 1>
+  - <type>: <change 2>
+
+RULES:
+- Group by intent, not by file. Deleting a feature's script + removing its config + removing its docs = one removal, not three.
+- Only use multi-line when there are truly independent purposes.
+- Imperative mood. No markdown. No explanations."
+
+build_user_prompt() {
+    local diff_content="$1"
+    echo "${HINT_SECTION:+$HINT_SECTION
+}
+FILE STATUS (A=added, M=modified, D=deleted, R=renamed):
+$FILE_STATUS
+
+STAT:
+$DIFF_STAT
+
+PROJECT STRUCTURE:
+$PROJECT_STRUCTURE
+
 DIFF:
 $diff_content"
 }
@@ -142,8 +136,9 @@ estimate_tokens() {
 }
 
 # Build prompt
-PROMPT=$(build_prompt "$DIFF_DETAILED")
-TOKEN_COUNT=$(estimate_tokens "$PROMPT")
+USER_PROMPT=$(build_user_prompt "$DIFF_DETAILED")
+FULL_PROMPT="$SYSTEM_PROMPT$USER_PROMPT"
+TOKEN_COUNT=$(estimate_tokens "$FULL_PROMPT")
 
 # Log token count
 if [ "$TOKEN_COUNT" -gt 10000 ]; then
@@ -160,13 +155,17 @@ echo -n "Thinking (Cloud)..."
 done; done) &
 SPINNER_PID=$!
 
-JSON_PROMPT=$(echo "$PROMPT" | jq -R -s '.')
+JSON_SYSTEM=$(echo "$SYSTEM_PROMPT" | jq -R -s '.')
+JSON_USER=$(echo "$USER_PROMPT" | jq -R -s '.')
 RESPONSE=$(curl -s -X POST "https://api.groq.com/openai/v1/chat/completions" \
     -H "Authorization: Bearer $GROQ_API_KEY" \
     -H "Content-Type: application/json" \
     -d "{
         \"model\": \"llama-3.3-70b-versatile\",
-        \"messages\": [{\"role\": \"user\", \"content\": $JSON_PROMPT}],
+        \"messages\": [
+            {\"role\": \"system\", \"content\": $JSON_SYSTEM},
+            {\"role\": \"user\", \"content\": $JSON_USER}
+        ],
         \"temperature\": 0.1,
         \"max_tokens\": 300
      }")
@@ -193,6 +192,9 @@ DOC_CHECK_PROMPT="Role: Senior Developer reviewing a commit for documentation co
 
 COMMIT MESSAGE:
 $MSG
+
+FILE STATUS:
+$FILE_STATUS
 
 FILES CHANGED:
 $DIFF_STAT
