@@ -10,7 +10,6 @@
 | `SUPER + R` | Open Wofi launcher |
 | `SUPER + Q` | Kill active window |
 | `SUPER + V` | Power menu (wofi) — shutdown, reboot, or update |
-| `SUPER + SHIFT + N` | Toggle sticky note |
 
 ## Power Menu (Super+V)
 
@@ -36,24 +35,6 @@ A wofi selection menu for power actions and system updates.
 **AI summary** requires `GROQ_API_KEY` set in `~/.bashrc`. Uses the LLM's training knowledge — no slow GitHub changelog fetching.
 
 **Source:** [`hypr/scripts/shutdown.sh`](../hypr/scripts/shutdown.sh)
-
----
-
-## Sticky Note
-
-A floating terminal note window (Kitty + micro) pinned across all workspaces.
-
-| Key / Action | Description |
-|---|---|
-| `SUPER + SHIFT + N` | Toggle sticky note open/closed |
-| `SUPER + left-click drag` | Move the note around the screen |
-| `SUPER + SHIFT + 1–8` | Move the note to a specific workspace |
-
-**Notes file:** `~/.sticky-notes.md` (plain Markdown, auto-created on first open)
-
-**Source:** [`hypr/scripts/sticky_note.sh`](../hypr/scripts/sticky_note.sh)
-
-The window is pinned (`pin` rule), so it follows you across workspaces by default. Use `SUPER + SHIFT + number` to unpin it onto a specific workspace if needed.
 
 ---
 
