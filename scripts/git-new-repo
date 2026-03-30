@@ -1,0 +1,25 @@
+#!/bin/bash
+
+if [ -z "$1" ]; then
+    echo "Usage: git new-repo <repo-name>"
+    exit 1
+fi
+
+REPO_NAME="$1"
+GITEA_URL="ssh://git@git-ssh.lab-ocp.com:2223/ocp/${REPO_NAME}.git"
+GITHUB_URL="git@github.com:OscarCarPu/${REPO_NAME}.git"
+
+echo "Cloning from Gitea: ${GITEA_URL}"
+git clone "$GITEA_URL" || exit 1
+
+cd "$REPO_NAME" || exit 1
+
+echo "Creating GitHub repo: ${REPO_NAME}"
+gh repo create "OscarCarPu/${REPO_NAME}" --private || exit 1
+
+echo "Adding GitHub as push-only remote"
+git remote set-url --add --push origin "$GITEA_URL"
+git remote set-url --add --push origin "$GITHUB_URL"
+
+echo "Done! Remotes:"
+git remote -v

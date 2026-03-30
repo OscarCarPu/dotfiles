@@ -11,3 +11,4 @@
     ai = !git-ai
     finish-feature = !git-finish-feature
     deploy = !git-deploy
+    new-repo = !git-new-repo
