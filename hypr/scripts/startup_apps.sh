@@ -18,6 +18,7 @@ open_web() {
         "https://aula.uoc.edu/" \
         "https://gv.lab-ocp.com/" \
         "https://gemini.google.com" \
+        "https://www.claude.ai/new" \
         "https://web.whatsapp.com/" \
         "$@" &
 }
