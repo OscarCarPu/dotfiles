@@ -6,6 +6,7 @@
 # Options:
 #   -A, --add            Run 'git add .' before committing
 #   -D, --no-doc-check   Skip the documentation completeness check
+#   -Y, --auto-accept    Auto-accept the commit message (skip editor)
 #   -h, --help           Show this help message
 #
 # Arguments:
@@ -40,11 +41,13 @@ fi
 # --- Parse flags and arguments ---
 SKIP_DOC_CHECK=false
 ADD_ALL=false
+AUTO_ACCEPT=false
 USER_HINT=""
 for arg in "$@"; do
     case "$arg" in
         --no-doc-check|-D) SKIP_DOC_CHECK=true ;;
         --add|-A) ADD_ALL=true ;;
+        --auto-accept|-Y) AUTO_ACCEPT=true ;;
         *) USER_HINT="$arg" ;;
     esac
 done
@@ -261,4 +264,8 @@ fi
 fi # end SKIP_DOC_CHECK
 
 # 7. Commit
-git commit -e -m "$MSG"
+if [ "$AUTO_ACCEPT" = true ]; then
+    git commit -m "$MSG"
+else
+    git commit -e -m "$MSG"
+fi
