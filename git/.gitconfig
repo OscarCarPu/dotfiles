@@ -9,6 +9,7 @@
     defaultBranch = main
 [alias]
     ai = !git-ai
+    ai-fast = !git-ai -D -Y -A -P
     finish-feature = !git-finish-feature
     deploy = !git-deploy
     new-repo = !git-new-repo

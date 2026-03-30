@@ -7,6 +7,7 @@
 #   -A, --add            Run 'git add .' before committing
 #   -D, --no-doc-check   Skip the documentation completeness check
 #   -Y, --auto-accept    Auto-accept the commit message (skip editor)
+#   -P, --push           Push to remote after committing
 #   -h, --help           Show this help message
 #
 # Arguments:
@@ -42,12 +43,14 @@ fi
 SKIP_DOC_CHECK=false
 ADD_ALL=false
 AUTO_ACCEPT=false
+PUSH_AFTER=false
 USER_HINT=""
 for arg in "$@"; do
     case "$arg" in
         --no-doc-check|-D) SKIP_DOC_CHECK=true ;;
         --add|-A) ADD_ALL=true ;;
         --auto-accept|-Y) AUTO_ACCEPT=true ;;
+        --push|-P) PUSH_AFTER=true ;;
         *) USER_HINT="$arg" ;;
     esac
 done
@@ -268,4 +271,9 @@ if [ "$AUTO_ACCEPT" = true ]; then
     git commit -m "$MSG"
 else
     git commit -e -m "$MSG"
+fi
+
+# 8. Push if requested
+if [ "$PUSH_AFTER" = true ]; then
+    git push
 fi
