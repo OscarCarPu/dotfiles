@@ -4,6 +4,7 @@
 # Usage: git-ai [OPTIONS] [HINT]
 #
 # Options:
+#   -A, --add            Run 'git add .' before committing
 #   -D, --no-doc-check   Skip the documentation completeness check
 #   -h, --help           Show this help message
 #
@@ -13,6 +14,7 @@
 # Examples:
 #   git-ai                          Generate commit message with doc check
 #   git-ai "refactoring auth flow"  Provide context hint for better message
+#   git-ai -A                       Stage all changes first
 #   git-ai -D                       Skip documentation check
 #   git-ai -D "quick fix"           Skip doc check with context hint
 
@@ -35,21 +37,28 @@ if [ -z "$GROQ_API_KEY" ]; then
     exit 1
 fi
 
+# --- Parse flags and arguments ---
+SKIP_DOC_CHECK=false
+ADD_ALL=false
+USER_HINT=""
+for arg in "$@"; do
+    case "$arg" in
+        --no-doc-check|-D) SKIP_DOC_CHECK=true ;;
+        --add|-A) ADD_ALL=true ;;
+        *) USER_HINT="$arg" ;;
+    esac
+done
+
+# Stage all changes if requested
+if [ "$ADD_ALL" = true ]; then
+    git add .
+fi
+
 # 1. Check for Staged Changes
 if git diff --cached --quiet; then
     echo "Error: No staged changes to commit."
     exit 1
 fi
-
-# --- Parse flags and arguments ---
-SKIP_DOC_CHECK=false
-USER_HINT=""
-for arg in "$@"; do
-    case "$arg" in
-        --no-doc-check|-D) SKIP_DOC_CHECK=true ;;
-        *) USER_HINT="$arg" ;;
-    esac
-done
 
 HINT_SECTION=""
 if [ -n "$USER_HINT" ]; then
