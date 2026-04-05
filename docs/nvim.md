@@ -39,9 +39,10 @@ Based on [NvChad v2.5](https://github.com/NvChad/NvChad) with the **oxocarbon** 
 |--------|---------|
 | **nvim-tree** | File explorer sidebar, opens on startup |
 | **supermaven** | AI code completion |
-| **conform.nvim** | Code formatting (stylua for Lua) |
-| **nvim-lspconfig** | LSP support (HTML, CSS, Go) |
-| **nvim-treesitter** | Syntax highlighting (vim, lua, vimdoc, html, css, go) |
+| **conform.nvim** | Code formatting (stylua, gofumpt, ktlint, rustfmt, ruff) |
+| **nvim-lspconfig** | LSP support (HTML, CSS, Go, Rust, Kotlin, XML, Svelte, Python) |
+| **nvim-treesitter** | Syntax highlighting (vim, lua, vimdoc, html, css, go, rust, kotlin, java, xml, markdown, svelte, js, ts, python) |
+| **nvim-surround** | Surround text with brackets, quotes, tags, etc. |
 
 ## Editor Settings
 
@@ -60,6 +61,21 @@ Based on [NvChad v2.5](https://github.com/NvChad/NvChad) with the **oxocarbon** 
 - **LSP**: kotlin-language-server (diagnostics, completion, go-to-definition)
 - **Formatter / Linter**: ktlint (format on save via conform.nvim, style checking)
 - Config: `configs/kotlin.lua`
+
+## Python
+
+- **LSP**: pyright with automatic venv detection (looks for `.venv` in project root)
+- **Formatter**: ruff (format on save via conform.nvim)
+- Config: `configs/python.lua`
+
+## Surround (nvim-surround)
+
+| Key | Action |
+|-----|--------|
+| `ys{motion}{char}` | Add surround (e.g. `ysiw"` wraps word in quotes) |
+| `ds{char}` | Delete surround (e.g. `ds"` removes quotes) |
+| `cs{old}{new}` | Change surround (e.g. `cs"'` changes `"` to `'`) |
+| `S{char}` | Surround selection (visual mode) |
 
 ## File Explorer
 

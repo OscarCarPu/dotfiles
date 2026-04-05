@@ -4,6 +4,7 @@ local options = {
     go = { "gofumpt", "goimports" },
     kotlin = { "ktlint" },
     rust = { "rustfmt" },
+    python = { "ruff_format" },
     -- css = { "prettier" },
     -- html = { "prettier" },
   },
