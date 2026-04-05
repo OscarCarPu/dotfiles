@@ -37,6 +37,7 @@ return {
         "svelte",
         "javascript",
         "typescript",
+        "python",
       },
     },
   },
@@ -84,6 +85,14 @@ return {
   {
     "iamironz/android-nvim-plugin",
     ft = { "kotlin", "java", "xml" },
+    opts = {},
+  },
+
+  -- Surround selections with brackets, quotes, tags, etc.
+  {
+    "kylechui/nvim-surround",
+    version = "*",
+    event = "VeryLazy",
     opts = {},
   },
 }
