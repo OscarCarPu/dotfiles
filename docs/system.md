@@ -48,6 +48,29 @@ Custom sidebar locations (Dev, Edu) appear in both Dolphin and GTK file dialogs 
 
 To add a new location, edit both files.
 
+## Bluetooth Spotify Auto-Switch
+
+A background service that automatically routes Spotify audio to known Bluetooth speakers (VTIN R2, Royaler) when they connect.
+
+- **Script**: `scripts/bt-spotify-switch` — listens for new PipeWire sinks via `pactl subscribe`, matches against known speaker MACs, and moves Spotify's sink-input
+- **Service**: `~/.config/systemd/user/bt-spotify-switch.service` — starts on login, restarts on failure
+
+### Adding a new speaker
+
+Edit `scripts/bt-spotify-switch` and add the MAC address (underscores instead of colons) to the `KNOWN_SPEAKERS` array, then restart the service:
+
+```bash
+systemctl --user restart bt-spotify-switch
+```
+
+### Useful commands
+
+| Command | Description |
+|---|---|
+| `journalctl --user -u bt-spotify-switch -f` | Watch live logs |
+| `systemctl --user status bt-spotify-switch` | Check service status |
+| `pactl list short sinks` | List available audio sinks |
+
 ### Things installed
 
 - imagemagick: editing images
