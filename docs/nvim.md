@@ -50,6 +50,13 @@ Based on [NvChad v2.5](https://github.com/NvChad/NvChad) with the **oxocarbon** 
 - **Word wrap**: Enabled with line break
 - **Cursor line**: Full line + number highlight
 
+## Rust
+
+- **LSP**: rust-analyzer with clippy on save and auto-import organization
+- **Formatter**: rustfmt (format on save via conform.nvim)
+- **Indentation**: Uses treesitter-based indentation (`after/indent/rust.lua`) instead of the built-in cindent. The default `indent/rust.vim` falls back to `cindent`, which is a C indenter and misindents code after Rust structs (no trailing `;` like C requires), causing wrong indentation in subsequent `impl` blocks.
+- Config: `configs/rust.lua`
+
 ## Go
 
 - **LSP**: gopls with staticcheck and gofumpt enabled
