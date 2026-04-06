@@ -1,0 +1,44 @@
+#!/usr/bin/env bash
+# Monitors Bluetooth audio sink connections and moves Spotify output
+# to known speaker devices (VTIN R2, Royaler).
+
+KNOWN_SPEAKERS=(
+    "B4_BB_E5_8C_BE_D5"  # VTIN R2
+    "C9_50_76_69_B5_B4"  # Royaler
+)
+
+is_known_speaker() {
+    local sink_name="$1"
+    for mac in "${KNOWN_SPEAKERS[@]}"; do
+        if [[ "$sink_name" == *"$mac"* ]]; then
+            return 0
+        fi
+    done
+    return 1
+}
+
+move_spotify_to_sink() {
+    local target_sink="$1"
+    pactl list sink-inputs 2>/dev/null | awk '
+        /^Sink Input #/{idx=$3; gsub(/#/, "", idx)}
+        /application\.process\.binary = "spotify"/{print idx}
+    ' | while read -r index; do
+        pactl move-sink-input "$index" "$target_sink"
+        echo "$(date '+%H:%M:%S') Moved Spotify (sink-input #$index) -> $target_sink"
+    done
+}
+
+echo "Watching for Bluetooth speaker connections (VTIN R2, Royaler)..."
+
+pactl subscribe 2>/dev/null | while read -r line; do
+    if [[ "$line" == *"'new'"* && "$line" == *"sink"* ]]; then
+        sleep 2
+        # Check all bluez sinks for known speakers
+        pactl list short sinks 2>/dev/null | awk '/bluez_output/{print $2}' | while read -r bt_sink; do
+            if is_known_speaker "$bt_sink"; then
+                echo "$(date '+%H:%M:%S') Known speaker detected: $bt_sink"
+                move_spotify_to_sink "$bt_sink"
+            fi
+        done
+    fi
+done
