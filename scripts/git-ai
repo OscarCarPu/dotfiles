@@ -1,5 +1,5 @@
 #!/bin/bash
-# git-ai — AI-powered commit message generator using Groq API
+# git-ai — AI-powered commit message generator using Claude Code
 #
 # Usage: git-ai [OPTIONS] [HINT]
 #
@@ -29,13 +29,8 @@ for arg in "$@"; do
 done
 
 # 0. Check Dependencies
-if ! command -v jq &>/dev/null; then
-    echo "❌ Error: 'jq' is not installed."
-    echo "Install it with: sudo dnf install jq (or sudo apt install jq)"
-    exit 1
-fi
-if [ -z "$GROQ_API_KEY" ]; then
-    echo "❌ Error: GROQ_API_KEY is missing."
+if ! command -v claude &>/dev/null; then
+    echo "Error: 'claude' CLI is not installed."
     exit 1
 fi
 
@@ -70,7 +65,6 @@ HINT_SECTION=""
 if [ -n "$USER_HINT" ]; then
     HINT_SECTION="USER INTENT/CONTEXT: $USER_HINT"
 fi
-# ---------------------------------
 
 # 2. Gather Context
 DIFF_STAT=$(git diff --cached --stat)
@@ -143,65 +137,22 @@ DIFF:
 $diff_content"
 }
 
-# Rough token estimator (conservative: 1 token ≈ 3 chars)
-estimate_tokens() {
-    local text="$1"
-    local char_count=${#text}
-    echo $((char_count / 3))
-}
-
-# Build prompt
 USER_PROMPT=$(build_user_prompt "$DIFF_DETAILED")
-FULL_PROMPT="$SYSTEM_PROMPT$USER_PROMPT"
-TOKEN_COUNT=$(estimate_tokens "$FULL_PROMPT")
 
-# Log token count
-if [ "$TOKEN_COUNT" -gt 10000 ]; then
-    echo "⚠️  Prompt large ($TOKEN_COUNT tokens), using reduced diff" >&2
-else
-    echo "📊 Prompt size: ~$TOKEN_COUNT tokens" >&2
-fi
+# 4. Generate commit message
+echo "Generating commit message ($CHANGED_FILES files)..."
+MSG=$(echo "$USER_PROMPT" | claude -p --model haiku --system-prompt "$SYSTEM_PROMPT" 2>/dev/null)
 
-# 4. Run Groq API with a spinner
-echo -n "Thinking (Cloud)..."
-(while :; do for c in / - \\ \|; do
-    echo -ne "\b$c"
-    sleep 0.1
-done; done) &
-SPINNER_PID=$!
-
-JSON_SYSTEM=$(echo "$SYSTEM_PROMPT" | jq -R -s '.')
-JSON_USER=$(echo "$USER_PROMPT" | jq -R -s '.')
-RESPONSE=$(curl -s -X POST "https://api.groq.com/openai/v1/chat/completions" \
-    -H "Authorization: Bearer $GROQ_API_KEY" \
-    -H "Content-Type: application/json" \
-    -d "{
-        \"model\": \"llama-3.3-70b-versatile\",
-        \"messages\": [
-            {\"role\": \"system\", \"content\": $JSON_SYSTEM},
-            {\"role\": \"user\", \"content\": $JSON_USER}
-        ],
-        \"temperature\": 0.1,
-        \"max_tokens\": 300
-     }")
-
-kill $SPINNER_PID 2>/dev/null
-echo -ne "\b \n"
-
-# 5. Extract and Clean
-MSG=$(echo "$RESPONSE" | jq -r '.choices[0].message.content // empty')
 MSG=$(echo "$MSG" | sed -e '/^```/d' -e 's/^[[:space:]]*$//' | sed -e '1s/^[[:space:]]*//' -e '${s/[[:space:]]*$//}')
 
-if [ -z "$MSG" ] || [ "$MSG" == "null" ]; then
-    echo "❌ Error: Model returned an empty string."
-    echo "📋 API Response:"
-    echo "$RESPONSE" | jq '.'
+if [ -z "$MSG" ]; then
+    echo "Error: Claude returned an empty response."
     exit 1
 fi
 
-# 6. Documentation Check
+# 5. Documentation Check
 if [ "$SKIP_DOC_CHECK" = true ]; then
-    echo "⏭️  Documentation check skipped (--no-doc-check)"
+    echo "Documentation check skipped (--no-doc-check)"
 else
 DOC_CHECK_PROMPT="Role: Senior Developer reviewing a commit for documentation completeness.
 
@@ -230,33 +181,12 @@ Rules:
 - Do NOT demand docs for minor internal changes, variable renames, dependency bumps, or changes that are self-explanatory from the commit message
 - Output ONLY \"PASS\" or \"FAIL: <reason>\". No other text."
 
-JSON_DOC_PROMPT=$(echo "$DOC_CHECK_PROMPT" | jq -R -s '.')
-
-echo -n "Checking documentation..."
-(while :; do for c in / - \\ \|; do
-    echo -ne "\b$c"
-    sleep 0.1
-done; done) &
-DOC_SPINNER_PID=$!
-
-DOC_RESPONSE=$(curl -s -X POST "https://api.groq.com/openai/v1/chat/completions" \
-    -H "Authorization: Bearer $GROQ_API_KEY" \
-    -H "Content-Type: application/json" \
-    -d "{
-        \"model\": \"llama-3.3-70b-versatile\",
-        \"messages\": [{\"role\": \"user\", \"content\": $JSON_DOC_PROMPT}],
-        \"temperature\": 0.0,
-        \"max_tokens\": 150
-     }")
-
-kill $DOC_SPINNER_PID 2>/dev/null
-echo -ne "\b \n"
-
-DOC_RESULT=$(echo "$DOC_RESPONSE" | jq -r '.choices[0].message.content // empty' | sed -e 's/^[[:space:]]*//' -e 's/[[:space:]]*$//')
+echo "Checking documentation..."
+DOC_RESULT=$(echo "$DOC_CHECK_PROMPT" | claude -p --model haiku 2>/dev/null | sed -e 's/^[[:space:]]*//' -e 's/[[:space:]]*$//')
 
 if echo "$DOC_RESULT" | grep -qi "^FAIL"; then
-    echo "❌ Documentation missing — commit blocked."
-    echo "📝 $DOC_RESULT"
+    echo "Documentation missing — commit blocked."
+    echo "$DOC_RESULT"
     echo ""
     echo "Commit message would have been:"
     echo "  $MSG"
@@ -266,14 +196,14 @@ if echo "$DOC_RESULT" | grep -qi "^FAIL"; then
 fi
 fi # end SKIP_DOC_CHECK
 
-# 7. Commit
+# 6. Commit
 if [ "$AUTO_ACCEPT" = true ]; then
     git commit -m "$MSG"
 else
     git commit -e -m "$MSG"
 fi
 
-# 8. Push if requested
+# 7. Push if requested
 if [ "$PUSH_AFTER" = true ]; then
     git push
 fi
