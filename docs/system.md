@@ -30,6 +30,8 @@ All three commands are available both as `git <cmd>` (via `git-<cmd>` scripts in
 | `-Y`, `--auto-accept` | Auto-accept the commit message (skip editor) |
 | `-P`, `--push` | Push to remote after committing |
 
+Short flags can be combined (e.g., `-AC`, `-DAY`, `-APY`). Pre-commit hooks are skipped gracefully if no hook is configured.
+
 ### Aliases (`~/.gitconfig`)
 
 ```ini

@@ -21,6 +21,11 @@
 #   git-ai -D                       Skip documentation check
 #   git-ai -D "quick fix"           Skip doc check with context hint
 #   git-ai -C                       Run doc check and pre-commit hooks only
+#   git-ai -AC                      Stage all, then run checks only
+#
+# Notes:
+#   Short flags can be combined: -AC, -DAY, -APY, etc.
+#   Pre-commit hooks are skipped gracefully if no hook is configured.
 
 # --- Help flag ---
 for arg in "$@"; do
@@ -43,13 +48,29 @@ AUTO_ACCEPT=false
 PUSH_AFTER=false
 CHECK_ONLY=false
 USER_HINT=""
+parse_short_flags() {
+    local flags="${1#-}"
+    while [ -n "$flags" ]; do
+        local f="${flags:0:1}"
+        flags="${flags:1}"
+        case "$f" in
+            D) SKIP_DOC_CHECK=true ;;
+            A) ADD_ALL=true ;;
+            Y) AUTO_ACCEPT=true ;;
+            P) PUSH_AFTER=true ;;
+            C) CHECK_ONLY=true ;;
+            *) echo "Unknown flag: -$f"; exit 1 ;;
+        esac
+    done
+}
 for arg in "$@"; do
     case "$arg" in
-        --no-doc-check|-D) SKIP_DOC_CHECK=true ;;
-        --add|-A) ADD_ALL=true ;;
-        --auto-accept|-Y) AUTO_ACCEPT=true ;;
-        --push|-P) PUSH_AFTER=true ;;
-        --check|-C) CHECK_ONLY=true ;;
+        --no-doc-check) SKIP_DOC_CHECK=true ;;
+        --add) ADD_ALL=true ;;
+        --auto-accept) AUTO_ACCEPT=true ;;
+        --push) PUSH_AFTER=true ;;
+        --check) CHECK_ONLY=true ;;
+        -*) parse_short_flags "$arg" ;;
         *) USER_HINT="$arg" ;;
     esac
 done
@@ -194,7 +215,9 @@ if [ "$CHECK_ONLY" = true ]; then
 
     echo ""
     echo "Running pre-commit hooks..."
-    if git hook run pre-commit 2>/dev/null; then
+    if [ ! -x "$(git rev-parse --git-dir)/hooks/pre-commit" ] && ! git config --get core.hooksPath &>/dev/null; then
+        echo "Pre-commit hooks: SKIPPED (no hook found)"
+    elif git hook run pre-commit; then
         echo "Pre-commit hooks: PASSED"
     else
         echo "Pre-commit hooks: FAILED"
