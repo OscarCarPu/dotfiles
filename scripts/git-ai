@@ -5,6 +5,7 @@
 #
 # Options:
 #   -A, --add            Run 'git add .' before committing
+#   -C, --check          Run doc check and pre-commit hooks only (no commit)
 #   -D, --no-doc-check   Skip the documentation completeness check
 #   -Y, --auto-accept    Auto-accept the commit message (skip editor)
 #   -P, --push           Push to remote after committing
@@ -19,6 +20,7 @@
 #   git-ai -A                       Stage all changes first
 #   git-ai -D                       Skip documentation check
 #   git-ai -D "quick fix"           Skip doc check with context hint
+#   git-ai -C                       Run doc check and pre-commit hooks only
 
 # --- Help flag ---
 for arg in "$@"; do
@@ -39,6 +41,7 @@ SKIP_DOC_CHECK=false
 ADD_ALL=false
 AUTO_ACCEPT=false
 PUSH_AFTER=false
+CHECK_ONLY=false
 USER_HINT=""
 for arg in "$@"; do
     case "$arg" in
@@ -46,6 +49,7 @@ for arg in "$@"; do
         --add|-A) ADD_ALL=true ;;
         --auto-accept|-Y) AUTO_ACCEPT=true ;;
         --push|-P) PUSH_AFTER=true ;;
+        --check|-C) CHECK_ONLY=true ;;
         *) USER_HINT="$arg" ;;
     esac
 done
@@ -139,21 +143,8 @@ $diff_content"
 
 USER_PROMPT=$(build_user_prompt "$DIFF_DETAILED")
 
-# 4. Generate commit message
-echo "Generating commit message ($CHANGED_FILES files)..."
-MSG=$(echo "$USER_PROMPT" | claude -p --model haiku --system-prompt "$SYSTEM_PROMPT" 2>/dev/null)
-
-MSG=$(echo "$MSG" | sed -e '/^```/d' -e 's/^[[:space:]]*$//' | sed -e '1s/^[[:space:]]*//' -e '${s/[[:space:]]*$//}')
-
-if [ -z "$MSG" ]; then
-    echo "Error: Claude returned an empty response."
-    exit 1
-fi
-
-# 5. Documentation Check
-if [ "$SKIP_DOC_CHECK" = true ]; then
-    echo "Documentation check skipped (--no-doc-check)"
-else
+# 4. Documentation check function
+run_doc_check() {
 DOC_CHECK_PROMPT="Role: Senior Developer reviewing a commit for documentation completeness.
 
 COMMIT MESSAGE:
@@ -183,27 +174,82 @@ Rules:
 
 echo "Checking documentation..."
 DOC_RESULT=$(echo "$DOC_CHECK_PROMPT" | claude -p --model haiku 2>/dev/null | sed -e 's/^[[:space:]]*//' -e 's/[[:space:]]*$//')
+}
 
-if echo "$DOC_RESULT" | grep -qi "^FAIL"; then
-    echo "Documentation missing — commit blocked."
-    echo "$DOC_RESULT"
-    echo ""
-    echo "Commit message would have been:"
-    echo "  $MSG"
-    echo ""
-    echo "Stage documentation updates and try again, or use --no-doc-check to skip."
+# 5. Generate commit message
+echo "Generating commit message ($CHANGED_FILES files)..."
+MSG=$(echo "$USER_PROMPT" | claude -p --model haiku --system-prompt "$SYSTEM_PROMPT" 2>/dev/null)
+
+MSG=$(echo "$MSG" | sed -e '/^```/d' -e 's/^[[:space:]]*$//' | sed -e '1s/^[[:space:]]*//' -e '${s/[[:space:]]*$//}')
+
+if [ -z "$MSG" ]; then
+    echo "Error: Claude returned an empty response."
     exit 1
 fi
-fi # end SKIP_DOC_CHECK
 
-# 6. Commit
+# 6. Check-only mode: pre-commit first, then doc check
+if [ "$CHECK_ONLY" = true ]; then
+    PRECOMMIT_FAILED=false
+    DOC_FAILED=false
+
+    echo ""
+    echo "Running pre-commit hooks..."
+    if git hook run pre-commit 2>/dev/null; then
+        echo "Pre-commit hooks: PASSED"
+    else
+        echo "Pre-commit hooks: FAILED"
+        PRECOMMIT_FAILED=true
+    fi
+
+    if [ "$SKIP_DOC_CHECK" = true ]; then
+        echo "Documentation check skipped (--no-doc-check)"
+    else
+        run_doc_check
+        if echo "$DOC_RESULT" | grep -qi "^FAIL"; then
+            echo "Documentation check: FAILED"
+            echo "$DOC_RESULT"
+            DOC_FAILED=true
+        else
+            echo "Documentation check: PASSED"
+        fi
+    fi
+
+    echo ""
+    if [ "$DOC_FAILED" = true ] || [ "$PRECOMMIT_FAILED" = true ]; then
+        echo "Some checks failed. Commit message would have been:"
+        echo "  $MSG"
+        exit 1
+    fi
+    echo "All checks passed. Commit message would be:"
+    echo "  $MSG"
+    exit 0
+fi
+
+# 6. Documentation Check (normal mode)
+if [ "$SKIP_DOC_CHECK" = true ]; then
+    echo "Documentation check skipped (--no-doc-check)"
+else
+    run_doc_check
+    if echo "$DOC_RESULT" | grep -qi "^FAIL"; then
+        echo "Documentation missing — commit blocked."
+        echo "$DOC_RESULT"
+        echo ""
+        echo "Commit message would have been:"
+        echo "  $MSG"
+        echo ""
+        echo "Stage documentation updates and try again, or use --no-doc-check to skip."
+        exit 1
+    fi
+fi
+
+# 7. Commit
 if [ "$AUTO_ACCEPT" = true ]; then
     git commit -m "$MSG"
 else
     git commit -e -m "$MSG"
 fi
 
-# 7. Push if requested
+# 8. Push if requested
 if [ "$PUSH_AFTER" = true ]; then
     git push
 fi

@@ -18,7 +18,17 @@ All three commands are available both as `git <cmd>` (via `git-<cmd>` scripts in
 |---|---|
 | `git finish-feature` | Merges current `feature/*` branch into `develop`, pushes, deletes branch locally and remotely |
 | `git deploy` | Merges `develop` into `main`, pushes, returns to `develop` |
-| `git ai [hint]` | AI-assisted commit message generation with optional context hint. Blocks commits missing doc updates for user-facing changes. Use `-D` / `--no-doc-check` to skip the doc check. |
+| `git ai [hint]` | AI-assisted commit message generation with optional context hint. Blocks commits missing doc updates for user-facing changes. |
+
+#### `git ai` flags
+
+| Flag | Description |
+|---|---|
+| `-A`, `--add` | Run `git add .` before committing |
+| `-C`, `--check` | Run pre-commit hooks and doc check only — no commit is made. Pre-commit runs first, then doc check; both always run even if one fails |
+| `-D`, `--no-doc-check` | Skip the documentation completeness check |
+| `-Y`, `--auto-accept` | Auto-accept the commit message (skip editor) |
+| `-P`, `--push` | Push to remote after committing |
 
 ### Aliases (`~/.gitconfig`)
 
