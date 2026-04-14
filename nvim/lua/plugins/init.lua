@@ -39,6 +39,9 @@ return {
         "typescript",
         "python",
       },
+      indent = {
+        enable = true,
+      },
     },
   },
 
