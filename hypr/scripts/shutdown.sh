@@ -23,7 +23,16 @@ CRITICAL_PKGS="^(linux|linux-lts|linux-zen|nvidia|mesa|systemd|grub|postgresql|p
 TMPFILE=""
 AI_PID=""
 
-trap 'kill "${AI_PID:-}" 2>/dev/null || true; rm -f "${TMPFILE:-}"' EXIT
+cleanup_and_power() {
+    kill "${AI_PID:-}" 2>/dev/null || true
+    rm -f "${TMPFILE:-}"
+    case "${POWER_ACTION:-none}" in
+        poweroff) echo -e "\nShutting down..."; sudo systemctl poweroff ;;
+        reboot)   echo -e "\nRebooting...";     sudo systemctl reboot   ;;
+        *)        echo -e "\nDone. Press Enter to close."; read -r      ;;
+    esac
+}
+trap cleanup_and_power EXIT
 
 echo -e "\033[1;34m=== System Update ===\033[0m"
 
