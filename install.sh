@@ -14,6 +14,7 @@ declare -A DOTFILES=(
     ["configs/gtk-3.0/bookmarks"]="$HOME/.config/gtk-3.0/bookmarks"
     ["systemd/rclone-bisync-arreglos.service"]="$HOME/.config/systemd/user/rclone-bisync-arreglos.service"
     ["systemd/rclone-bisync-arreglos.timer"]="$HOME/.config/systemd/user/rclone-bisync-arreglos.timer"
+    ["configs/sysctl.d/90-disable-ipv6.conf"]="/etc/sysctl.d/90-disable-ipv6.conf"
 )
 
 # Check if running from the dotfiles directory
