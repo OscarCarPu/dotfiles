@@ -7,9 +7,18 @@ vim.lsp.config("rust_analyzer", {
       },
       cargo = {
         allFeatures = true,
+        buildScripts = { enable = true },
       },
-      checkOnSave = {
+      procMacro = { enable = true },
+      checkOnSave = true,
+      check = {
         command = "clippy",
+      },
+      completion = {
+        autoimport = { enable = true },
+        fullFunctionSignatures = { enable = true },
+        callable = { snippets = "fill_arguments" },
+        postfix = { enable = true },
       },
     },
   },

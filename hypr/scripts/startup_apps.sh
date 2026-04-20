@@ -53,10 +53,6 @@ learn_rust() {
     kitty --directory ~/dev/play/rust/thebook/
 }
 
-boot_windows() {
-    kitty -e winboot &
-}
-
 musescore() {
     sleep 1
     hyprctl dispatch workspace 3
@@ -98,7 +94,6 @@ ENABLED_OPTIONS=(
     "normal_setup|Normal Setup"
     "learn_rust|Learn Rust"
     "musescore|MuseScore"
-    "boot_windows|Boot Windows"
     "uoc|UOC"
 )
 
