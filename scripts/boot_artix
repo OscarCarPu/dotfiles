@@ -1,0 +1,23 @@
+#!/bin/bash
+# Set next boot to Artix and reboot. One-shot: reverts to default after Artix boots.
+# Requires GRUB_DEFAULT=saved in /etc/default/grub.
+set -euo pipefail
+
+ENTRY=$(sudo -n cat /boot/grub/grub.cfg | awk -F\' '
+    /^menuentry / {
+        if (tolower($2) ~ /artix/) { print $2; exit }
+    }
+    /^smenumenu / { smenu=$2 }
+    /^[[:space:]]+menuentry / {
+        if (tolower($2) ~ /artix/) { print smenu ">" $2; exit }
+    }
+')
+
+if [[ -z "${ENTRY:-}" ]]; then
+    echo "boot_artix: no Artix menuentry found in /boot/grub/grub.cfg" >&2
+    exit 1
+fi
+
+echo "Setting next boot: $ENTRY"
+sudo -n grub-reboot "$ENTRY"
+sudo -n systemctl reboot

@@ -82,7 +82,11 @@ uoc() {
 
     hyprctl dispatch workspace 2
     sleep 1
-    kitty --directory ~/edu/data-science-degree/ 
+    kitty --directory ~/edu/data-science-degree/
+}
+
+boot_artix() {
+    kitty -e bash -c '~/.dotfiles/scripts/boot_artix || { echo; read -n1 -rp "Press any key to close..."; }'
 }
 
 # =============================================================================
@@ -95,6 +99,7 @@ ENABLED_OPTIONS=(
     "learn_rust|Learn Rust"
     "musescore|MuseScore"
     "uoc|UOC"
+    "boot_artix|Boot Artix"
 )
 
 # =============================================================================
