@@ -194,12 +194,12 @@ Rules:
 - Output ONLY \"PASS\" or \"FAIL: <reason>\". No other text."
 
 echo "Checking documentation..."
-DOC_RESULT=$(echo "$DOC_CHECK_PROMPT" | claude -p --model haiku 2>/dev/null | sed -e 's/^[[:space:]]*//' -e 's/[[:space:]]*$//')
+DOC_RESULT=$(echo "$DOC_CHECK_PROMPT" | claude -p --model haiku --effort medium 2>/dev/null | sed -e 's/^[[:space:]]*//' -e 's/[[:space:]]*$//')
 }
 
 # 5. Generate commit message
 echo "Generating commit message ($CHANGED_FILES files)..."
-MSG=$(echo "$USER_PROMPT" | claude -p --model haiku --system-prompt "$SYSTEM_PROMPT" 2>/dev/null)
+MSG=$(echo "$USER_PROMPT" | claude -p --model haiku --effort medium --system-prompt "$SYSTEM_PROMPT" 2>/dev/null)
 
 MSG=$(echo "$MSG" | sed -e '/^```/d' -e 's/^[[:space:]]*$//' | sed -e '1s/^[[:space:]]*//' -e '${s/[[:space:]]*$//}')
 
