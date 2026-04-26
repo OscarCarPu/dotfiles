@@ -95,6 +95,20 @@ reconfigure_monitors() {
     fi
     restore_workspaces
     snapshot_workspaces
+
+    # After monitor + workspace shuffle Hyprland sometimes loses keyboard/mouse
+    # focus on the active window (terminals go unresponsive). Force-refocus the
+    # currently-active window to wake input handling back up.
+    local active_addr
+    active_addr=$(hyprctl activewindow -j 2>/dev/null | jq -r '.address // empty')
+    if [[ -n "$active_addr" ]]; then
+        hyprctl dispatch focuswindow "address:$active_addr" >/dev/null 2>&1 || true
+    else
+        # No active window? Refocus the currently focused monitor instead.
+        local focused_mon
+        focused_mon=$(hyprctl monitors -j 2>/dev/null | jq -r '.[] | select(.focused) | .name' | head -1)
+        [[ -n "$focused_mon" ]] && hyprctl dispatch focusmonitor "$focused_mon" >/dev/null 2>&1 || true
+    fi
 }
 
 # Find Hyprland event socket
