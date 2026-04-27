@@ -1,0 +1,63 @@
+#!/bin/bash
+# Post-login boot timeline. All times are seconds after kernel boot.
+# Sources: kernel uptime, /proc/<pid>/stat start times, runit supervise/status mtimes.
+set -euo pipefail
+export LC_ALL=C
+
+CLK_TCK=$(getconf CLK_TCK)
+BOOT_EPOCH=$(date -d "$(uptime -s)" +%s)
+
+proc_start_after_boot() {
+    local pid=$1
+    [[ -r /proc/$pid/stat ]] || { echo ""; return; }
+    awk -v t="$CLK_TCK" '{ printf "%.1f", $22 / t }' /proc/$pid/stat
+}
+
+proc_row() {
+    local label=$1 pids=$2
+    for pid in $pids; do
+        [[ -d /proc/$pid ]] || continue
+        printf "  %6.1fs  %-30s (PID %s)\n" "$(proc_start_after_boot "$pid")" "$label" "$pid"
+    done
+}
+
+echo "=== Boot timeline (seconds after kernel boot) ==="
+echo "Kernel boot: $(uptime -s)"
+echo "Now:         $(date '+%Y-%m-%d %H:%M:%S')   (uptime: $(awk '{printf "%.0fs",$1}' /proc/uptime))"
+echo
+
+echo "--- Long-running processes ---"
+{
+    for prog in Hyprland waybar swaync awww-daemon DisplayLinkManager runsvdir kitty chromium spotify mscore; do
+        pids=$(pgrep -x "$prog" 2>/dev/null) || true
+        [[ -n "${pids:-}" ]] && proc_row "$prog" "$pids"
+    done
+    for script in monitor_watcher.sh fullscreen_dnd.sh set_wallpaper.sh battery_notify.sh; do
+        pids=$(pgrep -f "$script" 2>/dev/null) || true
+        [[ -n "${pids:-}" ]] && proc_row "$script" "$pids"
+    done
+} | sort -n
+
+echo
+echo "--- runit user services (last start) ---"
+for svc in "$HOME"/.local/share/runit/sv/*/supervise/status; do
+    [[ -f "$svc" ]] || continue
+    name=$(basename "$(dirname "$(dirname "$svc")")")
+    rel=$(( $(stat -c %Y "$svc") - BOOT_EPOCH ))
+    printf "  %6ds  %s\n" "$rel" "$name"
+done | sort -n
+
+echo
+echo "--- runit system services (within first 60s of boot, run with sudo for full data) ---"
+for svc in /run/runit/service/*/supervise/status; do
+    [[ -r "$svc" ]] || continue
+    name=$(basename "$(dirname "$(dirname "$svc")")")
+    rel=$(( $(stat -c %Y "$svc") - BOOT_EPOCH ))
+    (( rel > 60 || rel < 0 )) && continue
+    printf "  %6ds  %s\n" "$rel" "$name"
+done | sort -n
+
+echo
+echo "Tips:"
+echo "  sudo $0                               # also includes system services"
+echo "  dmesg --time-format=reltime | head    # kernel-side timeline"

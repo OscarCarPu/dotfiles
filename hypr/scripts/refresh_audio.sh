@@ -6,7 +6,8 @@ set -euo pipefail
 
 notify-send -t 2000 "Audio" "Refreshing audio devices..." 2>/dev/null || true
 
-systemctl --user restart wireplumber pipewire pipewire-pulse
+export SVDIR="$HOME/.local/share/runit/sv"
+sv restart pipewire wireplumber pipewire-pulse
 
 sleep 1
 

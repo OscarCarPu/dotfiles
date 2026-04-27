@@ -51,6 +51,21 @@ Scripts live in `scripts/` (symlinked to `~/.local/bin/`):
 - `scripts/git-finish-feature`
 - `scripts/git-deploy`
 
+## Personal Makefile (`~/Makefile`)
+
+Shortcuts for daily tasks (`make <target>` from `$HOME`). Sourced from
+[`home/Makefile`](../home/Makefile) and symlinked by `install.sh`.
+
+| Target | Action |
+|---|---|
+| `axeigo-forms-2026` | Run obradoiros forms generator with `uv` |
+| `ssh-lab` | SSH into the lab box |
+| `gv-api-pgcli` | Open `pgcli` against the gv-api DB through the lab box |
+| `rescan-wifi` | `nmcli` Wi-Fi rescan |
+| `wifi-oscar` | Rescan and connect to the `Oscar` SSID |
+
+Add more targets directly in `home/Makefile`; the symlink picks them up.
+
 ## File Manager Bookmarks
 
 Custom sidebar locations (Dev, Edu) appear in both Dolphin and GTK file dialogs (Chrome save/open).
@@ -62,27 +77,46 @@ To add a new location, edit both files.
 
 ## Bluetooth Spotify Auto-Switch
 
-A background service that automatically routes Spotify audio to known Bluetooth speakers (VTIN R2, Royaler) when they connect.
+`scripts/bt-spotify-switch` listens for new PipeWire sinks via `pactl subscribe`,
+matches against known speaker MACs (`VTIN R2`, `Royaler`), and moves Spotify's
+sink-input to that speaker as it connects.
 
-- **Script**: `scripts/bt-spotify-switch` — listens for new PipeWire sinks via `pactl subscribe`, matches against known speaker MACs, and moves Spotify's sink-input
-- **Service**: `~/.config/systemd/user/bt-spotify-switch.service` — starts on login, restarts on failure
+It is a manual tool — run it from a terminal when you want it active:
+
+```bash
+bt-spotify-switch &
+```
+
+To wrap it as a runit user service, mirror one of the entries under
+`runit/user/` and add the service name to `USER_RUNIT_SERVICES` in
+[`install.sh`](../install.sh).
 
 ### Adding a new speaker
 
-Edit `scripts/bt-spotify-switch` and add the MAC address (underscores instead of colons) to the `KNOWN_SPEAKERS` array, then restart the service:
-
-```bash
-systemctl --user restart bt-spotify-switch
-```
+Edit `scripts/bt-spotify-switch` and add the MAC address (underscores instead
+of colons) to the `KNOWN_SPEAKERS` array.
 
 ### Useful commands
 
 | Command | Description |
 |---|---|
-| `journalctl --user -u bt-spotify-switch -f` | Watch live logs |
-| `systemctl --user status bt-spotify-switch` | Check service status |
 | `pactl list short sinks` | List available audio sinks |
+| `pactl list sink-inputs` | List active streams |
 
 ### Things installed
 
 - imagemagick: editing images
+
+## Boot timeline
+
+`scripts/boot-bench` prints a per-process and per-service timeline relative to
+kernel boot. Useful when adding/removing `exec-once` entries or tuning
+`startup_apps.sh`.
+
+```bash
+boot-bench           # user processes + user runit services
+sudo boot-bench      # also reads /run/runit/service/*/supervise/status
+```
+
+See [`docs/artix.md`](artix.md) for the full Artix bring-up and post-install
+fixes (elogind dedup, GRUB default, DisplayLink activation).

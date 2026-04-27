@@ -1,0 +1,10 @@
+#!/bin/sh
+exec 2>&1
+export XDG_RUNTIME_DIR="/run/user/$(id -u)"
+export WAYLAND_DISPLAY=wayland-1
+[ -S "$XDG_RUNTIME_DIR/$WAYLAND_DISPLAY" ] || exit 1
+
+while :; do
+    "$HOME/.dotfiles/hypr/scripts/set_wallpaper.sh"
+    sleep 180
+done

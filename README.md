@@ -1,10 +1,10 @@
 # OCP's Dotfiles
 
-An Arch Hyprland configuration for my daily computer.
+An Artix Hyprland configuration for my daily computer.
 
 # Quick Start
 
-- *Os*: Arch Linux
+- *OS*: Artix Linux (runit)
 - *WM*: Hyprland (Wayland)
 - *Terminal*: Kitty
 - *Shell*: Bash
@@ -12,46 +12,65 @@ An Arch Hyprland configuration for my daily computer.
 
 # Repository Structure
 
-GNU Stow for symlinking
-
+- `bash/`: Bash login files (`.bash_profile`)
+- `home/`: Files that live at the root of `$HOME` (e.g. `Makefile`)
 - `hypr/`: Hyprland configuration
 - `nvim/`: Neovim configuration
 - `waybar/`: Waybar configuration
 - `swaync/`: SwayNC configuration
-- `scripts/`: Custom system tools (`.local/bin`)
-- `configs/`: Small configuration files
+- `wireplumber/`: WirePlumber priority rules
+- `runit/user/`: User runit services (pipewire, wireplumber, pipewire-pulse, rclone-bisync)
+- `runit/system/`: System runit services (displaylink)
+- `scripts/`: Custom system tools (`~/.local/bin`)
+- `configs/`: Small configuration files (sysctl, modules-load, gtk, chromium)
 - `docs/`: Documentation
 
-# Instalation
+# Installation
 
-```Bash
-# Clone the Repository
-git clone https://github.com/OscarCarPu/dotfiles.git ~/.dotfiles 
+```bash
+git clone https://github.com/OscarCarPu/dotfiles.git ~/.dotfiles
 cd ~/.dotfiles
 
-# Run install.sh 
-chmod +x ./install.sh
-./install.sh
+# User-level symlinks (configs, runit user services, scripts)
+bash install.sh
+
+# System-level symlinks (sudo): /etc/sysctl.d, /etc/modules-load.d, /etc/runit/sv
+bash install.sh --system
 ```
 
-# Symlink list 
+Full Artix bring-up (AUR packages, displaylink activation, runsvdir bootstrap)
+is documented in [`docs/artix.md`](docs/artix.md).
 
-- nvim -> ~/.config/nvim
-- hypr -> ~/.config/hypr
-- waybar -> ~/.config/waybar
-- swaync -> ~/.config/swaync
-- configs/chromium-flags.conf -> ~/.config/chromium-flags.conf
-- configs/user-places.xbel -> ~/.local/share/user-places.xbel
-- configs/gtk-3.0/bookmarks -> ~/.config/gtk-3.0/bookmarks
-- scripts -> ~/.local/bin
+# Symlink list
+
+User (`bash install.sh`):
+- `bash/.bash_profile` → `~/.bash_profile`
+- `home/Makefile` → `~/Makefile`
+- `hypr` → `~/.config/hypr`
+- `nvim` → `~/.config/nvim`
+- `waybar` → `~/.config/waybar`
+- `swaync` → `~/.config/swaync`
+- `wireplumber` → `~/.config/wireplumber`
+- `git/.gitconfig` → `~/.gitconfig`
+- `configs/chromium-flags.conf` → `~/.config/chromium-flags.conf`
+- `configs/user-places.xbel` → `~/.local/share/user-places.xbel`
+- `configs/gtk-3.0/bookmarks` → `~/.config/gtk-3.0/bookmarks`
+- `scripts/*` → `~/.local/bin/`
+- `runit/user/<svc>/{run,log/run}` → `~/.local/share/runit/sv/<svc>/...`
+
+System (`bash install.sh --system`):
+- `configs/sysctl.d/90-disable-ipv6.conf` → `/etc/sysctl.d/90-disable-ipv6.conf`
+- `configs/modules-load.d/evdi.conf` → `/etc/modules-load.d/evdi.conf`
+- `runit/system/displaylink/{run,log/run}` → `/etc/runit/sv/displaylink/...`
 
 # More docs
 
+- *Artix bring-up*: [Artix](docs/artix.md)
 - *Hyprland*: [Hyprland](docs/hyprland.md)
 - *Neovim*: [Neovim](nvim/README.md)
 - *System*: [System](docs/system.md)
 
 # Maintenance
 
-- No Symlink, no entry
-- Document as you go, everything is documented on system.md 
+- No symlink, no entry — everything must go through `install.sh`
+- Document as you go

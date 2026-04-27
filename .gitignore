@@ -1,13 +1,6 @@
 # Hypr state files
 hypr/wallpaper_index.json
 
-# OneDrive sensitive and state files
-onedrive/refresh_token
-onedrive/items.sqlite3
-onedrive/.config.backup
-onedrive/.config.hash
-onedrive/.sync_list.hash
-
 # Backup files
 *.backup
 *~

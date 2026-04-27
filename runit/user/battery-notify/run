@@ -1,0 +1,8 @@
+#!/bin/sh
+exec 2>&1
+export XDG_RUNTIME_DIR="/run/user/$(id -u)"
+
+while :; do
+    "$HOME/.dotfiles/hypr/scripts/battery_notify.sh"
+    sleep 60
+done

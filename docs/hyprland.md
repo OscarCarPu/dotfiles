@@ -26,7 +26,7 @@ A wofi selection menu for power actions and system updates.
 
 **Update terminal flow:**
 1. Calculates available updates and starts AI summary fetch in the background
-2. Shows latest Arch Linux news
+2. Shows latest distro news (pulled from `archlinux.org` — Artix tracks the same packages)
 3. Lists packages updating (critical ones highlighted in red)
 4. Optionally shows AI summary — already fetched, no waiting
 5. Confirms before running the update
@@ -38,34 +38,17 @@ A wofi selection menu for power actions and system updates.
 
 ---
 
-## Startup Boot Mode Selector
+## Startup Apps
 
-On Hyprland startup, a wofi popup appears allowing you to choose the boot mode.
+On Hyprland startup, [`hypr/scripts/startup_apps.sh`](../hypr/scripts/startup_apps.sh)
+unconditionally runs the `normal_setup` flow:
 
-**Options:**
+- Spotify spawns and lands on workspace 3 (windowrule pinned)
+- Chromium opens the daily tabs (Gmail x3, lab-ocp, Claude, WhatsApp) on workspace 1
+- Kitty opens on workspace 2 via `[workspace 2 silent]` dispatch
 
-| Key | Option | Description |
-|-----|--------|-------------|
-| `1` | Normal Setup | Opens browser (Gmail, Clockify, Gemini, WhatsApp) on workspace 2, Spotify on workspace 3 |
-| `2` | Learn Go | Same as Normal + Go tests tutorial site + terminal at `~/dev/play/go/learn-tests/` |
-| `3` | Boot Windows | Opens a terminal and runs `winboot` |
+Other modes (`learn_rust`, `musescore`, `uoc`) are kept in the file as
+ready-to-use functions — to switch flows, change the last line of the
+script from `normal_setup` to one of those.
 
-**Controls:**
-- Type the number to quick-filter, then press Enter
-- Use Up/Down arrows to navigate, then Enter to confirm
-- Press Escape to cancel (no action)
-
-**Source:** [`hypr/scripts/startup_apps.sh`](../hypr/scripts/startup_apps.sh)
-
-### Adding/Removing Options
-
-1. **Add a new option:** Define a function in the script, then add `"function_name|Label"` to `ENABLED_OPTIONS`
-2. **Remove an option:** Delete or comment out its line in `ENABLED_OPTIONS`
-
-```bash
-ENABLED_OPTIONS=(
-    "normal_setup|Normal Setup"
-    "learn_go|Learn Go"
-    "boot_windows|Boot Windows"
-)
-```
+To change the daily browser tab list, edit the `open_web` function.

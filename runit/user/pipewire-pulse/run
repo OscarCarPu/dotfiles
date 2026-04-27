@@ -1,0 +1,5 @@
+#!/bin/sh
+exec 2>&1
+SOCK="${XDG_RUNTIME_DIR:-/tmp}/pipewire-0"
+while [ ! -S "$SOCK" ]; do sleep 1; done
+exec pipewire-pulse

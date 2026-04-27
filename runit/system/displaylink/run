@@ -1,0 +1,5 @@
+#!/bin/sh
+exec 2>&1
+modprobe evdi
+cd /usr/lib/displaylink
+exec ./DisplayLinkManager

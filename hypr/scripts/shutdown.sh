@@ -8,8 +8,8 @@ case "$CHOICE" in
     *"Update + Shutdown"*) POWER_ACTION=poweroff ;;
     *"Update + Reboot"*)   POWER_ACTION=reboot   ;;
     *"Update"*)            POWER_ACTION=none      ;;
-    *"Shutdown"*)          systemctl poweroff; exit 0 ;;
-    *"Reboot"*)            systemctl reboot; exit 0   ;;
+    *"Shutdown"*)          loginctl poweroff; exit 0 ;;
+    *"Reboot"*)            loginctl reboot; exit 0   ;;
     *)                     exit 0 ;;
 esac
 
@@ -27,8 +27,8 @@ cleanup_and_power() {
     kill "${AI_PID:-}" 2>/dev/null || true
     rm -f "${TMPFILE:-}"
     case "${POWER_ACTION:-none}" in
-        poweroff) echo -e "\nShutting down..."; sudo systemctl poweroff ;;
-        reboot)   echo -e "\nRebooting...";     sudo systemctl reboot   ;;
+        poweroff) echo -e "\nShutting down..."; loginctl poweroff ;;
+        reboot)   echo -e "\nRebooting...";     loginctl reboot   ;;
         *)        echo -e "\nDone. Press Enter to close."; read -r      ;;
     esac
 }
@@ -433,11 +433,11 @@ fi
 case "${POWER_ACTION:-none}" in
     poweroff)
         echo -e "\nShutting down..."
-        sudo systemctl poweroff
+        loginctl poweroff
         ;;
     reboot)
         echo -e "\nRebooting..."
-        sudo systemctl reboot
+        loginctl reboot
         ;;
     *)
         echo -e "\nDone. Press Enter to close."

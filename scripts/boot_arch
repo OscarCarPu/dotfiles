@@ -1,0 +1,35 @@
+#!/bin/bash
+# Set next boot to Arch and reboot. One-shot: reverts to default (Artix) after Arch boots.
+# Requires GRUB_DEFAULT=saved in Arch's /etc/default/grub and the ESP mounted at /boot.
+# Run from Artix; Artix mounts the ESP read-only or the script falls back to grub-editenv.
+set -euo pipefail
+
+GRUB_CFG=""
+for candidate in /boot/grub/grub.cfg /efi/grub/grub.cfg /boot/efi/grub/grub.cfg; do
+    if sudo -n test -r "$candidate" 2>/dev/null; then
+        GRUB_CFG="$candidate"
+        break
+    fi
+done
+
+if [[ -z "$GRUB_CFG" ]]; then
+    echo "boot_arch: grub.cfg not found. Mount the ESP / Arch /boot first." >&2
+    exit 1
+fi
+
+# Match Arch but not Artix.
+ENTRY=$(sudo -n cat "$GRUB_CFG" | awk -F\' '
+    function is_arch(s) { s=tolower(s); return (s ~ /arch/ && s !~ /artix/) }
+    /^menuentry /                { if (is_arch($2)) { print $2; exit } }
+    /^submenu /                  { smenu=$2 }
+    /^[[:space:]]+menuentry /    { if (is_arch($2)) { print smenu ">" $2; exit } }
+')
+
+if [[ -z "${ENTRY:-}" ]]; then
+    echo "boot_arch: no Arch menuentry found in $GRUB_CFG" >&2
+    exit 1
+fi
+
+echo "Setting next boot: $ENTRY"
+sudo -n grub-reboot "$ENTRY"
+loginctl reboot
