@@ -8,7 +8,6 @@ declare -A DOTFILES=(
     ["waybar"]="$HOME/.config/waybar"
     ["swaync"]="$HOME/.config/swaync"
     ["wireplumber"]="$HOME/.config/wireplumber"
-    ["scripts"]="$HOME/.local/bin"
     ["git/.gitconfig"]="$HOME/.gitconfig"
     ["configs/user-places.xbel"]="$HOME/.local/share/user-places.xbel"
     ["configs/gtk-3.0/bookmarks"]="$HOME/.config/gtk-3.0/bookmarks"
@@ -48,6 +47,27 @@ for src in "${!DOTFILES[@]}"; do
 
     echo " Symlinking: $src -> $target"
     ln -sf "$src_path" "$target"
+done
+
+# Scripts: per-file symlinks so ~/.local/bin stays a real directory
+# and external tools (uv, claude, etc.) can write there without polluting this repo.
+LOCAL_BIN="$HOME/.local/bin"
+SCRIPTS_DIR="$DOTFILES_DIR/scripts"
+
+if [ -L "$LOCAL_BIN" ]; then
+    echo " Converting $LOCAL_BIN from directory symlink to real directory..."
+    rm "$LOCAL_BIN"
+fi
+mkdir -p "$LOCAL_BIN"
+
+for script in "$SCRIPTS_DIR"/*; do
+    script_name=$(basename "$script")
+    target="$LOCAL_BIN/$script_name"
+    if [ -e "$target" ] || [ -L "$target" ]; then
+        rm -f "$target"
+    fi
+    echo " Symlinking script: $script_name"
+    ln -sf "$script" "$target"
 done
 
 echo "Done!"
