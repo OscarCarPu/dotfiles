@@ -5,7 +5,7 @@
 set -euo pipefail
 
 open_web() {
-    chromium \
+    falkon \
         "https://mail.google.com/mail/u/0/" \
         "https://mail.google.com/mail/u/1/" \
         "https://mail.google.com/mail/u/2/" \

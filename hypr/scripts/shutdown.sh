@@ -166,9 +166,6 @@ def fetch_security_bulletins(version_bumps_list):
         "firefox": {
             "index": "https://www.mozilla.org/en-US/security/advisories/",
         },
-        "chromium": {
-            "index": "https://chromereleases.googleblog.com/",
-        },
         "thunderbird": {
             "index": "https://www.mozilla.org/en-US/security/advisories/",
         },

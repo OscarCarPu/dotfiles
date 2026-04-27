@@ -4,7 +4,6 @@
 declare -A DOTFILES=(
     ["bash/.bash_profile"]="$HOME/.bash_profile"
     ["home/Makefile"]="$HOME/Makefile"
-    ["configs/chromium-flags.conf"]="$HOME/.config/chromium-flags.conf"
     ["hypr"]="$HOME/.config/hypr"
     ["nvim"]="$HOME/.config/nvim"
     ["waybar"]="$HOME/.config/waybar"
@@ -21,7 +20,6 @@ USER_RUNIT_SERVICES=(
     pipewire
     wireplumber
     pipewire-pulse
-    rclone-bisync-arreglos
     set-wallpaper
     battery-notify
 )
@@ -30,6 +28,8 @@ USER_RUNIT_SERVICES=(
 declare -A SYSTEM_DOTFILES=(
     ["configs/sysctl.d/90-disable-ipv6.conf"]="/etc/sysctl.d/90-disable-ipv6.conf"
     ["configs/modules-load.d/evdi.conf"]="/etc/modules-load.d/evdi.conf"
+    ["configs/NetworkManager/dispatcher.d/10-eth-no-offloads"]="/etc/NetworkManager/dispatcher.d/10-eth-no-offloads"
+    ["runit/system-overrides/elogind-run"]="/etc/runit/sv/elogind/run"
 )
 
 # System-level runit services (require sudo). Symlinked into /etc/runit/sv/.

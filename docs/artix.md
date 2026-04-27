@@ -16,7 +16,7 @@ sudo pacman -S \
     waybar swaync wofi kitty \
     pipewire pipewire-audio pipewire-pulse wireplumber \
     elogind elogind-runit \
-    rclone jq grim slurp wl-clipboard \
+    jq grim slurp wl-clipboard \
     socat
 ```
 
@@ -78,14 +78,13 @@ so `DisplayLinkManager` finds it ready.
 `dbus-run-session` as `start-hyprland`, so all user services inherit the session
 DBus address. Defined under `runit/user/`:
 
-| Service                 | Purpose                                       |
-|-------------------------|-----------------------------------------------|
-| `pipewire`              | Audio server                                  |
-| `wireplumber`           | PipeWire session manager (waits for socket)   |
-| `pipewire-pulse`        | PulseAudio compatibility layer                |
-| `rclone-bisync-arreglos`| Bisync to Google Drive every 5 min             |
-| `set-wallpaper`         | Rotates wallpaper every 180 s via `awww`      |
-| `battery-notify`        | Polls battery every 60 s, alerts via DBus     |
+| Service          | Purpose                                       |
+|------------------|-----------------------------------------------|
+| `pipewire`       | Audio server                                  |
+| `wireplumber`    | PipeWire session manager (waits for socket)   |
+| `pipewire-pulse` | PulseAudio compatibility layer                |
+| `set-wallpaper`  | Rotates wallpaper every 180 s via `awww`      |
+| `battery-notify` | Polls battery every 60 s, alerts via DBus     |
 
 `set-wallpaper` waits for the Wayland socket before doing anything, so it can
 start before Hyprland and runit will keep retrying until the compositor is up.
@@ -93,7 +92,7 @@ start before Hyprland and runit will keep retrying until the compositor is up.
 To start them now without re-logging in:
 
 ```bash
-SVDIR=~/.local/share/runit/sv sv up pipewire wireplumber pipewire-pulse rclone-bisync-arreglos set-wallpaper battery-notify
+SVDIR=~/.local/share/runit/sv sv up pipewire wireplumber pipewire-pulse set-wallpaper battery-notify
 ```
 
 Status / logs:
@@ -162,7 +161,7 @@ ls /sys/class/drm/                       # should include card2-... entries
 hyprctl monitors                          # should list eDP-1 + 2 dock panels
 
 # User services running
-SVDIR=~/.local/share/runit/sv sv status pipewire wireplumber pipewire-pulse rclone-bisync-arreglos
+SVDIR=~/.local/share/runit/sv sv status pipewire wireplumber pipewire-pulse set-wallpaper battery-notify
 
 # DisplayLink daemon running
 pgrep -a DisplayLinkManager
@@ -185,19 +184,43 @@ the daemon loads firmware (`*.spkg`) by relative path.
 
 `elogind-runit` ships two service entries in `/etc/runit/sv/` (`elogind` and
 `logind` — the latter is a symlink to the former). Both get linked into
-`/etc/runit/runsvdir/default/`, so two supervisors race for the same daemon and
-the loser respawns once a second forever, spamming `dmesg` with "elogind is
-already running as PID …".
-
-Remove the duplicate:
+`/etc/runit/runsvdir/default/`, so two supervisors race for the same daemon
+on every cold boot.
 
 ```bash
 sudo rm /etc/runit/runsvdir/default/logind
-# kill any orphan supervisor that runsvdir already forked:
-sudo pkill -f "runsv logind"
+sudo pkill -f "runsv logind"   # kill orphan supervisor if any
 ```
 
-A reboot also clears it (the symlink is gone, so `runsvdir` won't recreate it).
+### `elogind` run script that respawns forever
+
+The `/etc/runit/sv/elogind/run` shipped by `elogind-runit` does
+`exec /usr/lib/elogind/elogind`, but the binary forks-and-detaches by default
+— so the foreground process exits immediately, runit respawns the script, the
+new instance bails out with `elogind is already running as PID …`, and the
+loop repeats every second forever (visible in `dmesg`).
+
+`install.sh --system` overrides that file with
+[`runit/system-overrides/elogind-run`](../runit/system-overrides/elogind-run),
+which starts elogind once and then blocks on the daemon's PID file, so runit
+only respawns when the actual daemon dies.
+
+After running `install.sh --system`, restart the supervisor once:
+
+```bash
+sudo sv restart elogind
+```
+
+Note: a future `pacman -Syu` of `elogind-runit` may overwrite the file (or
+drop a `.pacnew`). Re-run `install.sh --system` after such an update.
+
+### eth0 (USB-dock) offload watchdog
+
+USB Ethernet adapters in DisplayLink-class docks (cdc_ncm + Realtek) hit
+`NETDEV WATCHDOG: transmit queue 0 timed out` every ~30 s with default
+offloads enabled. `install.sh --system` installs
+[`configs/NetworkManager/dispatcher.d/10-eth-no-offloads`](../configs/NetworkManager/dispatcher.d/10-eth-no-offloads)
+which turns them off via `ethtool -K` whenever an `eth*` interface comes up.
 
 ### GRUB default
 
@@ -218,7 +241,7 @@ without changing the default.
 `scripts/boot-bench` (`~/.local/bin/boot-bench` after install) prints a
 post-login timeline of seconds-after-kernel-boot for:
 
-- Long-running processes (Hyprland, waybar, swaync, awww-daemon, chromium…)
+- Long-running processes (Hyprland, waybar, swaync, awww-daemon, falkon…)
   via `/proc/<pid>/stat` start times
 - runit user services via `supervise/status` mtimes
 - runit system services (run with `sudo` to see all)

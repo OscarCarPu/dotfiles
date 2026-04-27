@@ -19,10 +19,10 @@ An Artix Hyprland configuration for my daily computer.
 - `waybar/`: Waybar configuration
 - `swaync/`: SwayNC configuration
 - `wireplumber/`: WirePlumber priority rules
-- `runit/user/`: User runit services (pipewire, wireplumber, pipewire-pulse, rclone-bisync)
+- `runit/user/`: User runit services (pipewire stack, set-wallpaper, battery-notify)
 - `runit/system/`: System runit services (displaylink)
 - `scripts/`: Custom system tools (`~/.local/bin`)
-- `configs/`: Small configuration files (sysctl, modules-load, gtk, chromium)
+- `configs/`: Small configuration files (sysctl, modules-load, gtk, NetworkManager)
 - `docs/`: Documentation
 
 # Installation
@@ -52,7 +52,6 @@ User (`bash install.sh`):
 - `swaync` → `~/.config/swaync`
 - `wireplumber` → `~/.config/wireplumber`
 - `git/.gitconfig` → `~/.gitconfig`
-- `configs/chromium-flags.conf` → `~/.config/chromium-flags.conf`
 - `configs/user-places.xbel` → `~/.local/share/user-places.xbel`
 - `configs/gtk-3.0/bookmarks` → `~/.config/gtk-3.0/bookmarks`
 - `scripts/*` → `~/.local/bin/`

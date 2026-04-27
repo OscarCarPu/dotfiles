@@ -44,7 +44,7 @@ On Hyprland startup, [`hypr/scripts/startup_apps.sh`](../hypr/scripts/startup_ap
 unconditionally runs the `normal_setup` flow:
 
 - Spotify spawns and lands on workspace 3 (windowrule pinned)
-- Chromium opens the daily tabs (Gmail x3, lab-ocp, Claude, WhatsApp) on workspace 1
+- Falkon opens the daily tabs (Gmail x3, lab-ocp, Claude, WhatsApp) on workspace 1
 - Kitty opens on workspace 2 via `[workspace 2 silent]` dispatch
 
 Other modes (`learn_rust`, `musescore`, `uoc`) are kept in the file as

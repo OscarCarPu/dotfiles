@@ -1,0 +1,19 @@
+#!/bin/sh
+# Disable hardware offloads on USB/Realtek-class wired interfaces.
+# cdc_ncm-attached docks (e.g. the Wavlink/Realtek 6950) hit NETDEV WATCHDOG
+# resets every ~30 s with default offloads enabled. Turning these off keeps
+# the queue from stalling.
+INTERFACE="$1"
+STATUS="$2"
+
+case "$STATUS" in
+    up|connectivity-change)
+        case "$INTERFACE" in
+            eth*)
+                /usr/bin/ethtool -K "$INTERFACE" \
+                    tso off gso off gro off lro off \
+                    rx-checksum off tx-checksum-ipv4 off 2>/dev/null
+                ;;
+        esac
+        ;;
+esac

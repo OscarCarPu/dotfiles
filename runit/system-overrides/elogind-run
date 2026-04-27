@@ -1,0 +1,25 @@
+#!/bin/sh -e
+# Replacement for /etc/runit/sv/elogind/run that the elogind-runit package
+# ships. The packaged script `exec`s elogind, which forks and detaches; runit
+# then sees the foreground process exit, respawns it, and the new instance
+# bails with "elogind is already running as PID N" once a second forever.
+#
+# This version starts elogind once and blocks on its PID file so runsv only
+# respawns when the actual daemon dies.
+sv start dbus >/dev/null
+
+if [ -f /run/elogind.pid ]; then
+    PID=$(cat /run/elogind.pid)
+    if [ -n "$PID" ] && kill -0 "$PID" 2>/dev/null; then
+        exec tail --pid="$PID" -f /dev/null
+    fi
+fi
+
+/usr/lib/elogind/elogind
+i=0
+while [ ! -f /run/elogind.pid ] && [ "$i" -lt 10 ]; do
+    sleep 1
+    i=$((i + 1))
+done
+[ -f /run/elogind.pid ] || exit 1
+exec tail --pid="$(cat /run/elogind.pid)" -f /dev/null
