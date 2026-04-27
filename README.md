@@ -38,8 +38,9 @@ bash install.sh
 bash install.sh --system
 ```
 
-Full Artix bring-up (AUR packages, displaylink activation, runsvdir bootstrap)
-is documented in [`docs/artix.md`](docs/artix.md).
+The package list lives in [`docs/packages.md`](docs/packages.md). System
+bring-up (runit, drivers, post-install fixes) is in
+[`docs/system.md`](docs/system.md).
 
 # Symlink list
 
@@ -64,10 +65,12 @@ System (`bash install.sh --system`):
 
 # More docs
 
-- *Artix bring-up*: [Artix](docs/artix.md)
-- *Hyprland*: [Hyprland](docs/hyprland.md)
+- *Packages*: [Packages](docs/packages.md) — single source of truth for what's installed
+- *System*: [System](docs/system.md) — kernel, runit, drivers, network, post-install fixes
+- *Desktop*: [Desktop](docs/desktop.md) — Hyprland, Waybar, monitors, startup, power menu
+- *Workflow*: [Workflow](docs/workflow.md) — git aliases, Makefile, bookmarks, bt-spotify, boot-bench
 - *Neovim*: [Neovim](nvim/README.md)
-- *System*: [System](docs/system.md)
+- *Homelab*: [Homelab](docs/homelab.md)
 
 # Maintenance
 

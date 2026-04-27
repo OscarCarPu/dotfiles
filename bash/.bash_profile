@@ -10,3 +10,7 @@ if [ -z "${DISPLAY:-}${WAYLAND_DISPLAY:-}" ] && [ "$XDG_VTNR" = "1" ]; then
 fi
 
 [[ -f ~/.bashrc ]] && . ~/.bashrc
+
+# bun
+export BUN_INSTALL="$HOME/.bun"
+export PATH="$BUN_INSTALL/bin:$PATH"
