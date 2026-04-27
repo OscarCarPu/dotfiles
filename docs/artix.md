@@ -241,7 +241,7 @@ without changing the default.
 `scripts/boot-bench` (`~/.local/bin/boot-bench` after install) prints a
 post-login timeline of seconds-after-kernel-boot for:
 
-- Long-running processes (Hyprland, waybar, swaync, awww-daemon, falkon…)
+- Long-running processes (Hyprland, waybar, swaync, awww-daemon, brave…)
   via `/proc/<pid>/stat` start times
 - runit user services via `supervise/status` mtimes
 - runit system services (run with `sudo` to see all)

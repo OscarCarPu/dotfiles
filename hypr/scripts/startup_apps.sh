@@ -5,7 +5,7 @@
 set -euo pipefail
 
 open_web() {
-    falkon \
+    brave \
         "https://mail.google.com/mail/u/0/" \
         "https://mail.google.com/mail/u/1/" \
         "https://mail.google.com/mail/u/2/" \
@@ -19,21 +19,27 @@ open_web() {
 # Kitty is dispatched onto ws2 with the per-launch workspace selector.
 
 normal_setup() {
+    hyprctl dispatch workspace 3
     spotify &
+    sleep 1
     hyprctl dispatch workspace 1
     open_web
     hyprctl dispatch exec '[workspace 2 silent] kitty'
 }
 
 learn_rust() {
+    hyprctl dispatch workspace 3
     spotify &
+    sleep 1
     hyprctl dispatch workspace 1
     open_web "https://doc.rust-lang.org/book/"
     hyprctl dispatch exec '[workspace 2 silent] kitty --directory ~/dev/play/rust/thebook/'
 }
 
 musescore() {
+    hyprctl dispatch workspace 3
     spotify &
+    sleep 1
     hyprctl dispatch workspace 1
     open_web
     mscore &

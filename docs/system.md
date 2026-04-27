@@ -70,7 +70,7 @@ Add more targets directly in `home/Makefile`; the symlink picks them up.
 
 Custom sidebar locations (Dev, Edu) appear in both Dolphin/Qt and GTK file dialogs.
 
-- `configs/user-places.xbel` → Dolphin sidebar and KDE/Qt dialogs (Falkon save/open)
+- `configs/user-places.xbel` → Dolphin sidebar and KDE/Qt dialogs
 - `configs/gtk-3.0/bookmarks` → GTK file dialogs (Firefox, etc.)
 
 To add a new location, edit both files.

@@ -22,8 +22,11 @@ case "${1:-}" in
     PERCENTAGE=$((BRIGHTNESS * 100 / MAX_BRIGHTNESS))
     echo "$PERCENTAGE"
   ;;
+  set)
+    brightnessctl -d "$BRIGHTNESS_DEVICE" set "${2:-100}%" > /dev/null
+  ;;
   *)
-    echo "Usage: $0 [up|down|get]" >&2
+    echo "Usage: $0 [up|down|get|set <percent>]" >&2
     exit 1
   ;;
 esac

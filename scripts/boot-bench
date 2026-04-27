@@ -28,7 +28,7 @@ echo
 
 echo "--- Long-running processes ---"
 {
-    for prog in Hyprland waybar swaync awww-daemon DisplayLinkManager runsvdir kitty falkon spotify mscore; do
+    for prog in Hyprland waybar swaync awww-daemon DisplayLinkManager runsvdir kitty brave spotify mscore; do
         pids=$(pgrep -x "$prog" 2>/dev/null) || true
         [[ -n "${pids:-}" ]] && proc_row "$prog" "$pids"
     done
