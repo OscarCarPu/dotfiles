@@ -3,6 +3,7 @@
 # User-level symlinks (config files and dirs)
 declare -A DOTFILES=(
     ["bash/.bash_profile"]="$HOME/.bash_profile"
+    ["bash/.bashrc"]="$HOME/.bashrc"
     ["home/Makefile"]="$HOME/Makefile"
     ["hypr"]="$HOME/.config/hypr"
     ["nvim"]="$HOME/.config/nvim"

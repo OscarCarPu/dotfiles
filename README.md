@@ -12,7 +12,7 @@ An Artix Hyprland configuration for my daily computer.
 
 # Repository Structure
 
-- `bash/`: Bash login files (`.bash_profile`)
+- `bash/`: Bash login + interactive files (`.bash_profile`, `.bashrc`)
 - `home/`: Files that live at the root of `$HOME` (e.g. `Makefile`)
 - `hypr/`: Hyprland configuration
 - `nvim/`: Neovim configuration
@@ -46,6 +46,7 @@ bring-up (runit, drivers, post-install fixes) is in
 
 User (`bash install.sh`):
 - `bash/.bash_profile` → `~/.bash_profile`
+- `bash/.bashrc` → `~/.bashrc`
 - `home/Makefile` → `~/Makefile`
 - `hypr` → `~/.config/hypr`
 - `nvim` → `~/.config/nvim`
