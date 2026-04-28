@@ -7,14 +7,23 @@ set -euo pipefail
 LEFTMOST_SERIAL="LXLEE0524282"      # Should be at 0x840
 MIDDLE_SERIAL="PC3M665802149"       # Should be at 1920x0 with transform
 
-# Get current hyprctl monitor output
-MONITORS=$(hyprctl monitors -j)
+# Wait for Hyprland IPC to answer with a populated monitor list before we
+# query serials. On boot the `exec` line in hyprland.conf fires before
+# `hyprctl monitors` returns valid data, so without this we'd miss the
+# serials and fall back to the catch-all rule. Same idea as waybar's runit
+# run script waiting for the Wayland socket. ~10s cap.
+MONITORS="[]"
+for _ in $(seq 1 50); do
+    MONITORS=$(hyprctl monitors -j 2>/dev/null || echo "[]")
+    [[ "$(echo "$MONITORS" | jq 'length')" -gt 0 ]] && break
+    sleep 0.2
+done
 
 # Find which ports our monitors are on by querying hyprctl
 LEFTMOST_PORT=$(echo "$MONITORS" | jq -r ".[] | select(.serial==\"$LEFTMOST_SERIAL\") | .name" 2>/dev/null || echo "")
 MIDDLE_PORT=$(echo "$MONITORS" | jq -r ".[] | select(.serial==\"$MIDDLE_SERIAL\") | .name" 2>/dev/null || echo "")
 
-# If we couldn't find monitors by serial, bail out
+# If we still couldn't find monitors by serial, bail out
 if [[ -z "$LEFTMOST_PORT" ]] || [[ -z "$MIDDLE_PORT" ]]; then
     echo "Warning: Could not identify monitors by serial. Keeping current configuration."
     exit 0

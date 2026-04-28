@@ -92,6 +92,7 @@ Used by `scripts/bt-spotify-switch` and the lab Spotify auto-switch flow.
 - `tree-sitter-cli` — parser builds for Neovim
 - `rust` — `rustc` + `cargo` toolchain
 - `go` — Go toolchain
+- `uv` — Python package and project manager
 - `git`, `github-cli`
 - `docker`, `docker-runit`, `docker-compose`, `docker-buildx` — container
   runtime + BuildKit CLI plugin. `install.sh --system` activates the `docker`
@@ -113,6 +114,7 @@ Used by `scripts/bt-spotify-switch` and the lab Spotify auto-switch flow.
 - `spotify` — runs on workspace 3
 - `syncthing` — file sync
 - `musescore-bin` — sheet music editor
+- `jre-openjdk` — Java runtime
 
 ## AUR helper
 

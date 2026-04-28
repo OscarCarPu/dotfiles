@@ -4,7 +4,27 @@
 # dispatch at the bottom of this file (e.g. `learn_rust` instead of `normal_setup`).
 set -euo pipefail
 
+# Wait until the machine has internet, up to ~30s. Without this brave's daily
+# tabs all open as "no internet" pages on a cold boot before NetworkManager
+# finishes connecting. Prefer curl for a real reachability check; fall back
+# to DNS-only if curl isn't installed.
+wait_for_internet() {
+    local max_seconds="${1:-30}" deadline have_curl
+    deadline=$(( $(date +%s) + max_seconds ))
+    command -v curl >/dev/null 2>&1 && have_curl=1 || have_curl=0
+    while (( $(date +%s) < deadline )); do
+        if (( have_curl )); then
+            curl -fsS --max-time 2 -o /dev/null https://mail.google.com/generate_204 2>/dev/null && return 0
+        else
+            getent hosts mail.google.com >/dev/null 2>&1 && return 0
+        fi
+        sleep 0.5
+    done
+    return 1
+}
+
 open_web() {
+    wait_for_internet || true
     brave \
         "https://mail.google.com/mail/u/0/" \
         "https://mail.google.com/mail/u/1/" \

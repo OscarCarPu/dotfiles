@@ -142,7 +142,11 @@ The actual shutdown / reboot calls go through `loginctl` (provided by
 `hypr/scripts/setup_monitors_by_serial.sh` identifies the two external panels
 by EDID serial (`LXLEE0524282`, `PC3M665802149`) and pins them to absolute
 positions, regardless of which DisplayLink port the dock assigned. If you
-swap monitors, update the serials in that script.
+swap monitors, update the serials in that script. On boot it polls
+`hyprctl monitors -j` until Hyprland answers with a populated list (10s cap,
+mirrors waybar's "wait for the compositor" pattern) before reading serials,
+so the `exec` line in `hyprland.conf` doesn't lose the race against
+DisplayLink enumeration.
 
 `hypr/scripts/monitor_watcher.sh` listens to Hyprland's event socket (via
 `socat` + `jq`) and re-runs the setup script whenever monitors are added or
@@ -160,7 +164,10 @@ unconditionally runs the `normal_setup` flow:
 - Switches to workspace 3, spawns Spotify, waits for the window via
   `hyprctl clients` (no blind `sleep`)
 - Switches to workspace 1 and opens the daily tabs in Brave (Gmail x3,
-  lab-ocp, Claude, WhatsApp)
+  lab-ocp, Claude, WhatsApp). Before launching Brave, `wait_for_internet`
+  polls `https://mail.google.com/generate_204` (or `getent hosts` if curl
+  is missing) until reachable, 30s cap — keeps the daily tabs from cold-
+  booting into "no internet" pages while NetworkManager is still connecting.
 - Kitty opens on workspace 2 via `[workspace 2 silent]` dispatch
 
 Other modes (`learn_rust`, `musescore`, `uoc`) are kept in the file as
