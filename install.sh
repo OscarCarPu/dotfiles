@@ -37,9 +37,25 @@ declare -A SYSTEM_DOTFILES=(
 )
 
 # System-level runit services (require sudo). Symlinked into /etc/runit/sv/.
-# Activation (linking into /etc/runit/runsvdir/default/) is left to the operator.
+# Use this for services whose run script lives in this repo
+# (`runit/system/<svc>/run`).
 SYSTEM_RUNIT_SERVICES=(
     displaylink
+)
+
+# System-level runit services to activate at boot. Each entry is symlinked
+# from /etc/runit/runsvdir/current/<svc> -> /etc/runit/sv/<svc>. Use this for
+# both repo-provided services (above) and package-provided services
+# (e.g. docker-runit ships /etc/runit/sv/docker).
+SYSTEM_RUNIT_ACTIVATE=(
+    displaylink
+    docker
+)
+
+# Groups the invoking user (`$SUDO_USER`) should belong to. Applied in
+# --system mode via `gpasswd -a` (idempotent).
+SYSTEM_GROUPS=(
+    docker
 )
 
 DOTFILES_DIR=$(pwd)
@@ -89,8 +105,31 @@ if [ "${1:-}" = "--system" ]; then
         sudo mkdir -p "$target/log"
         sudo_link_file "$DOTFILES_DIR/runit/system/$svc/run"     "$target/run"
         sudo_link_file "$DOTFILES_DIR/runit/system/$svc/log/run" "$target/log/run"
-        echo " To activate: sudo ln -s /etc/runit/sv/$svc /run/runit/service/"
     done
+
+    echo "Activating system runit services (sudo)..."
+    for svc in "${SYSTEM_RUNIT_ACTIVATE[@]}"; do
+        if [ ! -d "/etc/runit/sv/$svc" ]; then
+            echo " Skipping $svc: /etc/runit/sv/$svc missing (install the package?)"
+            continue
+        fi
+        sudo_link_file "/etc/runit/sv/$svc" "/etc/runit/runsvdir/current/$svc"
+    done
+
+    target_user="${SUDO_USER:-$USER}"
+    if [ -n "$target_user" ] && [ "$target_user" != "root" ]; then
+        echo "Adding $target_user to system groups (sudo)..."
+        for grp in "${SYSTEM_GROUPS[@]}"; do
+            if ! getent group "$grp" >/dev/null; then
+                echo " Skipping $grp: group does not exist (install the package?)"
+                continue
+            fi
+            echo " gpasswd -a $target_user $grp"
+            sudo gpasswd -a "$target_user" "$grp" >/dev/null
+        done
+    else
+        echo "Skipping group setup: no non-root invoking user (set SUDO_USER)."
+    fi
 
     echo "Done (system)."
     exit 0

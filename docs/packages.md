@@ -93,6 +93,9 @@ Used by `scripts/bt-spotify-switch` and the lab Spotify auto-switch flow.
 - `rust` — `rustc` + `cargo` toolchain
 - `go` — Go toolchain
 - `git`, `github-cli`
+- `docker`, `docker-runit`, `docker-compose`, `docker-buildx` — container
+  runtime + BuildKit CLI plugin. `install.sh --system` activates the `docker`
+  runit service and adds the invoking user to the `docker` group
 
 ## CLI tooling
 
@@ -102,6 +105,7 @@ Used by `scripts/bt-spotify-switch` and the lab Spotify auto-switch flow.
 - `pacman-contrib` — *optional*. Provides `pacdiff` for `.pacnew` merging
   inside `shutdown.sh`. The script falls back to listing `.pacnew` paths if
   it is missing.
+- `python-pyotp` — TOTP code generation library
 
 ## Apps (AUR unless noted)
 
