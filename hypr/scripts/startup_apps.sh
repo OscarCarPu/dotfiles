@@ -15,13 +15,25 @@ open_web() {
         "$@" &
 }
 
-# Spotify lands on ws3 via windowrule in hyprland.conf.
+# Wait until a window with the given class appears, up to N tenths of a second.
+wait_for_class() {
+    local class="$1" max_tenths="${2:-50}" i=0
+    while (( i < max_tenths )); do
+        if hyprctl clients 2>/dev/null | grep -q "class: $class$"; then
+            return 0
+        fi
+        sleep 0.1
+        ((i++))
+    done
+    return 1
+}
+
 # Kitty is dispatched onto ws2 with the per-launch workspace selector.
 
 normal_setup() {
     hyprctl dispatch workspace 3
     spotify &
-    sleep 1
+    wait_for_class Spotify || true
     hyprctl dispatch workspace 1
     open_web
     hyprctl dispatch exec '[workspace 2 silent] kitty'
@@ -30,7 +42,7 @@ normal_setup() {
 learn_rust() {
     hyprctl dispatch workspace 3
     spotify &
-    sleep 1
+    wait_for_class Spotify || true
     hyprctl dispatch workspace 1
     open_web "https://doc.rust-lang.org/book/"
     hyprctl dispatch exec '[workspace 2 silent] kitty --directory ~/dev/play/rust/thebook/'
@@ -39,7 +51,7 @@ learn_rust() {
 musescore() {
     hyprctl dispatch workspace 3
     spotify &
-    sleep 1
+    wait_for_class Spotify || true
     hyprctl dispatch workspace 1
     open_web
     mscore &

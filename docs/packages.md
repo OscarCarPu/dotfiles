@@ -76,6 +76,8 @@ Used by `scripts/bt-spotify-switch` and the lab Spotify auto-switch flow.
 - `awww` — wallpaper rotator (runit `set-wallpaper` service uses it)
 - `brightnessctl` — backlight control, called from waybar/keybinds
 - `grim`, `slurp`, `wl-clipboard` — screenshot pipeline
+- `cliphist` — clipboard history (paired with `wofi` via `SUPER + SHIFT + V`)
+- `papirus-icon-theme` — vector icons used by GTK apps and wofi (set in `configs/gtk-3.0/settings.ini`)
 - `socat`, `jq` — used by `monitor_watcher.sh` to consume Hyprland's event socket
 - `elogind-runit` — `loginctl poweroff/reboot`, polkit, seat mgmt (pulls `elogind` as a dep)
 
@@ -96,6 +98,9 @@ Used by `scripts/bt-spotify-switch` and the lab Spotify auto-switch flow.
 - `fd`, `fzf`, `ripgrep` — search
 - `htop`, `ncdu`, `tree` — inspection
 - `unzip` — `.zip` archive extraction
+- `pacman-contrib` — *optional*. Provides `pacdiff` for `.pacnew` merging
+  inside `shutdown.sh`. The script falls back to listing `.pacnew` paths if
+  it is missing.
 
 ## Apps (AUR unless noted)
 

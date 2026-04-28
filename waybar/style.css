@@ -1,69 +1,97 @@
-@define-color bg-primary rgba(29, 31, 33, 0.8);
-@define-color bg-module #2e3440;
-@define-color bg-clock #64727D;
-@define-color bg-battery #5d6d7e;
-@define-color bg-battery-charging #26A65B;
-@define-color bg-battery-critical #f53c3c;
-@define-color bg-cpu #2ecc71;
-@define-color bg-memory #9b59b6;
-@define-color bg-network #2980b9;
-@define-color bg-network-disconnected #f53c3c;
-@define-color bg-audio #a6e3a1;
-@define-color bg-audio-muted #90b1b1;
-@define-color bg-power #e74c3c;
+/* Catppuccin Mocha palette */
+@define-color base       #1e1e2e;
+@define-color mantle     #181825;
+@define-color crust      #11111b;
+@define-color surface0   #313244;
+@define-color surface1   #45475a;
+@define-color surface2   #585b70;
+@define-color overlay0   #6c7086;
+@define-color text       #cdd6f4;
+@define-color subtext0   #a6adc8;
+@define-color red        #f38ba8;
+@define-color peach      #fab387;
+@define-color yellow     #f9e2af;
+@define-color green      #a6e3a1;
+@define-color teal       #94e2d5;
+@define-color blue       #89b4fa;
+@define-color mauve      #cba6f7;
+@define-color lavender   #b4befe;
 
-@define-color text-primary #cdd6f4;
-@define-color text-dark #2e3440;
-@define-color text-audio-muted #2a5c45;
-@define-color text-white #ffffff;
-@define-color text-black #000000;
+/* Semantic aliases */
+@define-color bg-bar         rgba(30, 30, 46, 0.85);
+@define-color bg-module      @surface0;
+@define-color bg-module-hi   @surface1;
+@define-color text-primary   @text;
+@define-color text-dark      @crust;
 
-@define-color workspace-color #89b4fa;
-@define-color workspace-active #fab387;
-@define-color workspace-urgent #eb4d4b;
+@define-color workspace-inactive @overlay0;
+@define-color workspace-active   @peach;
+@define-color workspace-urgent   @red;
 
 * {
+    border: none;
     border-radius: 0;
     font-family: "FiraCode Nerd Font", "Symbols Nerd Font", "Font Awesome 6 Free", sans-serif;
     font-size: 13px;
 }
 
 window#waybar {
-    background-color: @bg-primary;
+    background-color: @bg-bar;
     color: @text-primary;
-    transition-property: background-color;
-    transition-duration: .5s;
+    transition: background-color 0.3s ease;
+}
+
+/* Neutralize default GTK button hover (otherwise the network/audio module
+   icons disappear when the cursor enters because Adwaita-dark dims them). */
+button {
+    background: inherit;
+    box-shadow: none;
+}
+
+button:hover,
+button:active,
+button:focus,
+button:checked {
+    background: inherit;
+    box-shadow: none;
+    color: inherit;
+    text-shadow: none;
+    outline: none;
 }
 
 window#waybar.hidden {
     opacity: 0.2;
 }
 
-button {
-    box-shadow: inset 0 -3px transparent;
-    border: none;
-    border-radius: 0;
+tooltip {
+    background-color: @base;
+    border: 1px solid @workspace-active;
+    border-radius: 8px;
 }
 
-button:hover {
-    background: inherit;
-    box-shadow: inset 0 -3px #ffffff;
+tooltip label {
+    color: @text-primary;
+    padding: 4px;
 }
 
-/* you can set a style on hover for any module like this */
-#pulseaudio:hover {
-    background-color: #a37800; /* Example hover color */
+/* --- workspaces --- */
+
+#workspaces {
+    margin: 0 4px;
 }
 
 #workspaces button {
-    padding: 0 5px;
+    padding: 0 6px;
     background-color: transparent;
-    color: @workspace-color;
-    border-bottom: 1px solid transparent;
+    color: @workspace-inactive;
+    border-bottom: 2px solid transparent;
+    transition: color 0.2s ease, background-color 0.2s ease, border-color 0.2s ease;
 }
 
 #workspaces button:hover {
-    background: rgba(0, 0, 0, 0.2);
+    background-color: alpha(@surface1, 0.6);
+    color: @text-primary;
+    box-shadow: none;
 }
 
 #workspaces button.active {
@@ -72,12 +100,21 @@ button:hover {
 }
 
 #workspaces button.focused {
-    background-color: @bg-clock;
-    box-shadow: inset 0 -3px @text-white;
+    color: @text-primary;
+    background-color: @surface1;
 }
 
 #workspaces button.urgent {
+    color: @text-dark;
     background-color: @workspace-urgent;
+}
+
+/* --- module shell --- */
+
+#hyprland-window {
+    margin: 0 4px;
+    padding: 0;
+    background-color: transparent;
 }
 
 #clock,
@@ -87,61 +124,83 @@ button:hover {
 #network,
 #custom-brightness,
 #pulseaudio,
-#custom-power,
-#hyprland-window {
-    padding: 0 10px;
-    background-color: @bg-module;
-    margin: 0 2px;
+#tray,
+#idle_inhibitor,
+#custom-notification,
+#custom-power {
+    padding: 1px 10px;
+    margin: 2px 2px;
     border-radius: 4px;
+    background-color: @bg-module;
+    color: @text-primary;
+    transition: background-color 0.2s ease;
 }
 
-#hyprland-window {
-    margin: 0 4px;
-    background-color: transparent; /* Make the window title background transparent */
-    padding: 0; /* Remove padding for the window module */
+/* --- per-module accents --- */
+
+#clock {
+    background-color: @surface1;
+    color: @text-primary;
 }
 
-#hyprland-workspaces { /* Style the workspaces module as well */
-    margin: 0 4px;
-}
-
-#pulseaudio#speaker,
-#pulseaudio#mic {
-    background-color: @bg-audio;
+#cpu {
+    background-color: @green;
     color: @text-dark;
 }
 
-#pulseaudio#speaker.muted,
-#pulseaudio#mic.muted {
-    background-color: @bg-audio-muted;
-    color: @text-audio-muted;
+#memory {
+    background-color: @mauve;
+    color: @text-dark;
 }
 
-#clock {
-    background-color: @bg-clock;
+#network {
+    background-color: @blue;
+    color: @text-dark;
+}
+
+#network.disconnected {
+    background-color: @red;
+    color: @text-dark;
+}
+
+#custom-brightness {
+    background-color: @yellow;
+    color: @text-dark;
+}
+
+#pulseaudio.speaker,
+#pulseaudio.mic {
+    background-color: @teal;
+    color: @text-dark;
+}
+
+#pulseaudio.speaker.muted,
+#pulseaudio.mic.muted {
+    background-color: @overlay0;
     color: @text-primary;
 }
 
 #battery {
-    background-color: @bg-battery;
-    color: @text-white;
+    background-color: @surface1;
+    color: @text-primary;
 }
 
-#battery.charging, #battery.plugged {
-    color: @text-white;
-    background-color: @bg-battery-charging;
+#battery.charging,
+#battery.plugged {
+    background-color: @green;
+    color: @text-dark;
 }
 
 @keyframes blink {
     to {
-        background-color: @text-white;
-        color: @text-black;
+        background-color: @text-primary;
+        color: @text-dark;
     }
 }
 
 #battery.critical:not(.charging) {
-    background-color: @bg-battery-critical;
-    color: @text-white;
+    background-color: @red;
+    color: @text-dark;
     animation-name: blink;
     animation-duration: 0.5s;
     animation-timing-function: steps(12);
@@ -149,26 +208,31 @@ button:hover {
     animation-direction: alternate;
 }
 
-#cpu {
-    background-color: @bg-cpu;
-    color: @text-black;
+#tray {
+    padding: 0 6px;
 }
 
-#memory {
-    background-color: @bg-memory;
-    color: @text-white;
+#tray > .passive {
+    -gtk-icon-effect: dim;
 }
 
-#network {
-    background-color: @bg-network;
-    color: @text-white;
+#tray > .needs-attention {
+    -gtk-icon-effect: highlight;
 }
 
-#network.disconnected {
-    background-color: @bg-network-disconnected;
+#idle_inhibitor.activated {
+    background-color: @peach;
+    color: @text-dark;
+}
+
+#custom-notification {
+    font-family: "FiraCode Nerd Font", "Symbols Nerd Font", "Font Awesome 6 Free", sans-serif;
 }
 
 #custom-power {
-    background-color: @bg-power;
-    color: @text-white;
+    /* "⏻" has more left bearing than right inside its glyph box; trim the
+       left padding so it looks visually centered. */
+    padding: 1px 10px 1px 8px;
+    background-color: @red;
+    color: @text-dark;
 }

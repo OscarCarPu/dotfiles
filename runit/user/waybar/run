@@ -1,0 +1,25 @@
+#!/bin/sh
+exec 2>&1
+export XDG_RUNTIME_DIR="/run/user/$(id -u)"
+
+# Wait for the Wayland compositor to be up. runit retries this script ~1s
+# after it exits, so a couple of failures during boot is normal.
+WAYLAND_DISPLAY=$(
+    for s in "$XDG_RUNTIME_DIR"/wayland-[0-9]; do
+        case "${s##*/}" in *.lock) continue ;; esac
+        [ -S "$s" ] || continue
+        echo "${s##*/}"
+        break
+    done
+)
+[ -n "$WAYLAND_DISPLAY" ] || exit 1
+export WAYLAND_DISPLAY
+
+# The hyprland/* modules need the IPC signature to find the active socket.
+HYPRLAND_INSTANCE_SIGNATURE=$(ls -t "$XDG_RUNTIME_DIR/hypr" 2>/dev/null | head -1)
+[ -n "$HYPRLAND_INSTANCE_SIGNATURE" ] || exit 1
+export HYPRLAND_INSTANCE_SIGNATURE
+
+exec waybar \
+    -c "$HOME/.dotfiles/waybar/config.jsonc" \
+    -s "$HOME/.dotfiles/waybar/style.css"

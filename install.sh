@@ -8,11 +8,13 @@ declare -A DOTFILES=(
     ["hypr"]="$HOME/.config/hypr"
     ["nvim"]="$HOME/.config/nvim"
     ["waybar"]="$HOME/.config/waybar"
+    ["wofi"]="$HOME/.config/wofi"
     ["swaync"]="$HOME/.config/swaync"
     ["wireplumber"]="$HOME/.config/wireplumber"
     ["git/.gitconfig"]="$HOME/.gitconfig"
     ["configs/user-places.xbel"]="$HOME/.local/share/user-places.xbel"
     ["configs/gtk-3.0/bookmarks"]="$HOME/.config/gtk-3.0/bookmarks"
+    ["configs/gtk-3.0/settings.ini"]="$HOME/.config/gtk-3.0/settings.ini"
 )
 
 # User-level runit services. Only `run` and `log/run` are symlinked into each
@@ -23,6 +25,7 @@ USER_RUNIT_SERVICES=(
     pipewire-pulse
     set-wallpaper
     battery-notify
+    waybar
 )
 
 # System-level files (require sudo). Run with --system flag to apply.

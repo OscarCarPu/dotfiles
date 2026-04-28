@@ -17,6 +17,7 @@ An Artix Hyprland configuration for my daily computer.
 - `hypr/`: Hyprland configuration
 - `nvim/`: Neovim configuration
 - `waybar/`: Waybar configuration
+- `wofi/`: Wofi launcher styling
 - `swaync/`: SwayNC configuration
 - `wireplumber/`: WirePlumber priority rules
 - `runit/user/`: User runit services (pipewire stack, set-wallpaper, battery-notify)
@@ -51,11 +52,13 @@ User (`bash install.sh`):
 - `hypr` → `~/.config/hypr`
 - `nvim` → `~/.config/nvim`
 - `waybar` → `~/.config/waybar`
+- `wofi` → `~/.config/wofi`
 - `swaync` → `~/.config/swaync`
 - `wireplumber` → `~/.config/wireplumber`
 - `git/.gitconfig` → `~/.gitconfig`
 - `configs/user-places.xbel` → `~/.local/share/user-places.xbel`
 - `configs/gtk-3.0/bookmarks` → `~/.config/gtk-3.0/bookmarks`
+- `configs/gtk-3.0/settings.ini` → `~/.config/gtk-3.0/settings.ini`
 - `scripts/*` → `~/.local/bin/`
 - `runit/user/<svc>/{run,log/run}` → `~/.local/share/runit/sv/<svc>/...`
 

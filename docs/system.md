@@ -62,14 +62,17 @@ session DBus address. Defined under `runit/user/`:
 | `pipewire-pulse` | PulseAudio compatibility layer                |
 | `set-wallpaper`  | Rotates wallpaper every 180 s via `awww`      |
 | `battery-notify` | Polls battery every 60 s, alerts via DBus     |
+| `waybar`         | Status bar — waits for Wayland socket + Hyprland IPC, auto-restarts on crash |
 
-`set-wallpaper` waits for the Wayland socket before doing anything, so it can
-start before Hyprland and runit will keep retrying until the compositor is up.
+`set-wallpaper` and `waybar` wait for the Wayland socket before doing
+anything, so they can start before Hyprland and runit will keep retrying
+until the compositor is up. `waybar` also waits for the Hyprland IPC
+signature so the `hyprland/*` modules can find the socket.
 
 Start them now without re-logging in:
 
 ```bash
-SVDIR=~/.local/share/runit/sv sv up pipewire wireplumber pipewire-pulse set-wallpaper battery-notify
+SVDIR=~/.local/share/runit/sv sv up pipewire wireplumber pipewire-pulse set-wallpaper battery-notify waybar
 ```
 
 Status / logs:

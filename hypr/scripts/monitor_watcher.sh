@@ -26,7 +26,8 @@ write_max_monitors() {
 }
 
 current_monitor_count() {
-    hyprctl monitors -j 2>/dev/null | jq 'length' 2>/dev/null || echo 0
+    # Plaintext is enough here and avoids spawning jq on every workspace event.
+    hyprctl monitors 2>/dev/null | grep -c '^Monitor ' || echo 0
 }
 
 # Verify setup script exists
@@ -100,13 +101,13 @@ reconfigure_monitors() {
     # focus on the active window (terminals go unresponsive). Force-refocus the
     # currently-active window to wake input handling back up.
     local active_addr
-    active_addr=$(hyprctl activewindow -j 2>/dev/null | jq -r '.address // empty')
+    active_addr=$(hyprctl activewindow 2>/dev/null | awk '/^Window /{print $2; exit}')
     if [[ -n "$active_addr" ]]; then
         hyprctl dispatch focuswindow "address:$active_addr" >/dev/null 2>&1 || true
     else
         # No active window? Refocus the currently focused monitor instead.
         local focused_mon
-        focused_mon=$(hyprctl monitors -j 2>/dev/null | jq -r '.[] | select(.focused) | .name' | head -1)
+        focused_mon=$(hyprctl monitors 2>/dev/null | awk '/^Monitor /{name=$2} /focused: yes/{print name; exit}')
         [[ -n "$focused_mon" ]] && hyprctl dispatch focusmonitor "$focused_mon" >/dev/null 2>&1 || true
     fi
 }
