@@ -79,7 +79,7 @@ IGNORED=$(awk -F'=' '
 declare -A IGNORED_MAP
 while read -r p; do [ -n "$p" ] && IGNORED_MAP[$p]=1; done <<< "$IGNORED"
 
-REPO_UPDATES=$(pacman -Qu 2>/dev/null | grep -v '\[ignored\]' || true)
+REPO_UPDATES=$(pacman -Qu 2>/dev/null || true)
 AUR_UPDATES=""
 if command -v yay &>/dev/null; then
     AUR_UPDATES=$(yay -Qua --color never 2>/dev/null || true)
