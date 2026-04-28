@@ -32,6 +32,10 @@ An Artix Hyprland configuration for my daily computer.
 git clone https://github.com/OscarCarPu/dotfiles.git ~/.dotfiles
 cd ~/.dotfiles
 
+# Packages from docs/packages.md (bootstraps yay if needed) + uv-managed
+# Python tooling (pyright, ruff) for nvim
+bash install-packages.sh
+
 # User-level symlinks (configs, runit user services, scripts)
 bash install.sh
 

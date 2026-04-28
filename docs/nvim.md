@@ -74,6 +74,9 @@ Based on [NvChad v2.5](https://github.com/NvChad/NvChad) with the **oxocarbon** 
 - **LSP**: pyright with automatic venv detection (looks for `.venv` in project root)
 - **Formatter**: ruff (format on save via conform.nvim)
 - Config: `configs/python.lua`
+- **Install**: `pyright` and `ruff` are installed via `uv tool install` by
+  `install-packages.sh`. Both must be on `PATH` or nvim silently no-ops on
+  diagnostics and format-on-save.
 
 ## Surround (nvim-surround)
 

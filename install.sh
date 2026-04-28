@@ -168,4 +168,6 @@ done
 
 echo "Done."
 echo
-echo "Next: 'bash install.sh --system' to install /etc files (requires sudo)."
+echo "Next:"
+echo "  bash install.sh --system   # /etc files (requires sudo)"
+echo "  bash install-packages.sh   # pacman/AUR packages from docs/packages.md"

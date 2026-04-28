@@ -6,6 +6,16 @@ Single source of truth for what should be installed on this machine. Other docs
 (`system.md`, `desktop.md`, `workflow.md`) point here instead of duplicating
 package lists.
 
+To install everything in this file (skipping the "Base system" and "External
+programs" sections), run `bash install-packages.sh` from the repo root. The
+script bootstraps `yay` if missing, installs every listed package via
+`yay -S --needed`, and finishes by installing the uv-managed Python tooling
+(`pyright`, `ruff`) used by nvim.
+
+Convention for parsers: a list item starts with one or more comma-separated
+backticked package names (`- \`pkg1\`, \`pkg2\` — prose`). Backticks in the
+prose after the em-dash are references, not packages.
+
 To verify against reality:
 
 ```bash
@@ -127,7 +137,13 @@ Used by `scripts/bt-spotify-switch` and the lab Spotify auto-switch flow.
 ## External programs (not via pacman)
 
 Installed outside the package manager — excluded from the `pacman -Qqe` diff
-above.
+above and skipped by `install-packages.sh`.
 
 - `claude` — Claude Code CLI, lives at `~/.local/bin/claude`
 - `bun` — JavaScript runtime, install via `curl -fsSL https://bun.sh/install | bash`
+- `direnv` — per-directory env loader, install via
+  `curl -sfL https://direnv.net/install.sh | bash`. Lands in `~/.bun/bin/direnv`.
+  `bash/.bashrc` runs `eval "$(direnv hook bash)"`
+- `pyright`, `ruff` — Python LSP + formatter for nvim. Installed by
+  `install-packages.sh` via `uv tool install`. Pyright auto-detects the
+  per-project `.venv` (see `nvim/lua/configs/python.lua`)
