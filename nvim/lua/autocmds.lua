@@ -1,7 +1,11 @@
 require "nvchad.autocmds"
 
-vim.api.nvim_create_autocmd("VimEnter", {
+vim.api.nvim_create_autocmd("User", {
+  pattern = "FilePost",
+  once = true,
   callback = function()
-    require("nvim-tree.api").tree.open()
+    vim.schedule(function()
+      require("nvim-tree.api").tree.open { focus = false }
+    end)
   end,
 })

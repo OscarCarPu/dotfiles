@@ -3,6 +3,13 @@ vim.lsp.config("pyright", {
     python = {
       venvPath = ".",
       venv = ".venv",
+      analysis = {
+        typeCheckingMode = "off",
+        diagnosticSeverityOverrides = {
+          reportUndefinedVariable = "error",
+          reportMissingImports = "error",
+        },
+      },
     },
   },
 })

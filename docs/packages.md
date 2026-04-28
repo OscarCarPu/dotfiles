@@ -103,6 +103,7 @@ Used by `scripts/bt-spotify-switch` and the lab Spotify auto-switch flow.
 - `rust` — `rustc` + `cargo` toolchain
 - `go` — Go toolchain
 - `uv` — Python package and project manager
+- `tk` — Tcl/Tk toolkit, provides `tkinter` for Python GUIs
 - `git`, `github-cli`
 - `docker`, `docker-runit`, `docker-compose`, `docker-buildx` — container
   runtime + BuildKit CLI plugin. `install.sh --system` activates the `docker`
