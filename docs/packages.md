@@ -126,6 +126,7 @@ Used by `scripts/bt-spotify-switch` and the lab Spotify auto-switch flow.
 - `syncthing` — file sync
 - `musescore-bin` — sheet music editor
 - `jre-openjdk` — Java runtime
+- `obsidian-bin` — markdown notes / knowledge base
 
 ## AUR helper
 
@@ -148,3 +149,6 @@ above and skipped by `install-packages.sh`.
 - `pyright`, `ruff` — Python LSP + formatter for nvim. Installed by
   `install-packages.sh` via `uv tool install`. Pyright auto-detects the
   per-project `.venv` (see `nvim/lua/configs/python.lua`)
+- `ibgateway` — IBKR IB Gateway, installed from the official installer at
+  <https://www.interactivebrokers.com/en/trading/ibgateway-stable.php> into
+  `~/Jts/ibgateway/1046`
