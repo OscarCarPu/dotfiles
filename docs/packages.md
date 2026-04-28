@@ -107,6 +107,7 @@ Used by `scripts/bt-spotify-switch` and the lab Spotify auto-switch flow.
 - `brave-bin` — daily browser, opened by `startup_apps.sh`
 - `spotify` — runs on workspace 3
 - `syncthing` — file sync
+- `musescore-bin` — sheet music editor
 
 ## AUR helper
 
