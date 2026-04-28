@@ -91,6 +91,7 @@ Used by `scripts/bt-spotify-switch` and the lab Spotify auto-switch flow.
 - `neovim`, `vim`
 - `tree-sitter-cli` — parser builds for Neovim
 - `rust` — `rustc` + `cargo` toolchain
+- `go` — Go toolchain
 - `git`, `github-cli`
 
 ## CLI tooling
