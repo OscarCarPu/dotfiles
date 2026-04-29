@@ -1,0 +1,2 @@
+enabled=False
+XDG_DOWNLOAD_DIR="$HOME/downloads"

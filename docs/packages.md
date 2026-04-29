@@ -132,6 +132,10 @@ Used by `scripts/bt-spotify-switch` and the lab Spotify auto-switch flow.
 
 - `yay-bin`
 
+## Flatpak
+
+- `flatpak` — sandboxed-app package manager, used alongside pacman/AUR
+
 ## Image processing
 
 - `imagemagick` — used by ad-hoc image edits (referenced from system docs)
