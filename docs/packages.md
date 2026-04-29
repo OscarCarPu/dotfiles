@@ -91,6 +91,18 @@ Used by `scripts/bt-spotify-switch` and the lab Spotify auto-switch flow.
 - `socat`, `jq` — used by `monitor_watcher.sh` to consume Hyprland's event socket
 - `elogind-runit` — `loginctl poweroff/reboot`, polkit, seat mgmt (pulls `elogind` as a dep)
 
+## Storage
+
+Removable-media stack. `udiskie` runs from Hyprland (`exec-once = udiskie
+-a -n -t`) and uses `udisks2` over D-Bus to auto-mount USB drives on
+hotplug; polkit grants the active-session user passwordless mount.
+`gvfs` lets `thunar` show the mounts in its sidebar and handle trash.
+
+- `udisks2` — D-Bus mount service
+- `udiskie` — auto-mount daemon (notifies + tray icon in waybar)
+- `gvfs` — virtual filesystem layer for the file manager
+- `thunar` — file manager
+
 ## Fonts
 
 - `ttf-cascadia-code-nerd`
@@ -130,7 +142,9 @@ Used by `scripts/bt-spotify-switch` and the lab Spotify auto-switch flow.
 - `jre-openjdk` — Java runtime
 - `obsidian-bin` — markdown notes / knowledge base
 - `openscad-git` — programmers' 3D CAD modeller
-- `prusa-slicer-git` — 3D-print slicer; profiles tracked in `configs/PrusaSlicer/`
+- `prusa-slicer` — 3D-print slicer (Arch `[extra]` repo, enabled via
+  `artix-archlinux-support` in `configs/pacman.conf`); profiles tracked
+  in `configs/PrusaSlicer/`
 
 ## AUR helper
 
