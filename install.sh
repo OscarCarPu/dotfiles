@@ -58,6 +58,7 @@ SYSTEM_RUNIT_ACTIVATE=(
 # --system mode via `gpasswd -a` (idempotent).
 SYSTEM_GROUPS=(
     docker
+    uucp
 )
 
 DOTFILES_DIR=$(pwd)

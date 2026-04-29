@@ -129,6 +129,7 @@ Used by `scripts/bt-spotify-switch` and the lab Spotify auto-switch flow.
 - `musescore-bin` — sheet music editor
 - `jre-openjdk` — Java runtime
 - `obsidian-bin` — markdown notes / knowledge base
+- `openscad-git` — programmers' 3D CAD modeller
 
 ## AUR helper
 
@@ -156,7 +157,9 @@ above and skipped by `install-packages.sh`.
   `install-packages.sh` via `uv tool install`. Pyright auto-detects the
   per-project `.venv` (see `nvim/lua/configs/python.lua`)
 - `espup`, `espflash` — ESP32 toolchain installer + flasher. Installed by
-  `install-packages.sh` via `cargo install --locked`
+  `install-packages.sh` via `cargo install --locked`. `install.sh --system`
+  adds the invoking user to the `uucp` group for serial/USB access to
+  connected chips
 - `ibgateway` — IBKR IB Gateway, installed from the official installer at
   <https://www.interactivebrokers.com/en/trading/ibgateway-stable.php> into
   `~/Jts/ibgateway/1046`
