@@ -79,8 +79,10 @@ fi
 # --- cargo-installed ESP32 tooling ----------------------------------------
 
 echo "Installing espup + espflash via cargo (ESP32 toolchain)..."
+rustup default stable
 cargo install --locked espup
 cargo install --locked espflash
+export PATH="$HOME/.cargo/bin:$PATH"
 espup install
 
 # --- refresh running Hyprland env so new /etc/profile.d/*.sh takes effect -

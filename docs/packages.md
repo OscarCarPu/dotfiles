@@ -100,7 +100,9 @@ Used by `scripts/bt-spotify-switch` and the lab Spotify auto-switch flow.
 
 - `neovim`, `vim`
 - `tree-sitter-cli` — parser builds for Neovim
-- `rust` — `rustc` + `cargo` toolchain
+- `rustup` — Rust toolchain manager (installs `rustc`/`cargo`; required by
+  `espup` for Xtensa toolchain). `install-packages.sh` runs `rustup default
+  stable` to materialize the host toolchain
 - `go` — Go toolchain
 - `uv` — Python package and project manager
 - `tk` — Tcl/Tk toolkit, provides `tkinter` for Python GUIs
