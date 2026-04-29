@@ -130,6 +130,7 @@ Used by `scripts/bt-spotify-switch` and the lab Spotify auto-switch flow.
 - `jre-openjdk` — Java runtime
 - `obsidian-bin` — markdown notes / knowledge base
 - `openscad-git` — programmers' 3D CAD modeller
+- `prusa-slicer-git` — 3D-print slicer; profiles tracked in `configs/PrusaSlicer/`
 
 ## AUR helper
 

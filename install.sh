@@ -16,6 +16,9 @@ declare -A DOTFILES=(
     ["configs/user-dirs.dirs"]="$HOME/.config/user-dirs.dirs"
     ["configs/gtk-3.0/bookmarks"]="$HOME/.config/gtk-3.0/bookmarks"
     ["configs/gtk-3.0/settings.ini"]="$HOME/.config/gtk-3.0/settings.ini"
+    ["configs/PrusaSlicer/filament"]="$HOME/.config/PrusaSlicer/filament"
+    ["configs/PrusaSlicer/printer"]="$HOME/.config/PrusaSlicer/printer"
+    ["configs/PrusaSlicer/print"]="$HOME/.config/PrusaSlicer/print"
 )
 
 # User-level runit services. Only `run` and `log/run` are symlinked into each
