@@ -204,15 +204,56 @@ History lives at `~/.cache/cliphist/db`. Wipe it with `cliphist wipe`.
 ## Notifications (SwayNC)
 
 `swaync` runs as `exec-once` and is exposed in waybar as the
-`custom/notification` module (left of the system blocks):
+`custom/notification` module (between the USB indicator and the CPU
+block):
 
 - Left click → toggle the notification panel
 - Right click → toggle Do Not Disturb
 - `SUPER + N` does the same as left click
 
-The waybar module reads state via `swaync-client -swb` (subscribed JSON
-output) so the icon updates immediately when notifications arrive or DND is
-toggled. Config + theme live in [`swaync/`](../swaync/).
+The module reads state via `swaync-client -swb` (subscribed JSON output)
+so the icon updates immediately when notifications arrive or DND is
+toggled. Display:
+
+- 0 unread → module is collapsed out of the bar entirely (zero padding,
+  zero margin, no clickable area). Driven by the `.none` / `.dnd-none`
+  / `.inhibited-none` / `.dnd-inhibited-none` CSS rules in
+  `waybar/style.css`.
+- ≥1 unread → yellow pill with the count and a bell glyph, e.g. `5 `.
+  In DND it stays the same shape but turns peach.
+
+The bell glyph uses the JSON Unicode escape `` (Nerd Font
+`nf-fa-bell`) inside `format` rather than a literal character — that
+keeps the config valid ASCII so it round-trips cleanly through edits.
+Config + theme live in [`swaync/`](../swaync/).
+
+## Removable media (USB)
+
+Auto-mount stack so a USB stick "just appears" when plugged in:
+
+- `udiskie -a -n` runs from `hyprland.conf` as `exec-once`. It listens
+  for udev events and asks `udisks2` to mount removable devices under
+  `/run/media/$USER/<label>/`. `polkit` already grants the active-session
+  user passwordless mount, so no custom rule is needed.
+- `gvfs` provides the virtual-filesystem layer that `thunar` (the file
+  manager) uses for sidebar mounts and the trash.
+
+The waybar `custom/usb` module is the visible UI. Driver:
+[`hypr/scripts/usb_status.sh`](../hypr/scripts/usb_status.sh) globs
+`/run/media/$USER/*` and emits JSON for waybar:
+
+- Nothing mounted → empty text, module hidden.
+- ≥1 mount → green pill `󰕓 N` (USB icon + mount count). Tooltip lists
+  the labels.
+- Left click → `udiskie-umount -a` unmounts every removable device
+  (also powers them off via udisks2 so it's safe to pull).
+- Right click → opens Thunar at `/run/media/$USER`.
+
+To mount a device that was already plugged in before udiskie started:
+
+```bash
+udisksctl mount -b /dev/sdX
+```
 
 ## Hypr state files
 

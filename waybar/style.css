@@ -125,7 +125,6 @@ tooltip label {
 #custom-brightness,
 #pulseaudio,
 #tray,
-#idle_inhibitor,
 #custom-notification,
 #custom-power {
     padding: 1px 10px;
@@ -220,13 +219,40 @@ tooltip label {
     -gtk-icon-effect: highlight;
 }
 
-#idle_inhibitor.activated {
-    background-color: @peach;
+#custom-usb.mounted {
+    background-color: @green;
     color: @text-dark;
+    padding: 0 8px;
 }
 
 #custom-notification {
     font-family: "FiraCode Nerd Font", "Symbols Nerd Font", "Font Awesome 6 Free", sans-serif;
+}
+
+#custom-notification.notification,
+#custom-notification.inhibited-notification {
+    background-color: @yellow;
+    color: @text-dark;
+    font-weight: bold;
+}
+
+#custom-notification.dnd-notification,
+#custom-notification.dnd-inhibited-notification {
+    background-color: @peach;
+    color: @text-dark;
+    font-weight: bold;
+}
+
+/* Collapse the notification module when nothing is pending — swaync sets
+   one of these classes for the "no notifications" states, and the shared
+   rule above otherwise leaves a clickable empty box in the bar. */
+#custom-notification.none,
+#custom-notification.dnd-none,
+#custom-notification.inhibited-none,
+#custom-notification.dnd-inhibited-none {
+    padding: 0;
+    margin: 0;
+    background-color: transparent;
 }
 
 #custom-power {

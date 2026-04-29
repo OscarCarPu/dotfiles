@@ -94,12 +94,15 @@ Used by `scripts/bt-spotify-switch` and the lab Spotify auto-switch flow.
 ## Storage
 
 Removable-media stack. `udiskie` runs from Hyprland (`exec-once = udiskie
--a -n -t`) and uses `udisks2` over D-Bus to auto-mount USB drives on
+-a -n`) and uses `udisks2` over D-Bus to auto-mount USB drives on
 hotplug; polkit grants the active-session user passwordless mount.
 `gvfs` lets `thunar` show the mounts in its sidebar and handle trash.
+The waybar `custom/usb` module (see `hypr/scripts/usb_status.sh`) is the
+visible UI: shows a green button when something is mounted, left-click
+unmounts all, right-click opens Thunar.
 
 - `udisks2` — D-Bus mount service
-- `udiskie` — auto-mount daemon (notifies + tray icon in waybar)
+- `udiskie` — auto-mount daemon (notifies on hotplug)
 - `gvfs` — virtual filesystem layer for the file manager
 - `thunar` — file manager
 

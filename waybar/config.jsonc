@@ -11,7 +11,7 @@
     ],
     "modules-right": [
         "tray",
-        "idle_inhibitor",
+        "custom/usb",
         "custom/notification",
         "cpu",
         "memory",
@@ -25,34 +25,21 @@
     "tray": {
         "spacing": 8
     },
-    "idle_inhibitor": {
-        "format": "{icon}",
-        "format-icons": {
-            "activated": "",
-            "deactivated": ""
-        },
-        "tooltip-format-activated": "Idle inhibitor: on",
-        "tooltip-format-deactivated": "Idle inhibitor: off"
+    "custom/usb": {
+        "exec": "~/.dotfiles/hypr/scripts/usb_status.sh",
+        "return-type": "json",
+        "interval": 2,
+        "on-click": "udiskie-umount -a",
+        "on-click-right": "thunar /run/media/$USER"
     },
     "custom/notification": {
-        "tooltip": false,
-        "format": "{icon}",
-        "format-icons": {
-            "notification": "<span foreground='red'><sup></sup></span>",
-            "none": "",
-            "dnd-notification": "<span foreground='red'><sup></sup></span>",
-            "dnd-none": "",
-            "inhibited-notification": "<span foreground='red'><sup></sup></span>",
-            "inhibited-none": "",
-            "dnd-inhibited-notification": "<span foreground='red'><sup></sup></span>",
-            "dnd-inhibited-none": ""
-        },
+        "tooltip": true,
+        "format": "{} ",
         "return-type": "json",
         "exec-if": "which swaync-client",
         "exec": "swaync-client -swb",
         "on-click": "swaync-client -t -sw",
-        "on-click-right": "swaync-client -d -sw",
-        "escape": true
+        "on-click-right": "swaync-client -d -sw"
     },
     "hyprland/workspaces": {
         "format": "{icon}",
