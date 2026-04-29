@@ -76,4 +76,17 @@ else
     echo "Open a new shell so PATH picks up uv, then re-run this script." >&2
 fi
 
+# --- refresh running Hyprland env so new /etc/profile.d/*.sh takes effect -
+# Newly installed packages may drop into /etc/profile.d/ (e.g. flatpak.sh
+# adds XDG_DATA_DIRS so launchers see .desktop entries). The compositor
+# was started before that file existed, so push the fresh values in.
+
+if [ -n "${HYPRLAND_INSTANCE_SIGNATURE:-}" ]; then
+    echo "Refreshing Hyprland env (XDG_DATA_DIRS, PATH) from /etc/profile..."
+    new_xdg=$(env -i HOME="$HOME" PATH=/usr/bin:/usr/sbin bash -lc 'printf %s "$XDG_DATA_DIRS"')
+    new_path=$(env -i HOME="$HOME" PATH=/usr/bin:/usr/sbin bash -lc 'printf %s "$PATH"')
+    hyprctl keyword env "XDG_DATA_DIRS,$new_xdg" >/dev/null
+    hyprctl keyword env "PATH,$new_path" >/dev/null
+fi
+
 echo "Done."
