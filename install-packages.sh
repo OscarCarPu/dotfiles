@@ -76,6 +76,13 @@ else
     echo "Open a new shell so PATH picks up uv, then re-run this script." >&2
 fi
 
+# --- cargo-installed ESP32 tooling ----------------------------------------
+
+echo "Installing espup + espflash via cargo (ESP32 toolchain)..."
+cargo install --locked espup
+cargo install --locked espflash
+espup install
+
 # --- refresh running Hyprland env so new /etc/profile.d/*.sh takes effect -
 # Newly installed packages may drop into /etc/profile.d/ (e.g. flatpak.sh
 # adds XDG_DATA_DIRS so launchers see .desktop entries). The compositor

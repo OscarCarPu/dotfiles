@@ -114,9 +114,9 @@ Used by `scripts/bt-spotify-switch` and the lab Spotify auto-switch flow.
 - `fd`, `fzf`, `ripgrep` — search
 - `htop`, `ncdu`, `tree` — inspection
 - `unzip` — `.zip` archive extraction
-- `pacman-contrib` — *optional*. Provides `pacdiff` for `.pacnew` merging
-  inside `shutdown.sh`. The script falls back to listing `.pacnew` paths if
-  it is missing.
+- `pacman-contrib` — provides `pacdiff` for `.pacnew` merging inside
+  `shutdown.sh`. The script falls back to listing `.pacnew` paths if it is
+  missing.
 - `python-pyotp` — TOTP code generation library
 
 ## Apps (AUR unless noted)
@@ -153,6 +153,8 @@ above and skipped by `install-packages.sh`.
 - `pyright`, `ruff` — Python LSP + formatter for nvim. Installed by
   `install-packages.sh` via `uv tool install`. Pyright auto-detects the
   per-project `.venv` (see `nvim/lua/configs/python.lua`)
+- `espup`, `espflash` — ESP32 toolchain installer + flasher. Installed by
+  `install-packages.sh` via `cargo install --locked`
 - `ibgateway` — IBKR IB Gateway, installed from the official installer at
   <https://www.interactivebrokers.com/en/trading/ibgateway-stable.php> into
   `~/Jts/ibgateway/1046`
