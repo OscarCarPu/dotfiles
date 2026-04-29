@@ -35,6 +35,7 @@ declare -A SYSTEM_DOTFILES=(
     ["configs/modules-load.d/evdi.conf"]="/etc/modules-load.d/evdi.conf"
     ["configs/NetworkManager/dispatcher.d/10-eth-no-offloads"]="/etc/NetworkManager/dispatcher.d/10-eth-no-offloads"
     ["runit/system-overrides/elogind-run"]="/etc/runit/sv/elogind/run"
+    ["configs/pacman.conf"]="/etc/pacman.conf"
 )
 
 # System-level runit services (require sudo). Symlinked into /etc/runit/sv/.

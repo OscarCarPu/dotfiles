@@ -151,6 +151,19 @@ offloads enabled. `install.sh --system` installs
 [`configs/NetworkManager/dispatcher.d/10-eth-no-offloads`](../configs/NetworkManager/dispatcher.d/10-eth-no-offloads)
 which turns them off via `ethtool -K` whenever an `eth*` interface comes up.
 
+### `lib32` repository (Artix multilib)
+
+Artix's 32-bit repo is `[lib32]` (not `[multilib]`). `/etc/pacman.conf` is
+symlinked from [`configs/pacman.conf`](../configs/pacman.conf) with that
+section uncommented. Refresh after first install:
+
+```bash
+sudo pacman -Sy
+```
+
+A future `pacman -Syu` may drop a `pacman.conf.pacnew`. Merge into the tracked
+copy in the repo, not `/etc/pacman.conf` directly.
+
 ### GRUB default
 
 If you dual-boot and Arch's GRUB is the bootloader on the ESP, set Artix as
