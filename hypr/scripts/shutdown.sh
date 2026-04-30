@@ -137,8 +137,10 @@ if [ -n "$SKIPPED_UPDATES" ]; then
     done <<< "$SKIPPED_UPDATES"
 
     # Live status block (network) for the blockers covering these packages.
+    # Pass `pkg<TAB>newver` so the report shows the exact upstream version
+    # being held (catches patch bumps, not just whole-version releases).
     if [ -x "$TRACKER_SCRIPT" ]; then
-        echo "$SKIPPED_UPDATES" | awk '{print $1}' | "$TRACKER_SCRIPT" || true
+        echo "$SKIPPED_UPDATES" | awk '{print $1 "\t" $4}' | "$TRACKER_SCRIPT" || true
     fi
 fi
 
@@ -208,11 +210,25 @@ fi
 
 echo -e "\n\033[1;32m[ Updating Repos ]\033[0m"
 # DBs already synced in step 2; -Su (no -y) avoids a redundant network sync.
-sudo pacman -Su || UPDATE_FAILED=1
+# Drop pacman/yay's per-package "ignoring …" warnings (already covered by the
+# [ Skipped ] block above) via filter_pin_noise.py. A plain `grep -v` would
+# break interactivity because pacman writes prompts to stderr without a
+# trailing newline; the helper reads char-by-char and only buffers lines that
+# could be the noise pattern, so prompts reach the user instantly.
+PIN_FILTER="$HOME/.dotfiles/hypr/scripts/filter_pin_noise.py"
+if [ -x "$PIN_FILTER" ]; then
+    sudo pacman -Su 2> >("$PIN_FILTER" >&2) || UPDATE_FAILED=1
+else
+    sudo pacman -Su || UPDATE_FAILED=1
+fi
 
 if [ -z "${UPDATE_FAILED:-}" ] && [ -n "$AUR_UPDATES" ] && command -v yay &>/dev/null; then
     echo -e "\n\033[1;32m[ Updating AUR ]\033[0m"
-    yay -Sua || UPDATE_FAILED=1
+    if [ -x "$PIN_FILTER" ]; then
+        yay -Sua 2> >("$PIN_FILTER" >&2) || UPDATE_FAILED=1
+    else
+        yay -Sua || UPDATE_FAILED=1
+    fi
 fi
 
 # --- Step 5: pacnew check ---

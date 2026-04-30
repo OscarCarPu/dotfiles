@@ -10,7 +10,9 @@
       "hyprwayland-scanner",
       "hyprwire",
       "xdg-desktop-portal-hyprland",
-      "hyprutils"
+      "hyprutils",
+      "hyprgraphics",
+      "hyprlang"
     ],
     "tracking": [
       {"kind": "pr",    "repo": "hyprwm/aquamarine", "number": 279},

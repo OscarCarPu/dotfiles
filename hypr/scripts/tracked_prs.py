@@ -86,10 +86,17 @@ def render_issue(repo: str, number: int, data: dict | None) -> tuple[str, bool]:
     return f"  {label}  {YELLOW}open{RESET}  updated {updated}", False
 
 
-def collect_skipped(argv: list[str]) -> set[str]:
-    if argv:
-        return set(argv)
-    return {line.strip() for line in sys.stdin if line.strip()}
+def collect_skipped(argv: list[str]) -> dict[str, str]:
+    """Parse pkg names plus optional version. Each item may be 'pkg' or
+    'pkg<TAB>ver' / 'pkg ver'. Returns {pkg: ver_or_empty}."""
+    raw = argv if argv else [line.rstrip("\n") for line in sys.stdin]
+    out: dict[str, str] = {}
+    for it in raw:
+        if not it.strip():
+            continue
+        toks = it.replace("\t", " ").split(None, 1)
+        out[toks[0]] = toks[1].strip() if len(toks) > 1 else ""
+    return out
 
 
 def load_entries() -> list[dict]:
@@ -102,7 +109,7 @@ def primary_ref(entry: dict) -> dict | None:
         or next(iter(entry.get("tracking", [])), None)
 
 
-def cmd_refs(skipped: set[str]) -> int:
+def cmd_refs(skipped: dict[str, str]) -> int:
     for entry in load_entries():
         ref = primary_ref(entry)
         if not ref:
@@ -128,7 +135,8 @@ def main() -> int:
         print(f"{RED}tracked_prs: cannot read {DATA_FILE}: {e}{RESET}", file=sys.stderr)
         return 1
 
-    relevant = [e for e in entries if set(e.get("packages", [])) & skipped]
+    skipped_set = set(skipped)
+    relevant = [e for e in entries if set(e.get("packages", [])) & skipped_set]
     if not relevant:
         return 0
 
@@ -146,11 +154,19 @@ def main() -> int:
 
     print(f"\n{BOLD}[ Tracked blockers ]{RESET}")
     for entry in relevant:
-        covered = sorted(set(entry["packages"]) & skipped)
+        covered = sorted(set(entry["packages"]) & skipped_set)
         print(f"{CYAN}▸ {entry['name']}{RESET}")
         if entry.get("reason"):
             print(f"  {GRAY}Why: {entry['reason']}{RESET}")
-        print(f"  {GRAY}Pins covered: {', '.join(covered)}{RESET}")
+        if covered and any(skipped[p] for p in covered):
+            width = max(len(p) for p in covered)
+            print(f"  {GRAY}Pins covered ({len(covered)}):{RESET}")
+            for p in covered:
+                ver = skipped[p]
+                ver_part = f"  {ver}" if ver else ""
+                print(f"  {GRAY}  {p:<{width}}{ver_part}{RESET}")
+        else:
+            print(f"  {GRAY}Pins covered: {', '.join(covered)}{RESET}")
         for ref in entry["tracking"]:
             key = (ref["kind"], ref["repo"], ref["number"])
             data = results.get(key)
