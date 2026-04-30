@@ -1,0 +1,20 @@
+[
+  {
+    "name": "aquamarine evdi/DisplayLink fix",
+    "reason": "aquamarine 0.11 broke DisplayLink/evdi (drmGetDevice spam, DVI-I-2 applyCommit failures)",
+    "packages": [
+      "aquamarine",
+      "hyprland",
+      "hyprtoolkit",
+      "hyprland-guiutils",
+      "hyprwayland-scanner",
+      "hyprwire",
+      "xdg-desktop-portal-hyprland",
+      "hyprutils"
+    ],
+    "tracking": [
+      {"kind": "pr",    "repo": "hyprwm/aquamarine", "number": 279},
+      {"kind": "issue", "repo": "hyprwm/aquamarine", "number": 169}
+    ]
+  }
+]

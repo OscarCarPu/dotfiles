@@ -25,6 +25,11 @@ set -uo pipefail
 CRITICAL_PKGS="^(linux|linux-lts|linux-zen|linux-hardened|nvidia|nvidia-dkms|mesa|lib32-mesa|glibc|lib32-glibc|pacman|runit|elogind|elogind-runit)$"
 
 power_action() {
+    if [ -n "${UPDATE_FAILED:-}" ]; then
+        echo -e "\n\033[1;31m✗ Update failed — staying on. Resolve the errors above and re-run.\033[0m"
+        read -rp $'\nPress Enter to close: '
+        return
+    fi
     case "${POWER_ACTION:-none}" in
         poweroff)
             read -rp $'\nReady to shut down. Press Enter to confirm (Ctrl+C to cancel): '
@@ -109,11 +114,32 @@ fi
 # Show skipped packages up front so the user knows the IgnorePkg list is
 # actually doing its job (e.g. aquamarine 0.11 with the DisplayLink regression).
 if [ -n "$SKIPPED_UPDATES" ]; then
+    TRACKER_SCRIPT="$HOME/.dotfiles/hypr/scripts/tracked_prs.py"
+
+    # Map each skipped pkg -> "repo#num" via tracked_prs.json (offline, fast).
+    declare -A SKIP_REF
+    if [ -x "$TRACKER_SCRIPT" ]; then
+        while IFS=$'\t' read -r pkg ref; do
+            [ -n "$pkg" ] && SKIP_REF[$pkg]="$ref"
+        done < <(echo "$SKIPPED_UPDATES" | awk '{print $1}' | "$TRACKER_SCRIPT" --refs || true)
+    fi
+
     echo -e "\n\033[1;90m[ Skipped — IgnorePkg in /etc/pacman.conf ]\033[0m"
     while IFS= read -r line; do
         [ -z "$line" ] && continue
-        echo -e "\033[0;90m~~ $line\033[0m"
+        pname=$(echo "$line" | awk '{print $1}')
+        ref="${SKIP_REF[$pname]:-}"
+        if [ -n "$ref" ]; then
+            echo -e "\033[0;90m~~ $line\033[0m  \033[0;36m→ $ref\033[0m"
+        else
+            echo -e "\033[0;90m~~ $line\033[0m"
+        fi
     done <<< "$SKIPPED_UPDATES"
+
+    # Live status block (network) for the blockers covering these packages.
+    if [ -x "$TRACKER_SCRIPT" ]; then
+        echo "$SKIPPED_UPDATES" | awk '{print $1}' | "$TRACKER_SCRIPT" || true
+    fi
 fi
 
 if [ -z "$ALL_UPDATES" ]; then
@@ -182,11 +208,11 @@ fi
 
 echo -e "\n\033[1;32m[ Updating Repos ]\033[0m"
 # DBs already synced in step 2; -Su (no -y) avoids a redundant network sync.
-sudo pacman -Su
+sudo pacman -Su || UPDATE_FAILED=1
 
-if [ -n "$AUR_UPDATES" ] && command -v yay &>/dev/null; then
+if [ -z "${UPDATE_FAILED:-}" ] && [ -n "$AUR_UPDATES" ] && command -v yay &>/dev/null; then
     echo -e "\n\033[1;32m[ Updating AUR ]\033[0m"
-    yay -Sua
+    yay -Sua || UPDATE_FAILED=1
 fi
 
 # --- Step 5: pacnew check ---
