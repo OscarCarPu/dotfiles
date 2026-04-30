@@ -222,9 +222,11 @@ toggled. Display:
 - ≥1 unread → yellow pill with the count and a bell glyph, e.g. `5 `.
   In DND it stays the same shape but turns peach.
 
-The bell glyph uses the JSON Unicode escape `` (Nerd Font
-`nf-fa-bell`) inside `format` rather than a literal character — that
-keeps the config valid ASCII so it round-trips cleanly through edits.
+The bell glyph in `format` is `` (Nerd Font
+`nf-fa-bell`, U+F0F3). If a future edit strips it (some editors mangle
+private-use BMP characters), restore it with the JSON Unicode escape
+`` — JSON parsers (waybar's included) treat both forms
+identically.
 Config + theme live in [`swaync/`](../swaync/).
 
 ## Removable media (USB)
