@@ -49,7 +49,8 @@ Modifier `$mainMod = SUPER`. Source: [`hypr/hyprland.conf`](../hypr/hyprland.con
 
 | Key | Action |
 |-----|--------|
-| `Print` | Region screenshot → clipboard (`grim -g "$(slurp)" \| wl-copy`) |
+| `Print` | Region screenshot → clipboard |
+| `Shift+Print` | Active monitor screenshot → clipboard |
 | `XF86MonBrightnessUp/Down` | Brightness ±1% |
 | `XF86AudioRaiseVolume/LowerVolume` | Volume ±5% |
 | `XF86AudioMute` | Toggle sink mute |
