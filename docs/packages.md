@@ -71,8 +71,12 @@ Used by `scripts/bt-spotify-switch` and the lab Spotify auto-switch flow.
 
 ## Audio
 
-- `pipewire`, `pipewire-pulse`, `wireplumber`
+- `pipewire`, `pipewire-pulse`, `pipewire-alsa`, `wireplumber`
 - `pavucontrol` — GUI mixer
+
+`pipewire-alsa` redirects ALSA's `default` PCM through PipeWire. Without it,
+ALSA-only apps (e.g. MuseScore AppImage) grab the hardware device directly and
+never appear as streams in the mixer.
 
 ## Wayland / Hyprland
 
