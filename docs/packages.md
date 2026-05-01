@@ -152,6 +152,7 @@ unmounts all, right-click opens Thunar.
 - `prusa-slicer` — 3D-print slicer (Arch `[extra]` repo, enabled via
   `artix-archlinux-support` in `configs/pacman.conf`); profiles tracked
   in `configs/PrusaSlicer/`
+- `libreoffice-still` — office suite (stable branch)
 
 ## AUR helper
 
