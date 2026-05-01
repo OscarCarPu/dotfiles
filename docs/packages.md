@@ -153,6 +153,8 @@ unmounts all, right-click opens Thunar.
   `artix-archlinux-support` in `configs/pacman.conf`); profiles tracked
   in `configs/PrusaSlicer/`
 - `libreoffice-still` — office suite (stable branch)
+- `python-pyqt6`, `python-pyqt6-webengine` — Qt6 Python bindings + WebEngine
+  module
 
 ## AUR helper
 
