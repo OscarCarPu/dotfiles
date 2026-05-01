@@ -125,6 +125,8 @@ unmounts all, right-click opens Thunar.
 - `go` — Go toolchain
 - `uv` — Python package and project manager
 - `tk` — Tcl/Tk toolkit, provides `tkinter` for Python GUIs
+- `r` — R statistical computing language
+- `rstudio-desktop-bin` (AUR) — R IDE
 - `git`, `github-cli`
 - `docker`, `docker-runit`, `docker-compose`, `docker-buildx` — container
   runtime + BuildKit CLI plugin. `install.sh --system` activates the `docker`
