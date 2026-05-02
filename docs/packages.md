@@ -157,7 +157,7 @@ unmounts all, right-click opens Thunar.
 - `libreoffice-still` — office suite (stable branch)
 - `python-pyqt6`, `python-pyqt6-webengine` — Qt6 Python bindings + WebEngine
   module
-- `sioyek` — keyboard-driven PDF viewer
+- `okular` — PDF viewer
 
 ## AUR helper
 
