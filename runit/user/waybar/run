@@ -20,6 +20,23 @@ HYPRLAND_INSTANCE_SIGNATURE=$(ls -t "$XDG_RUNTIME_DIR/hypr" 2>/dev/null | head -
 [ -n "$HYPRLAND_INSTANCE_SIGNATURE" ] || exit 1
 export HYPRLAND_INSTANCE_SIGNATURE
 
+# waybar binds bars to wl_outputs at startup; outputs advertised after that
+# bind get no bar. Check the log a few seconds in and, if a monitor is bare,
+# kill waybar so runit restarts the service.
+parent=$$
+(
+    sleep 8
+    [ "$PPID" = "$parent" ] || exit
+    expected=$(hyprctl monitors -j 2>/dev/null | grep -c '"description":')
+    [ "$expected" -gt 0 ] || exit
+    actual=$(tac log/main/current 2>/dev/null | awk '
+        /Using configuration file/ { exit }
+        /Bar configured.*for output:/ { outputs[$NF] = 1 }
+        END { n = 0; for (o in outputs) n++; print n }
+    ')
+    [ "${actual:-0}" -lt "$expected" ] && kill "$parent"
+) &
+
 exec waybar \
     -c "$HOME/.dotfiles/waybar/config.jsonc" \
     -s "$HOME/.dotfiles/waybar/style.css"
