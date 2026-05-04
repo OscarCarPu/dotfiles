@@ -188,6 +188,9 @@ above and skipped by `install-packages.sh`.
   `install-packages.sh` via `cargo install --locked`. `install.sh --system`
   adds the invoking user to the `uucp` group for serial/USB access to
   connected chips
+- `sqlc` — generates type-safe Go from SQL. Installed by `install-packages.sh`
+  via `go install github.com/sqlc-dev/sqlc/cmd/sqlc@latest`. Lands in
+  `~/go/bin`, which `bash/.bashrc` adds to `PATH`
 - `ibgateway` — IBKR IB Gateway, installed from the official installer at
   <https://www.interactivebrokers.com/en/trading/ibgateway-stable.php> into
   `~/Jts/ibgateway/1046`

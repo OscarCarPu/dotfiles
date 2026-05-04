@@ -85,6 +85,11 @@ cargo install --locked espflash
 export PATH="$HOME/.cargo/bin:$PATH"
 espup install
 
+# --- go-installed tooling -------------------------------------------------
+
+echo "Installing sqlc via go install..."
+go install github.com/sqlc-dev/sqlc/cmd/sqlc@latest
+
 # --- refresh running Hyprland env so new /etc/profile.d/*.sh takes effect -
 # Newly installed packages may drop into /etc/profile.d/ (e.g. flatpak.sh
 # adds XDG_DATA_DIRS so launchers see .desktop entries). The compositor
