@@ -25,23 +25,28 @@ MIDDLE_PORT=$(echo "$MONITORS" | jq -r ".[] | select(.serial==\"$MIDDLE_SERIAL\"
 HAS_EDP=0
 echo "$MONITORS" | jq -e '.[] | select(.name=="eDP-1")' > /dev/null 2>&1 && HAS_EDP=1
 
-# Configure each known monitor that is currently connected, keeping its
-# absolute position so left/right relationships hold even when one of the
-# three is unplugged. Workspace defaults are only set for present monitors.
+# Place each present monitor adjacent to the previous one by accumulating an
+# X offset. Hardcoding absolute positions left a gap when the middle monitor
+# was unplugged, blocking the cursor from crossing between the two extremes.
+# Widths: leftmost 1920, middle rotated -> 1080, eDP-1 1920.
+X_OFFSET=0
+
 if [[ -n "$LEFTMOST_PORT" ]]; then
-    hyprctl keyword monitor "$LEFTMOST_PORT,1920x1080@60,0x840,1"
+    hyprctl keyword monitor "$LEFTMOST_PORT,1920x1080@60,${X_OFFSET}x840,1"
     hyprctl keyword workspace "1, monitor:$LEFTMOST_PORT, default:true"
     hyprctl dispatch moveworkspacetomonitor 1 "$LEFTMOST_PORT"
+    X_OFFSET=$((X_OFFSET + 1920))
 fi
 
 if [[ -n "$MIDDLE_PORT" ]]; then
-    hyprctl keyword monitor "$MIDDLE_PORT,1920x1080@60,1920x0,1,transform,1"
+    hyprctl keyword monitor "$MIDDLE_PORT,1920x1080@60,${X_OFFSET}x0,1,transform,1"
     hyprctl keyword workspace "2, monitor:$MIDDLE_PORT, default:true"
     hyprctl dispatch moveworkspacetomonitor 2 "$MIDDLE_PORT"
+    X_OFFSET=$((X_OFFSET + 1080))
 fi
 
 if (( HAS_EDP )); then
-    hyprctl keyword monitor "eDP-1,1920x1080@60,3000x840,1"
+    hyprctl keyword monitor "eDP-1,1920x1080@60,${X_OFFSET}x840,1"
     hyprctl keyword workspace "3, monitor:eDP-1, default:true"
     hyprctl dispatch moveworkspacetomonitor 3 eDP-1
 fi
