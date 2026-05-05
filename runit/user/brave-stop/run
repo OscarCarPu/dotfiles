@@ -1,0 +1,25 @@
+#!/bin/sh
+exec 2>&1
+
+# Sentinel service. Stays idle while the session is up; on SIGTERM it
+# politely terminates brave so brave's profile flush handler runs (cookies,
+# Last Session, exit_type=Normal). Without this, session teardown can SIGKILL
+# brave before it persists state, which manifests as random "logged out of
+# everything" sessions on next boot.
+
+shutdown() {
+    pkill -TERM -x brave
+    i=0
+    while pgrep -x brave >/dev/null; do
+        i=$((i + 1))
+        [ "$i" -ge 10 ] && break
+        sleep 1
+    done
+    exit 0
+}
+trap shutdown TERM
+
+while :; do
+    sleep 86400 &
+    wait $!
+done

@@ -14,6 +14,7 @@ declare -A DOTFILES=(
     ["git/.gitconfig"]="$HOME/.gitconfig"
     ["configs/user-places.xbel"]="$HOME/.local/share/user-places.xbel"
     ["configs/user-dirs.dirs"]="$HOME/.config/user-dirs.dirs"
+    ["configs/brave-flags.conf"]="$HOME/.config/brave-flags.conf"
     ["configs/gtk-3.0/bookmarks"]="$HOME/.config/gtk-3.0/bookmarks"
     ["configs/gtk-3.0/settings.ini"]="$HOME/.config/gtk-3.0/settings.ini"
     ["configs/PrusaSlicer/filament"]="$HOME/.config/PrusaSlicer/filament"
@@ -30,6 +31,7 @@ USER_RUNIT_SERVICES=(
     set-wallpaper
     battery-notify
     waybar
+    brave-stop
 )
 
 # System-level files (require sudo). Run with --system flag to apply.
@@ -151,7 +153,7 @@ done
 echo "Symlinking user runit services..."
 for svc in "${USER_RUNIT_SERVICES[@]}"; do
     target="$HOME/.local/share/runit/sv/$svc"
-    mkdir -p "$target/log"
+    mkdir -p "$target/log/main"
     link_file "$DOTFILES_DIR/runit/user/$svc/run"     "$target/run"
     link_file "$DOTFILES_DIR/runit/user/$svc/log/run" "$target/log/run"
 done
