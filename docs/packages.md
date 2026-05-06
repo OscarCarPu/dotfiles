@@ -149,6 +149,7 @@ unmounts all, right-click opens Thunar.
 - `syncthing` — file sync
 - `musescore-bin` — sheet music editor
 - `jre-openjdk` — Java runtime
+- `jdk21-openjdk` — Java 21 development kit
 - `obsidian-bin` — markdown notes / knowledge base
 - `openscad-git` — programmers' 3D CAD modeller
 - `prusa-slicer` — 3D-print slicer (Arch `[extra]` repo, enabled via
