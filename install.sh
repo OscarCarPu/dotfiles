@@ -64,6 +64,8 @@ SYSTEM_RUNIT_ACTIVATE=(
 SYSTEM_GROUPS=(
     docker
     uucp
+    android-sdk
+    adbusers
 )
 
 DOTFILES_DIR=$(pwd)
@@ -138,6 +140,10 @@ if [ "${1:-}" = "--system" ]; then
     else
         echo "Skipping group setup: no non-root invoking user (set SUDO_USER)."
     fi
+
+    echo "Reloading udev rules (sudo)..."
+    sudo udevadm control --reload-rules
+    sudo udevadm trigger
 
     echo "Done (system)."
     exit 0

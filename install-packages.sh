@@ -90,6 +90,22 @@ espup install
 echo "Installing sqlc via go install..."
 go install github.com/sqlc-dev/sqlc/cmd/sqlc@latest
 
+# --- Android SDK platforms / build-tools ----------------------------------
+# /opt/android-sdk is root:android-sdk 775 — needs `install.sh --system` to
+# add the user to the android-sdk group, then a fresh login (or `newgrp`).
+
+SDKMANAGER=/opt/android-sdk/cmdline-tools/latest/bin/sdkmanager
+if [ -x "$SDKMANAGER" ] && [ -w /opt/android-sdk ]; then
+    echo "Accepting Android SDK licenses..."
+    # Subshell drops pipefail so `yes` getting SIGPIPE doesn't abort the script.
+    ( set +o pipefail; yes | "$SDKMANAGER" --licenses >/dev/null )
+    echo "Installing Android SDK platforms;android-35 + build-tools;36.1.0..."
+    "$SDKMANAGER" "platforms;android-35" "build-tools;36.1.0"
+else
+    echo "Skipping sdkmanager: $SDKMANAGER missing or /opt/android-sdk not writable." >&2
+    echo "Run 'bash install.sh --system' then log out/in (or 'newgrp android-sdk') and re-run." >&2
+fi
+
 # --- refresh running Hyprland env so new /etc/profile.d/*.sh takes effect -
 # Newly installed packages may drop into /etc/profile.d/ (e.g. flatpak.sh
 # adds XDG_DATA_DIRS so launchers see .desktop entries). The compositor

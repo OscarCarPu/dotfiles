@@ -150,6 +150,9 @@ unmounts all, right-click opens Thunar.
 - `musescore-bin` — sheet music editor
 - `jre-openjdk` — Java runtime
 - `jdk21-openjdk` — Java 21 development kit
+- `android-sdk`, `android-sdk-platform-tools`, `android-sdk-cmdline-tools-latest` — Android SDK + `adb`/`fastboot` + `sdkmanager`
+- `android-tools` — standalone `adb`/`fastboot`/`mkbootimg` in `/usr/bin` (Arch `[extra]`)
+- `android-udev` — udev rules so non-root users (in `adbusers`) can reach connected devices
 - `obsidian-bin` — markdown notes / knowledge base
 - `openscad-git` — programmers' 3D CAD modeller
 - `prusa-slicer` — 3D-print slicer (Arch `[extra]` repo, enabled via
