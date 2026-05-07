@@ -99,4 +99,31 @@ return {
     opts = {},
   },
 
+  -- Competitive programming (Codeforces, AtCoder, ...) via Competitive Companion
+  {
+    "xeluxee/competitest.nvim",
+    dependencies = "MunifTanjim/nui.nvim",
+    cmd = "CompetiTest",
+    opts = {
+      received_files_extension = "rs",
+      template_file = vim.fn.expand "~/dev/CP/templates/template.rs",
+      evaluate_template_modifiers = true,
+      -- "A. Koshary and Some Numbers" -> "A.rs"
+      received_problems_path = function(task, ext)
+        local letter = task.name:match "^(%w+)" or "problem"
+        return string.format("%s/%s.%s", vim.fn.getcwd(), letter, ext)
+      end,
+      received_contests_problems_path = function(task, ext)
+        local letter = task.name:match "^(%w+)" or "problem"
+        return string.format("%s.%s", letter, ext)
+      end,
+      compile_command = {
+        rust = { exec = "rustc", args = { "-O", "--crate-name", "sol", "$(FNAME)", "-o", "sol" } },
+      },
+      run_command = {
+        rust = { exec = "./sol" },
+      },
+    },
+  },
+
 }

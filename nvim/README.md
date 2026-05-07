@@ -30,6 +30,27 @@ Rust support is configured via:
 - **Crate versions**: [crates.nvim](https://github.com/saecki/crates.nvim) shows dependency versions inline when editing `Cargo.toml`
 - **Treesitter**: `rust` and `toml` parsers for syntax highlighting
 
+# Competitive Programming (Codeforces)
+
+[competitest.nvim](https://github.com/xeluxee/competitest.nvim) is configured Rust-only:
+received problems land as `.rs` files seeded from `~/dev/CP/templates/template.rs`,
+compiled with `rustc -O` and run as a native binary. Template modifiers
+(`$(PROBLEM)`, `$(DATE)`, `$(AUTHOR)`, …) are evaluated on receive. Pair with the
+[Competitive Companion](https://github.com/jmerle/competitive-companion) browser
+extension to import problems/contests/testcases directly from Codeforces.
+
+| Keymap        | Action                                |
+|---------------|---------------------------------------|
+| `<leader>cr`  | Run tests on the current file         |
+| `<leader>cR`  | Run tests without recompiling         |
+| `<leader>ca`  | Add testcase                          |
+| `<leader>ce`  | Edit testcase                         |
+| `<leader>cd`  | Delete testcase                       |
+| `<leader>cu`  | Show CompetiTest UI                   |
+| `<leader>cp`  | Receive a problem (Comp. Companion)   |
+| `<leader>cC`  | Receive a full contest                |
+| `<leader>ct`  | Receive testcases for current problem |
+
 # Android / Java / Kotlin
 
 Android development support is configured via:
