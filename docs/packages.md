@@ -127,6 +127,10 @@ unmounts all, right-click opens Thunar.
 - `tk` — Tcl/Tk toolkit, provides `tkinter` for Python GUIs
 - `r` — R statistical computing language
 - `rstudio-desktop-bin` (AUR) — R IDE
+- `texlive-basic`, `texlive-latex`, `texlive-latexrecommended`,
+  `texlive-latexextra`, `texlive-fontsrecommended`, `texlive-xetex`,
+  `texlive-plaingeneric` — LaTeX engine + collections needed by
+  `rmarkdown`/`knitr` to knit PDFs from R
 - `git`, `github-cli`
 - `docker`, `docker-runit`, `docker-compose`, `docker-buildx` — container
   runtime + BuildKit CLI plugin. `install.sh --system` activates the `docker`
