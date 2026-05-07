@@ -43,6 +43,12 @@ declare -A SYSTEM_DOTFILES=(
     ["configs/pacman.conf"]="/etc/pacman.conf"
 )
 
+# Sudoers drop-ins. Cannot be symlinked — sudo refuses files not owned by
+# root with mode > 0440, and validation walks symlinks to the target.
+declare -A SYSTEM_SUDOERS=(
+    ["configs/sudoers.d/10-cpu-governor"]="/etc/sudoers.d/10-cpu-governor"
+)
+
 # System-level runit services (require sudo). Symlinked into /etc/runit/sv/.
 # Use this for services whose run script lives in this repo
 # (`runit/system/<svc>/run`).
@@ -101,12 +107,25 @@ sudo_link_file() {
     sudo ln -sf "$src" "$target"
 }
 
+sudo_install_sudoers() {
+    local src="$1" target="$2"
+    sudo mkdir -p "$(dirname "$target")"
+    echo " Installing (sudo, 0440 root): $src -> $target"
+    sudo install -m 0440 -o root -g root "$src" "$target"
+    sudo visudo -cf "$target" >/dev/null
+}
+
 # --- system mode ----------------------------------------------------------
 
 if [ "${1:-}" = "--system" ]; then
     echo "Installing system files (sudo)..."
     for src in "${!SYSTEM_DOTFILES[@]}"; do
         sudo_link_file "$DOTFILES_DIR/$src" "${SYSTEM_DOTFILES[$src]}"
+    done
+
+    echo "Installing sudoers drop-ins (sudo)..."
+    for src in "${!SYSTEM_SUDOERS[@]}"; do
+        sudo_install_sudoers "$DOTFILES_DIR/$src" "${SYSTEM_SUDOERS[$src]}"
     done
 
     echo "Installing system runit services (sudo)..."

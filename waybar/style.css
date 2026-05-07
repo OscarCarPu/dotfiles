@@ -126,7 +126,8 @@ tooltip label {
 #pulseaudio,
 #tray,
 #custom-notification,
-#custom-power {
+#custom-power,
+#custom-power-profile {
     padding: 1px 10px;
     margin: 2px 2px;
     border-radius: 4px;
@@ -177,6 +178,16 @@ tooltip label {
 #pulseaudio.mic.muted {
     background-color: @overlay0;
     color: @text-primary;
+}
+
+#custom-power-profile.performance {
+    background-color: @red;
+    color: @text-dark;
+}
+
+#custom-power-profile.powersave {
+    background-color: @green;
+    color: @text-dark;
 }
 
 #battery {

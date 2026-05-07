@@ -1,0 +1,8 @@
+# Let the waybar power-profile module flip the CPU scaling governor
+# between `performance` and `powersave` without a password prompt.
+# See ~/.dotfiles/hypr/scripts/power_profile.sh.
+#
+# Restricted to writes against the kernel-exposed scaling_governor sysfs
+# files; the kernel itself rejects any value that isn't a listed governor
+# (`scaling_available_governors`).
+%wheel ALL=(root) NOPASSWD: /usr/bin/tee /sys/devices/system/cpu/cpufreq/policy[0-9]/scaling_governor, /usr/bin/tee /sys/devices/system/cpu/cpufreq/policy[0-9][0-9]/scaling_governor
