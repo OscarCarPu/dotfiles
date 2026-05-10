@@ -20,6 +20,7 @@ declare -A DOTFILES=(
     ["configs/PrusaSlicer/filament"]="$HOME/.config/PrusaSlicer/filament"
     ["configs/PrusaSlicer/printer"]="$HOME/.config/PrusaSlicer/printer"
     ["configs/PrusaSlicer/print"]="$HOME/.config/PrusaSlicer/print"
+    ["configs/applications/autofirma.desktop"]="$HOME/.local/share/applications/autofirma.desktop"
     ["claude/skills"]="$HOME/.claude/skills"
 )
 

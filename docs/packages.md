@@ -166,7 +166,14 @@ unmounts all, right-click opens Thunar.
 - `python-pyqt6`, `python-pyqt6-webengine` — Qt6 Python bindings + WebEngine
   module
 - `okular` — PDF viewer
-- `autofirma` — Spanish gov e-signature client (FNMT/DNIe, XAdES/PAdES/CAdES); needs `jre-openjdk` above
+- `autofirma-bin` — Spanish gov e-signature client (FNMT/DNIe,
+  XAdES/PAdES/CAdES); use the `-bin` AUR (official .deb repackaged) rather
+  than `autofirma`, which the Xunta de Galicia sede rejects with `SAF_21`.
+  Pulls `jdk17-openjdk` automatically (its launcher hardcodes Java 17). The
+  `.desktop` override in `configs/applications/autofirma.desktop` injects
+  `DISPLAY=:0` so the Swing GUI works when launched from Wayland clients
+  (Brave passes only `WAYLAND_DISPLAY`, so AutoFirma dies with
+  `HeadlessException`).
 
 ## AUR helper
 
