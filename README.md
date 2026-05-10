@@ -24,6 +24,7 @@ An Artix Hyprland configuration for my daily computer.
 - `runit/system/`: System runit services (displaylink)
 - `scripts/`: Custom system tools (`~/.local/bin`)
 - `configs/`: Small configuration files (sysctl, modules-load, gtk, NetworkManager)
+- `claude/`: Claude Code skills (`claude/skills/` → `~/.claude/skills/`)
 - `docs/`: Documentation
 
 # Installation
@@ -63,6 +64,7 @@ User (`bash install.sh`):
 - `configs/user-places.xbel` → `~/.local/share/user-places.xbel`
 - `configs/gtk-3.0/bookmarks` → `~/.config/gtk-3.0/bookmarks`
 - `configs/gtk-3.0/settings.ini` → `~/.config/gtk-3.0/settings.ini`
+- `claude/skills` → `~/.claude/skills`
 - `scripts/*` → `~/.local/bin/`
 - `runit/user/<svc>/{run,log/run}` → `~/.local/share/runit/sv/<svc>/...`
 
@@ -78,6 +80,7 @@ System (`bash install.sh --system`):
 - *System*: [System](docs/system.md) — kernel, runit, drivers, network, post-install fixes
 - *Desktop*: [Desktop](docs/desktop.md) — Hyprland, Waybar, monitors, startup, power menu
 - *Workflow*: [Workflow](docs/workflow.md) — git aliases, Makefile, bookmarks, bt-spotify, boot-bench
+- *Claude Code*: [Claude](docs/claude.md) — custom skills
 - *Neovim*: [Neovim](nvim/README.md)
 - *Homelab*: [Homelab](docs/homelab.md)
 

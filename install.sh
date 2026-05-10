@@ -20,6 +20,7 @@ declare -A DOTFILES=(
     ["configs/PrusaSlicer/filament"]="$HOME/.config/PrusaSlicer/filament"
     ["configs/PrusaSlicer/printer"]="$HOME/.config/PrusaSlicer/printer"
     ["configs/PrusaSlicer/print"]="$HOME/.config/PrusaSlicer/print"
+    ["claude/skills"]="$HOME/.claude/skills"
 )
 
 # User-level runit services. Only `run` and `log/run` are symlinked into each
