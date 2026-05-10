@@ -166,6 +166,7 @@ unmounts all, right-click opens Thunar.
 - `python-pyqt6`, `python-pyqt6-webengine` — Qt6 Python bindings + WebEngine
   module
 - `okular` — PDF viewer
+- `autofirma` — Spanish gov e-signature client (FNMT/DNIe, XAdES/PAdES/CAdES); needs `jre-openjdk` above
 
 ## AUR helper
 
