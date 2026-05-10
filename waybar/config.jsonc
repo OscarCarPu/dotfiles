@@ -35,7 +35,17 @@
     },
     "custom/notification": {
         "tooltip": true,
-        "format": "{} ",
+        "format": "{icon}",
+        "format-icons": {
+            "notification":               "",
+            "inhibited-notification":     "",
+            "dnd-notification":           "",
+            "dnd-inhibited-notification": "",
+            "none":                       "",
+            "inhibited-none":             "",
+            "dnd-none":                   "",
+            "dnd-inhibited-none":         ""
+        },
         "return-type": "json",
         "exec-if": "which swaync-client",
         "exec": "swaync-client -swb",

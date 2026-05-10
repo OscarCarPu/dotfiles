@@ -156,6 +156,7 @@ tooltip label {
 #network {
     background-color: @blue;
     color: @text-dark;
+    min-width: 200px;
 }
 
 #network.disconnected {
@@ -236,10 +237,6 @@ tooltip label {
     padding: 0 8px;
 }
 
-#custom-notification {
-    font-family: "FiraCode Nerd Font", "Symbols Nerd Font", "Font Awesome 6 Free", sans-serif;
-}
-
 #custom-notification.notification,
 #custom-notification.inhibited-notification {
     background-color: @yellow;
@@ -248,22 +245,12 @@ tooltip label {
 }
 
 #custom-notification.dnd-notification,
-#custom-notification.dnd-inhibited-notification {
+#custom-notification.dnd-inhibited-notification,
+#custom-notification.dnd-none,
+#custom-notification.dnd-inhibited-none {
     background-color: @peach;
     color: @text-dark;
     font-weight: bold;
-}
-
-/* Collapse the notification module when nothing is pending — swaync sets
-   one of these classes for the "no notifications" states, and the shared
-   rule above otherwise leaves a clickable empty box in the bar. */
-#custom-notification.none,
-#custom-notification.dnd-none,
-#custom-notification.inhibited-none,
-#custom-notification.dnd-inhibited-none {
-    padding: 0;
-    margin: 0;
-    background-color: transparent;
 }
 
 #custom-power {
