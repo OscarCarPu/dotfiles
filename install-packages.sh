@@ -1,6 +1,6 @@
 #!/bin/bash
 # Install every package listed in docs/packages.md, plus the `uv tool`
-# Python utilities (pyright/ruff for nvim, jupyter notebook for `.ipynb`).
+# dependencies that nvim's Python LSP/formatter needs.
 #
 # Skips sections marked as not managed by this repo:
 #   - "Base system"                      (provided by the Artix install medium)
@@ -68,12 +68,11 @@ yay -S --needed "${pkgs[@]}"
 # --- uv-managed Python tooling for nvim -----------------------------------
 
 if command -v uv >/dev/null 2>&1; then
-    echo "Installing pyright + ruff + notebook via uv tool..."
+    echo "Installing pyright + ruff via uv tool (nvim Python LSP/formatter)..."
     uv tool install pyright
     uv tool install ruff
-    uv tool install notebook
 else
-    echo "uv not on PATH — skipping pyright/ruff/notebook." >&2
+    echo "uv not on PATH — skipping pyright/ruff." >&2
     echo "Open a new shell so PATH picks up uv, then re-run this script." >&2
 fi
 

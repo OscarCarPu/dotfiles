@@ -200,32 +200,6 @@ above and skipped by `install-packages.sh`.
 - `pyright`, `ruff` — Python LSP + formatter for nvim. Installed by
   `install-packages.sh` via `uv tool install`. Pyright auto-detects the
   per-project `.venv` (see `nvim/lua/configs/python.lua`)
-- `notebook` — classic Jupyter Notebook (web UI for `.ipynb` files).
-  Installed by `install-packages.sh` via `uv tool install`; the `jupyter`
-  CLI runs from its own isolated Python, so the per-project venv has to
-  publish its kernelspec to the global kernel search path. The directory
-  containing `kernels/` is `<venv>/share/jupyter` (not `<venv>/share` —
-  Jupyter appends `kernels/` itself). Setup:
-
-  ```bash
-  cd project/                                          # has notebook.ipynb, data/
-  uv venv
-  source .venv/bin/activate
-  uv pip install ipykernel pandas                      # + notebook deps
-  JUPYTER_PATH="$PWD/.venv/share/jupyter" jupyter notebook notebook.ipynb
-  ```
-
-  To skip the prefix on every launch, drop a `.envrc` so `direnv` exports
-  it on entry:
-
-  ```bash
-  source .venv/bin/activate
-  export JUPYTER_PATH="$PWD/.venv/share/jupyter"
-  ```
-
-  Then `cd project/ && jupyter notebook notebook.ipynb` just works —
-  cwd = project dir so `data/foo.csv` resolves, and the venv's `python3`
-  kernel is discovered by global `jupyter`.
 - `espup`, `espflash` — ESP32 toolchain installer + flasher. Installed by
   `install-packages.sh` via `cargo install --locked`. `install.sh --system`
   adds the invoking user to the `uucp` group for serial/USB access to
@@ -236,3 +210,21 @@ above and skipped by `install-packages.sh`.
 - `ibgateway` — IBKR IB Gateway, installed from the official installer at
   <https://www.interactivebrokers.com/en/trading/ibgateway-stable.php> into
   `~/Jts/ibgateway/1046`
+
+## Python notebooks
+
+Classic Jupyter Notebook (`.ipynb` in the browser) is not installed
+globally — each project gets its own copy in the venv. Server, kernel, and
+project deps share one Python, so there's no `JUPYTER_PATH` or kernelspec
+wiring to maintain:
+
+```bash
+cd project/                       # contains notebook.ipynb, data/
+uv venv
+source .venv/bin/activate
+uv pip install notebook pandas    # + whatever the notebook needs
+jupyter notebook notebook.ipynb   # cwd = project, so data/foo.csv resolves
+```
+
+To re-enter later: `source .venv/bin/activate && jupyter notebook …` —
+deps persist in `.venv/`.
