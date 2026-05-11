@@ -29,6 +29,7 @@ open_web() {
         "https://mail.google.com/mail/u/0/" \
         "https://mail.google.com/mail/u/1/" \
         "https://mail.google.com/mail/u/2/" \
+        "https://mail.google.com/mail/u/4/" \
         "https://gv.lab-ocp.com/" \
         "https://www.claude.ai/new" \
         "https://web.whatsapp.com/" \
