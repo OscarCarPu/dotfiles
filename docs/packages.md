@@ -200,6 +200,32 @@ above and skipped by `install-packages.sh`.
 - `pyright`, `ruff` — Python LSP + formatter for nvim. Installed by
   `install-packages.sh` via `uv tool install`. Pyright auto-detects the
   per-project `.venv` (see `nvim/lua/configs/python.lua`)
+- `notebook` — classic Jupyter Notebook (web UI for `.ipynb` files).
+  Installed by `install-packages.sh` via `uv tool install`; the `jupyter`
+  CLI runs from its own isolated Python, so the per-project venv has to
+  publish its kernelspec to the global kernel search path. The directory
+  containing `kernels/` is `<venv>/share/jupyter` (not `<venv>/share` —
+  Jupyter appends `kernels/` itself). Setup:
+
+  ```bash
+  cd project/                                          # has notebook.ipynb, data/
+  uv venv
+  source .venv/bin/activate
+  uv pip install ipykernel pandas                      # + notebook deps
+  JUPYTER_PATH="$PWD/.venv/share/jupyter" jupyter notebook notebook.ipynb
+  ```
+
+  To skip the prefix on every launch, drop a `.envrc` so `direnv` exports
+  it on entry:
+
+  ```bash
+  source .venv/bin/activate
+  export JUPYTER_PATH="$PWD/.venv/share/jupyter"
+  ```
+
+  Then `cd project/ && jupyter notebook notebook.ipynb` just works —
+  cwd = project dir so `data/foo.csv` resolves, and the venv's `python3`
+  kernel is discovered by global `jupyter`.
 - `espup`, `espflash` — ESP32 toolchain installer + flasher. Installed by
   `install-packages.sh` via `cargo install --locked`. `install.sh --system`
   adds the invoking user to the `uucp` group for serial/USB access to
