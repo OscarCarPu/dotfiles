@@ -55,7 +55,7 @@ If you include code:
 
 Exercises should follow a deliberate progression:
 
-- **Mechanical (1–2 exercises)**: direct formula or procedure application, no ambiguity — builds procedural fluency.
+- **Mechanical (10 exercises)**: direct formula or procedure application, no ambiguity — builds procedural fluency. Vary the surface form (different numbers, different symbols, different orderings of the same operation) so the student practices the procedure many times, not the same problem repeatedly.
 - **Interpretive (2–3 exercises)**: apply the concept to a slightly different setup, or explain what a result means — tests whether the student understood the output.
 - **Conceptual (1–2 exercises)**: requires connecting ideas, identifying when a method fails, comparing approaches, or producing a short proof — tests genuine understanding.
 
