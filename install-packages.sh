@@ -80,6 +80,7 @@ fi
 
 echo "Installing espup + espflash via cargo (ESP32 toolchain)..."
 rustup default stable
+rustup component add rust-analyzer
 cargo install --locked espup
 cargo install --locked espflash
 export PATH="$HOME/.cargo/bin:$PATH"
