@@ -1,0 +1,10 @@
+{
+  "id": "anymd-as-md-obsidian",
+  "version": "0.0.3",
+  "description": "This plugin provides an initial support for viewing files with .qmd and .rmd extensions.",
+  "name": "qmd as md",
+  "author": "Agustín Covarrubias",
+  "authorUrl": "https://github.com/agucova",
+  "isDesktopOnly": false,
+  "minAppVersion": "0.10.12"
+}

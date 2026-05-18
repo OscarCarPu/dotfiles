@@ -1,0 +1,17 @@
+#!/bin/sh
+exec 2>&1
+DOTFILES="$HOME/.dotfiles/obsidian"
+
+inotifywait -m -r -e create,moved_to --format '%w%f' "$HOME" 2>/dev/null | \
+while IFS= read -r path; do
+    [ "$(basename "$path")" = ".obsidian" ] && [ -d "$path" ] || continue
+    sleep 2
+    ln -sf "$DOTFILES/appearance.json"       "$path/appearance.json"
+    ln -sf "$DOTFILES/community-plugins.json" "$path/community-plugins.json"
+    ln -sf "$DOTFILES/core-plugins.json"      "$path/core-plugins.json"
+    mkdir -p "$path/themes" "$path/plugins"
+    ln -sf "$DOTFILES/themes/Obsidian Nord"              "$path/themes/Obsidian Nord"
+    for plugin in obsidian-latex-suite obsidian-style-settings anymd-as-md-obsidian; do
+        ln -sf "$DOTFILES/plugins/$plugin" "$path/plugins/$plugin"
+    done
+done

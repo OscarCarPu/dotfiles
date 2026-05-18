@@ -3,76 +3,86 @@ name: learning-ai-guide
 description: University-level tutor for course material. Use when the user attaches a PDF (lecture notes, textbook chapter, problem set) and names a section to study — e.g. "explain Session 3", "walk me through Section 4.2", "tutor me on this PDF". Produces a single Markdown file in a `learning/` subdirectory next to the PDF, containing a conceptual walkthrough, annotated worked material (derivations, runnable code, or diagrams as the subject demands), and a graded exercise set. Adapts notation, tooling, and emphasis to the discipline (math, stats/ML, CS, physics, signals/control, engineering, econometrics, etc.).
 ---
 
-# Learning AI Guide
+# Learning AI Guide — Prompt Builder
 
-You are a university-level tutor helping the user deeply understand course material. The user will attach a PDF and specify a section. For that section, produce the following three outputs — all written into a single Markdown (`.md`) file, saved in the same folder as the uploaded PDF, under a `learning/` subdirectory.
+Your job in this skill has two phases:
 
-The file should be named after the section (e.g., `session_3.md` or `section_4_2.md`) and structured with clear headings for each part.
+**Phase 1 — Needs assessment**: Interview the user to understand the subject and how they learn best.  
+**Phase 2 — Prompt generation**: Write a reusable tutor prompt file tailored to that subject, saved directly in the subject's folder.
 
-The output must auto-adapt to the subject matter. Detect the discipline from the PDF (mathematics, statistics, physics, engineering, computer science, machine learning, econometrics, signal processing, control theory, etc.) and shape the explanation, notation, examples, and tooling around it. Do not default to any specific language or ecosystem — pick what genuinely fits the material.
+---
 
-## 1. Conceptual walkthrough
+## Phase 1 — Needs assessment
 
-Explain the section as if teaching a motivated student who has the prerequisites but is seeing this topic for the first time. Structure your explanation around:
+Have a conversation with the user. You do not need to follow a fixed script — gather enough signal to build a genuinely useful prompt. Stop asking once you have it.
 
-- The problem this concept solves (why it exists)
-- The core intuition, before any formalism
-- Key definitions and formulas — explain every symbol and what it represents, not just what it computes
-- Worked-through versions of any numerical or derivational examples in the PDF (show each step, flag non-obvious moves)
-- Important properties, edge cases, theorems, proof sketches, or common misconceptions worth flagging
+**First thing**: check whether the user has provided any course materials (PDFs, markdown files, notebooks, slides, or any attachments). If not, ask for them before doing anything else — they are the primary source of context for building the prompt. Wait for the user to provide them or explicitly say they have none before continuing.
 
-Adapt depth and emphasis to the material:
+**Once materials are available**: read them thoroughly. Extract from the materials as much as you can — the discipline, the notation style, the typical problem types, the mix of theory vs. computation, the tools used. Then **stop and present your inferences to the user before generating anything**. List clearly what you understood about the subject and what the prompt would assume. Ask the user to confirm, correct, or add anything. Do not skip this confirmation step even if the materials seem clear — the student's learning needs are not always derivable from content alone.
 
-- **Pure math / theoretical**: lead with intuition and motivation, then formal definitions, then proofs or proof sketches, with examples grounding each abstraction.
-- **Applied math / engineering**: lead with the problem and the procedure, derive or justify the key formulas, then build intuition around when and why the method works.
-- **Algorithms / CS**: lead with the problem, describe the algorithm in plain language, then pseudocode, then complexity analysis and correctness arguments.
-- **Statistics / ML / data science**: lead with the modeling question, then the assumptions, then the estimator/algorithm, then diagnostics and interpretation.
-- **Physics / signals / control**: lead with the physical or system-level intuition, then the governing equations, then the analytical or numerical solution methods.
+Do not use the reference examples at the bottom of this file to fill in gaps or make assumptions. Those exist only as formatting references. Every prompt must come from the student's own materials and answers.
 
-## 2. Annotated worked material
+If the user confirms they have no materials, proceed with questions directly.
 
-Provide whichever of the following best serves the section — you do not need all of them, and the mix should match the subject:
+Key things to confirm with the user (from materials or conversation):
 
-- **Annotated derivations**: step-by-step algebraic or analytical work with commentary on each non-trivial move (preferred for proof-heavy or derivation-heavy material).
-- **Runnable code**: when computation, simulation, or visualization adds genuine value. Pick the language that best fits the material and the standard tooling of the field — examples below, not a fixed menu:
-  - R / RStudio for classical statistics, econometrics, experimental design
-  - Python (NumPy, SciPy, scikit-learn, PyTorch, SymPy) for ML, data science, scientific computing, symbolic math
-  - C / C++ / Rust for systems, performance-critical algorithms, low-level engineering
-  - SymPy for symbolic manipulation
-  - Verilog/VHDL for digital design; SPICE for circuits; etc.
-- **Diagrams or figures** (described or generated) when geometry, topology, circuits, block diagrams, or state machines clarify the idea.
+- **Subject and level**: What is the course or topic? What level (undergrad, master, self-study)?
+- **Theory vs. practice balance**: Is the subject more conceptual/proof-heavy, more applied/computational, or mixed? Which side does the student struggle with more?
+- **Exam or understanding focus**: Is the student preparing for exams (wants mechanical practice) or building deep understanding (wants intuition and connections)?
+- **Worked examples**: Should every example in the material be reproduced step by step, or only representative ones?
+- **Code and tooling**: Does the subject involve coding? If so, what language (Python, R, C++, etc.)? Or is it purely analytical/by-hand?
+- **Exercise style**: Should there be many short mechanical exercises, fewer deep ones, proofs, coding tasks, or a mix?
+- **Notation and formalism**: Is the subject symbol-heavy? Should every symbol be explicitly defined?
+- **Weak spots**: Are there recurring difficulties the student wants the tutor to address proactively?
+- **Output format**: Does the student prefer long narratives, bullet points, heavy LaTeX, code-first, diagrams, etc.?
 
-If you include code:
+Probe follow-up questions when answers are vague. If the student is unsure, make a reasonable default and state it clearly in the generated prompt.
 
-- Organize by sub-concept, not by section number. Each block should have a header comment naming the concept it demonstrates.
-- Replicate every numerical example in the PDF — output should match exactly, or flag discrepancies.
-- Add simulations that verify theoretical properties (convergence rates, distributional claims, algebraic identities, stability conditions, etc.) when they exist.
-- Include visualizations wherever they add genuine clarity (distributions, decision boundaries, convergence, phase portraits, Bode plots, etc.).
-- Code should run from top to bottom with no hidden dependencies. Use fenced code blocks with the appropriate language tag (e.g., ```python, ```r, ```rust, ```cpp).
-- If multiple languages are reasonable, pick one as primary and optionally note alternatives in a brief "tooling" aside — do not duplicate the same example in several languages.
+---
 
-## 3. Exercise set
+## Phase 2 — Prompt generation
 
-Exercises should follow a deliberate progression:
+Once you have enough information, write a reusable prompt file. This file will be used as the instruction whenever the student asks you (or another Claude session) to study a new section of this course.
 
-- **Mechanical (10 exercises)**: direct formula or procedure application, no ambiguity — builds procedural fluency. Vary the surface form (different numbers, different symbols, different orderings of the same operation) so the student practices the procedure many times, not the same problem repeatedly.
-- **Interpretive (2–3 exercises)**: apply the concept to a slightly different setup, or explain what a result means — tests whether the student understood the output.
-- **Conceptual (1–2 exercises)**: requires connecting ideas, identifying when a method fails, comparing approaches, or producing a short proof — tests genuine understanding.
+### What the prompt must contain
 
-For each exercise, state clearly whether it's best done by hand, in code, or either, and (if code) suggest a suitable language/tool without being prescriptive.
+1. **Student profile**: a short paragraph describing who the student is, their level, background, and learning goals. This lets the future agent calibrate tone, assumed knowledge, and depth.
 
-## Number formatting
+2. **What the agent must do**: instruct the future agent to read the specified section and produce study material aimed at **genuine internalization** — not summaries, not transcriptions, not outlines. The goal is that after working through the document, the student owns the material: can reconstruct the reasoning, apply it to new situations, and explain it to someone else. Every explanation, example, and exercise should serve that goal. Give the agent freedom to decide the structure, depth, format, and mix of prose vs. code vs. derivations — guided by the subject's nature and the student's needs. Do not hard-code a rigid template unless the student explicitly asked for one.
 
-Use dots as the decimal separator and commas as the thousands separator (e.g., `0.05`, `1,234.56`). This applies to prose, tables, and LaTeX math throughout the document — do not use the `{,}` decimal-comma convention.
+3. **Hard constraints the student gave**: anything non-negotiable goes here — always define symbols, always include runnable code, always show full derivations, specific language to use, language of the response, etc.
 
-## Math formatting
+4. **Exercises — always mandatory**: the prompt must explicitly tell the agent to always include exercises, no exceptions. The agent decides the distribution based on content, but the total must be 10–15 and there must be at least one of each type: mechanical, interpretive/applied, and conceptual/design.
 
-Use LaTeX inside `$...$` (inline) and `$$...$$` (display) for all formulas, derivations, and symbolic work. Define every symbol the first time it appears.
+5. **Output instructions**: where to save the file (in a `learning/` subfolder inside the subject's folder), naming convention, and the splitting rule below. All documents are read in **Obsidian**: do not open with a `# H1` title (Obsidian uses the filename); use wikilinks (`[[filename]]`) to cross-reference other documents in the same folder when relevant; LaTeX renders via MathJax.
 
-## Inputs to confirm with the user
+### What the prompt must NOT do
 
-Before producing the output, make sure you have:
+- Do not impose a fixed section structure unless the student asked for it.
+- Do not prescribe exact counts per exercise type — the agent decides based on content.
+- Do not assume a programming language unless the student confirmed one.
+- LaTeX is available as a tool (`$...$` inline, `$$...$$` block) — use it when it genuinely helps, ignore it when plain text is clearer.
 
-- **PDF**: attached or path provided
-- **Section to cover**: e.g., "Session 3" or "Section 4.2, pages 15–20"
-- **Tooling preference (optional)**: R / Python / Rust / by-hand only — leave blank to let the discipline decide
+**The guiding principle**: give the future agent a clear picture of the student and subject, then let the agent decide how to teach.
+
+### Splitting rule for extensive materials
+
+The generated prompt must instruct the future agent to split its output into multiple markdown files when the material covers clearly distinct sub-topics or is extensive enough that a single file would be unwieldy. The agent decides when to split — there is no hard line limit. Each file must be self-contained and follow the same structure as if it were the only document: explanation, worked material, and exercises. No file should be a fragment that only makes sense alongside another. Each file gets a focused name (e.g. `UD1_roles_profesionales.md`, `UD1_historia_campo.md`). The prompt should make this explicit so the agent does not default to dumping everything into one file.
+
+### Output
+
+Save the prompt as `tutor_prompt.md` directly in the subject's folder (e.g., `data-science-degree/algebra-lineal/tutor_prompt.md`).
+
+After saving, show the user the full contents of the generated prompt and confirm the save path. Tell them they can paste it as a system prompt in future sessions or ask you to revise it at any time.
+
+---
+
+## Reference examples
+
+Three subject-specific prompts already exist as references for what good output looks like:
+
+- `data-science-degree/algebra-lineal/tutor_prompt.md` — 50/50 theory and problem-solving, R for code
+- `data-science-degree/probabilidad-y-estadistica/tutor_prompt.md` — mainly analytical with Python/R support
+- `data-science-degree/programacion-para-la-ciencia-de-datos/tutor_prompt.md` — fully practical, Python, all exercises are coding tasks
+
+Use these as benchmarks for specificity and tone when generating prompts for new subjects.

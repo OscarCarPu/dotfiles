@@ -6,6 +6,7 @@
 [[ $- != *i* ]] && return
 
 export PATH="$HOME/.local/bin:$HOME/.cargo/bin:$HOME/go/bin:$PATH"
+export SVDIR="$HOME/.local/share/runit/sv"
 
 # bun
 export BUN_INSTALL="$HOME/.bun"

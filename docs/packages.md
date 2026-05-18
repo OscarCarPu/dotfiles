@@ -93,6 +93,7 @@ never appear as streams in the mixer.
 - `cliphist` — clipboard history (paired with `wofi` via `SUPER + SHIFT + V`)
 - `papirus-icon-theme` — vector icons used by GTK apps and wofi (set in `configs/gtk-3.0/settings.ini`)
 - `socat`, `jq` — used by `monitor_watcher.sh` to consume Hyprland's event socket
+- `inotify-tools` — filesystem watcher; used by the `obsidian-theme` runit service to auto-apply Nord theme and plugins to new vaults
 - `elogind-runit` — `loginctl poweroff/reboot`, polkit, seat mgmt (pulls `elogind` as a dep)
 
 ## Storage

@@ -34,6 +34,7 @@ USER_RUNIT_SERVICES=(
     battery-notify
     waybar
     brave-stop
+    obsidian-theme
 )
 
 # System-level files (require sudo). Run with --system flag to apply.
