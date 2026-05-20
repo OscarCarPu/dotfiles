@@ -9,7 +9,12 @@ CHOICE=$(printf "%s󰐥</span>  Shutdown\n%s󰜉</span>  Reboot\n%s󰚰</span>  
 
 close_apps() {
     pkill -TERM -x librewolf 2>/dev/null || true
-    sleep 1
+    local i=0
+    while pgrep -x librewolf >/dev/null 2>&1; do
+        i=$((i + 1))
+        [ "$i" -ge 10 ] && break
+        sleep 1
+    done
 }
 
 case "$CHOICE" in
@@ -39,13 +44,13 @@ power_action() {
         poweroff)
             read -rp $'\nReady to shut down. Press Enter to confirm (Ctrl+C to cancel): '
             pkill -TERM -x librewolf 2>/dev/null || true
-            sleep 1
+            i=0; while pgrep -x librewolf >/dev/null 2>&1; do i=$((i+1)); [ "$i" -ge 10 ] && break; sleep 1; done
             loginctl poweroff
             ;;
         reboot)
             read -rp $'\nReady to reboot. Press Enter to confirm (Ctrl+C to cancel): '
             pkill -TERM -x librewolf 2>/dev/null || true
-            sleep 1
+            i=0; while pgrep -x librewolf >/dev/null 2>&1; do i=$((i+1)); [ "$i" -ge 10 ] && break; sleep 1; done
             loginctl reboot
             ;;
         *)

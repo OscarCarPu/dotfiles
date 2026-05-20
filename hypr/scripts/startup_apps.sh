@@ -33,6 +33,7 @@ open_web() {
         "https://gv.lab-ocp.com/" \
         "https://www.claude.ai/new" \
         "https://web.whatsapp.com/" \
+        "https://aula.uoc.edu/" \
         "$@" &
 }
 

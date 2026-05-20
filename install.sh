@@ -21,6 +21,7 @@ declare -A DOTFILES=(
     ["configs/PrusaSlicer/print"]="$HOME/.config/PrusaSlicer/print"
     ["configs/applications/autofirma.desktop"]="$HOME/.local/share/applications/autofirma.desktop"
     ["claude/skills"]="$HOME/.claude/skills"
+    ["configs/librewolf.overrides.cfg"]="$HOME/.librewolf/librewolf.overrides.cfg"
 )
 
 # User-level runit services. Only `run` and `log/run` are symlinked into each
@@ -183,6 +184,17 @@ for svc in "${USER_RUNIT_SERVICES[@]}"; do
     link_file "$DOTFILES_DIR/runit/user/$svc/run"     "$target/run"
     link_file "$DOTFILES_DIR/runit/user/$svc/log/run" "$target/log/run"
 done
+
+# Librewolf user.js: symlink into the install-default profile so session prefs
+# survive across restarts. Detects the profile dynamically from profiles.ini.
+lw_profile=$(awk -F= '/^\[Install/{found=1} found && /^Default=/{print $2; exit}' \
+    "$HOME/.librewolf/profiles.ini" 2>/dev/null)
+if [ -n "$lw_profile" ]; then
+    link_file "$DOTFILES_DIR/configs/librewolf-user.js" \
+        "$HOME/.librewolf/$lw_profile/user.js"
+else
+    echo " Skipping librewolf user.js: no Librewolf profile found (launch it once first)"
+fi
 
 # Scripts: per-file symlinks so ~/.local/bin stays a real directory
 # and external tools (uv, claude, etc.) can write there without polluting this repo.
