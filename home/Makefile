@@ -1,4 +1,4 @@
-.phony: axeigo-forms-2026 ssh-lab
+.phony: axeigo-forms-2026 ssh-lab celeste olympus
 
 axeigo-forms-2026:
 	cd /home/ocp/dev/axeigo/formularios/obradoiros && uv run main.py
@@ -13,5 +13,11 @@ rescan-wifi:
 	nmcli device wifi list --rescan yes
 
 wifi-oscar:
-	nmcli device wifi list --rescan yes 
+	nmcli device wifi list --rescan yes
 	nmcli device wifi connect Oscar
+
+celeste:
+	legendary launch Salt --no-wine --override-exe CelesteLauncher.sh
+
+olympus:
+	/home/ocp/Games/Olympus/olympus-launch.sh
