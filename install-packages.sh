@@ -91,6 +91,13 @@ espup install
 echo "Installing sqlc via go install..."
 go install github.com/sqlc-dev/sqlc/cmd/sqlc@latest
 
+# -- claude code -----------------------------------------------------------
+
+if ! command -v claude >/dev/null 2>&1; then
+    echo "Installing claude via curl..."
+    curl -sSfL https://claude.ai/install.sh | bash
+fi
+
 # --- Android SDK platforms / build-tools ----------------------------------
 # /opt/android-sdk is root:android-sdk 775 — needs `install.sh --system` to
 # add the user to the android-sdk group, then a fresh login (or `newgrp`).

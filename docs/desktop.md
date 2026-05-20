@@ -18,9 +18,9 @@ Modifier `$mainMod = SUPER`. Source: [`hypr/hyprland.conf`](../hypr/hyprland.con
 |-----|--------|
 | `SUPER + E` | Kitty terminal |
 | `SUPER + R` | Wofi launcher (drun) |
-| `SUPER + F` | Brave |
+| `SUPER + F` | Librewolf |
 | `SUPER + P` | Spotify |
-| `SUPER + S` | SoundCloud (Brave PWA) |
+| `SUPER + S` | SoundCloud (Librewolf) |
 | `SUPER + Q` | Kill active window |
 | `SUPER + V` | Power menu — shutdown, reboot, update |
 | `SUPER + N` | Toggle SwayNC notification panel |
@@ -164,8 +164,8 @@ unconditionally runs the `normal_setup` flow:
 
 - Switches to workspace 3, spawns Spotify, waits for the window via
   `hyprctl clients` (no blind `sleep`)
-- Switches to workspace 1 and opens the daily tabs in Brave (Gmail x3,
-  lab-ocp, Claude, WhatsApp). Before launching Brave, `wait_for_internet`
+- Switches to workspace 1 and opens the daily tabs in Librewolf (Gmail x3,
+  lab-ocp, Claude, WhatsApp). Before launching Librewolf, `wait_for_internet`
   polls `https://mail.google.com/generate_204` (or `getent hosts` if curl
   is missing) until reachable, 30s cap — keeps the daily tabs from cold-
   booting into "no internet" pages while NetworkManager is still connecting.

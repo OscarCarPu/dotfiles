@@ -4,7 +4,7 @@
 # dispatch at the bottom of this file (e.g. `learn_rust` instead of `normal_setup`).
 set -euo pipefail
 
-# Wait until the machine has internet, up to ~30s. Without this brave's daily
+# Wait until the machine has internet, up to ~30s. Without this librewolf's daily
 # tabs all open as "no internet" pages on a cold boot before NetworkManager
 # finishes connecting. Prefer curl for a real reachability check; fall back
 # to DNS-only if curl isn't installed.
@@ -25,7 +25,7 @@ wait_for_internet() {
 
 open_web() {
     wait_for_internet || true
-    brave \
+    librewolf \
         "https://mail.google.com/mail/u/0/" \
         "https://mail.google.com/mail/u/1/" \
         "https://mail.google.com/mail/u/2/" \

@@ -7,12 +7,17 @@ CHOICE=$(printf "%s󰐥</span>  Shutdown\n%s󰜉</span>  Reboot\n%s󰚰</span>  
     "$ICON" "$ICON" "$ICON" "$ICON" "$ICON" "$ICON" | \
     wofi --dmenu --allow-markup --prompt "System" --cache-file /dev/null --lines 6 --insensitive 2>/dev/null) || true
 
+close_apps() {
+    pkill -TERM -x librewolf 2>/dev/null || true
+    sleep 1
+}
+
 case "$CHOICE" in
     *"Update + Shutdown"*) POWER_ACTION=poweroff ;;
     *"Update + Reboot"*)   POWER_ACTION=reboot   ;;
     *"Update Only"*)       POWER_ACTION=none     ;;
-    *"Shutdown"*)          loginctl poweroff; exit 0 ;;
-    *"Reboot"*)            loginctl reboot; exit 0   ;;
+    *"Shutdown"*)          close_apps; loginctl poweroff; exit 0 ;;
+    *"Reboot"*)            close_apps; loginctl reboot; exit 0   ;;
     *)                     exit 0 ;;
 esac
 
@@ -33,10 +38,14 @@ power_action() {
     case "${POWER_ACTION:-none}" in
         poweroff)
             read -rp $'\nReady to shut down. Press Enter to confirm (Ctrl+C to cancel): '
+            pkill -TERM -x librewolf 2>/dev/null || true
+            sleep 1
             loginctl poweroff
             ;;
         reboot)
             read -rp $'\nReady to reboot. Press Enter to confirm (Ctrl+C to cancel): '
+            pkill -TERM -x librewolf 2>/dev/null || true
+            sleep 1
             loginctl reboot
             ;;
         *)

@@ -1,4 +1,6 @@
 // -*- mode: jsonc -*-
+// Waybar config for the narrow (portrait) middle monitor.
+// Omits cpu, memory, network, and power widgets to avoid squeezing the clock.
 {
     "layer": "top",
     "position": "top",
@@ -13,9 +15,6 @@
         "tray",
         "custom/usb",
         "custom/notification",
-        "cpu",
-        "memory",
-        "network",
         "custom/brightness",
         "pulseaudio#speaker",
         "pulseaudio#mic",
@@ -36,14 +35,14 @@
         "tooltip": true,
         "format": "{icon}",
         "format-icons": {
-            "notification":               "",
-            "inhibited-notification":     "",
-            "dnd-notification":           "",
-            "dnd-inhibited-notification": "",
-            "none":                       "",
-            "inhibited-none":             "",
-            "dnd-none":                   "",
-            "dnd-inhibited-none":         ""
+            "notification":               "",
+            "inhibited-notification":     "",
+            "dnd-notification":           "",
+            "dnd-inhibited-notification": "",
+            "none":                       "",
+            "inhibited-none":             "",
+            "dnd-none":                   "",
+            "dnd-inhibited-none":         ""
         },
         "return-type": "json",
         "exec-if": "which swaync-client",
@@ -68,29 +67,6 @@
         "tooltip-format": "<big>{:%Y %B}</big>\n<tt><small>{calendar}</small></tt>",
         "format-alt": "{:%d-%m-%Y %H:%M:%S}",
     },
-    "cpu": {
-        "format": "{usage}% ",
-        "tooltip": true,
-        "interval": 2
-    },
-    "memory": {
-        "format": " {used:0.1f}G ({percentage}%)",
-        "tooltip": true,
-        "tooltip-format": "{used:0.1f}G / {total:0.1f}G",
-        "interval": 2
-    },
-    "network": {
-        "interval": 2,
-        "format": "󰇚 {bandwidthDownBits} | 󰕒 {bandwidthUpBits}",
-        "format-wifi": "󰇚 {bandwidthDownBits} | 󰕒 {bandwidthUpBits}",
-        "format-ethernet": "󰇚 {bandwidthDownBits} | 󰕒 {bandwidthUpBits}",
-        "tooltip-format": "{ifname} via {gwaddr}",
-        "format-linked": "{ifname} (No IP)",
-        "format-disconnected": "Disconnected ⚠",
-        "max-length": 80,
-        "on-click-right": "nm-connection-editor",
-        "format-alt": "{ifname}: {ipaddr}"
-    },
     "custom/brightness": {
         "format": "󰖨 {}%",
         "exec": "~/.dotfiles/hypr/scripts/brightness.sh get",
@@ -102,7 +78,7 @@
     },
     "pulseaudio#speaker": {
         "format": "{icon}  {volume}%",
-        "format-muted": " Muted",
+        "format-muted": " Muted",
         "on-scroll-up": "pactl set-sink-volume @DEFAULT_SINK@ +2%",
         "on-scroll-down": "pactl set-sink-volume @DEFAULT_SINK@ -2%",
         "on-click": "pactl set-sink-mute @DEFAULT_SINK@ toggle",
@@ -110,15 +86,15 @@
         "tooltip": true,
         "format-icons": {
             "default": [
-                "",
-                "",
-                ""
+                "",
+                "",
+                ""
             ]
         }
     },
     "pulseaudio#mic": {
-        "format-source": " {volume}%",
-        "format-source-muted": "  Muted",
+        "format-source": " {volume}%",
+        "format-source-muted": "  Muted",
         "format": "{format_source}",
         "on-scroll-up": "pactl set-source-volume @DEFAULT_SOURCE@ +2%",
         "on-scroll-down": "pactl set-source-volume @DEFAULT_SOURCE@ -2%",

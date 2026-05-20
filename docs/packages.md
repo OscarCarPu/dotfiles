@@ -149,7 +149,7 @@ unmounts all, right-click opens Thunar.
 
 ## Apps (AUR unless noted)
 
-- `brave-bin` — daily browser, opened by `startup_apps.sh`
+- `librewolf-bin` — daily browser, opened by `startup_apps.sh`
 - `spotify` — runs on workspace 3
 - `syncthing` — file sync
 - `musescore-bin` — sheet music editor
@@ -173,7 +173,7 @@ unmounts all, right-click opens Thunar.
   Pulls `jdk17-openjdk` automatically (its launcher hardcodes Java 17). The
   `.desktop` override in `configs/applications/autofirma.desktop` injects
   `DISPLAY=:0` so the Swing GUI works when launched from Wayland clients
-  (Brave passes only `WAYLAND_DISPLAY`, so AutoFirma dies with
+  (Librewolf passes only `WAYLAND_DISPLAY`, so AutoFirma dies with
   `HeadlessException`).
 
 ## AUR helper
