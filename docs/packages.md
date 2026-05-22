@@ -150,6 +150,7 @@ unmounts all, right-click opens Thunar.
 ## Apps (AUR unless noted)
 
 - `librewolf-bin` — daily browser, opened by `startup_apps.sh`
+- `chromium` — lightweight Chromium for checking web rendering
 - `spotify` — runs on workspace 3
 - `syncthing` — file sync
 - `musescore-bin` — sheet music editor
