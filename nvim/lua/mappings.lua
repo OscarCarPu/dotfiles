@@ -21,6 +21,12 @@ map("n", "<leader>sd", "<cmd>Telescope diagnostics<CR>", { desc = "Search diagno
 map("n", "<leader>ss", "<cmd>Telescope lsp_document_symbols<CR>", { desc = "Search document symbols" })
 map("n", "<leader>sS", "<cmd>Telescope lsp_dynamic_workspace_symbols<CR>", { desc = "Search workspace symbols" })
 
+-- git (diffview)
+map("n", "<leader>gd", "<cmd>DiffviewOpen<cr>", { desc = "Git: diff all changes" })
+map("n", "<leader>gh", "<cmd>DiffviewFileHistory %<cr>", { desc = "Git: file history" })
+map("n", "<leader>gH", "<cmd>DiffviewFileHistory<cr>", { desc = "Git: repo history" })
+map("n", "<leader>gq", "<cmd>DiffviewClose<cr>", { desc = "Git: close diffview" })
+
 -- competitive programming (CompetiTest / Codeforces)
 map("n", "<leader>cr", "<cmd>CompetiTest run<CR>", { desc = "CP: Run tests" })
 map("n", "<leader>cR", "<cmd>CompetiTest run_no_compile<CR>", { desc = "CP: Run (no compile)" })
