@@ -147,6 +147,7 @@ unmounts all, right-click opens Thunar.
   missing.
 - `python-pyotp` — TOTP code generation library
 - `python-seaborn` — statistical data visualisation library
+- `python-scipy` — scientific computing library (optimization, signal processing, stats)
 
 ## Apps (AUR unless noted)
 
