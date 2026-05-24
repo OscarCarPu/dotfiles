@@ -146,6 +146,7 @@ unmounts all, right-click opens Thunar.
   `shutdown.sh`. The script falls back to listing `.pacnew` paths if it is
   missing.
 - `python-pyotp` — TOTP code generation library
+- `python-seaborn` — statistical data visualisation library
 
 ## Apps (AUR unless noted)
 
