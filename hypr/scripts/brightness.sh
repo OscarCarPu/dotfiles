@@ -17,11 +17,11 @@ notify_waybar() {
 
 case "${1:-}" in
   up)
-    brightnessctl -d "$BRIGHTNESS_DEVICE" set +1% > /dev/null
+    brightnessctl -e -d "$BRIGHTNESS_DEVICE" set +4% > /dev/null
     notify_waybar
   ;;
   down)
-    brightnessctl -d "$BRIGHTNESS_DEVICE" set 1%- > /dev/null
+    brightnessctl -e -d "$BRIGHTNESS_DEVICE" set 4%- > /dev/null
     notify_waybar
   ;;
   get)

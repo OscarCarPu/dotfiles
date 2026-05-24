@@ -13,7 +13,6 @@
     ],
     "modules-right": [
         "tray",
-        "custom/usb",
         "custom/notification",
         "custom/brightness",
         "pulseaudio#speaker",
@@ -23,13 +22,6 @@
     ],
     "tray": {
         "spacing": 8
-    },
-    "custom/usb": {
-        "exec": "~/.dotfiles/hypr/scripts/usb_status.sh",
-        "return-type": "json",
-        "interval": 2,
-        "on-click": "udiskie-umount -a",
-        "on-click-right": "thunar /run/media/$USER"
     },
     "custom/notification": {
         "tooltip": true,

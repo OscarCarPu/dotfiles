@@ -17,6 +17,9 @@ case "${1:-}" in
   mute)
     wpctl set-mute @DEFAULT_AUDIO_SINK@ toggle
   ;;
+  mic-mute)
+    wpctl set-mute @DEFAULT_AUDIO_SOURCE@ toggle
+  ;;
   get)
     wpctl get-volume @DEFAULT_AUDIO_SINK@
   ;;

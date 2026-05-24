@@ -127,7 +127,7 @@ tooltip label {
 #tray,
 #custom-notification,
 #custom-power,
-#custom-power-profile {
+#custom-touchpad {
     padding: 1px 10px;
     margin: 2px 2px;
     border-radius: 4px;
@@ -181,13 +181,13 @@ tooltip label {
     color: @text-primary;
 }
 
-#custom-power-profile.performance {
-    background-color: @red;
+#custom-touchpad.enabled {
+    background-color: @green;
     color: @text-dark;
 }
 
-#custom-power-profile.powersave {
-    background-color: @green;
+#custom-touchpad.disabled {
+    background-color: @red;
     color: @text-dark;
 }
 

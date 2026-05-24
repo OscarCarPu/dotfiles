@@ -11,7 +11,6 @@
     ],
     "modules-right": [
         "tray",
-        "custom/usb",
         "custom/notification",
         "cpu",
         "memory",
@@ -19,18 +18,11 @@
         "custom/brightness",
         "pulseaudio#speaker",
         "pulseaudio#mic",
-        "custom/power-profile",
+        "custom/touchpad",
         "battery"
     ],
     "tray": {
         "spacing": 8
-    },
-    "custom/usb": {
-        "exec": "~/.dotfiles/hypr/scripts/usb_status.sh",
-        "return-type": "json",
-        "interval": 2,
-        "on-click": "udiskie-umount -a",
-        "on-click-right": "thunar /run/media/$USER"
     },
     "custom/notification": {
         "tooltip": true,
@@ -69,7 +61,7 @@
         "format-alt": "{:%d-%m-%Y %H:%M:%S}",
     },
     "cpu": {
-        "format": "{usage}% ",
+        "format": "{usage}% ",
         "tooltip": true,
         "interval": 2
     },
@@ -126,13 +118,12 @@
         "tooltip": true,
         "on-click-middle": "pavucontrol"
     },
-    "custom/power-profile": {
-        "format": "{}",
-        "exec": "~/.dotfiles/hypr/scripts/power_profile.sh get",
+    "custom/touchpad": {
+        "exec": "~/.dotfiles/hypr/scripts/touchpad.sh get",
         "return-type": "json",
-        "interval": 10,
-        "signal": 9,
-        "on-click": "~/.dotfiles/hypr/scripts/power_profile.sh toggle",
+        "interval": "once",
+        "signal": 10,
+        "on-click": "~/.dotfiles/hypr/scripts/touchpad.sh toggle",
         "tooltip": true
     },
     "battery": {
