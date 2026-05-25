@@ -148,6 +148,7 @@ unmounts all, right-click opens Thunar.
 - `python-pyotp` — TOTP code generation library
 - `python-seaborn` — statistical data visualisation library
 - `python-scipy` — scientific computing library (optimization, signal processing, stats)
+- `marp-cli` (AUR: `marp-cli`) — Markdown to presentation slides converter (HTML/PDF/PPTX)
 
 ## Apps (AUR unless noted)
 
@@ -169,6 +170,7 @@ unmounts all, right-click opens Thunar.
 - `libreoffice-still` — office suite (stable branch)
 - `python-pyqt6`, `python-pyqt6-webengine` — Qt6 Python bindings + WebEngine
   module
+- `obs-studio` — screen/video capture and streaming
 - `okular` — PDF viewer
 - `autofirma-bin` — Spanish gov e-signature client (FNMT/DNIe,
   XAdES/PAdES/CAdES); use the `-bin` AUR (official .deb repackaged) rather
