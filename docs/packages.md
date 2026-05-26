@@ -171,6 +171,8 @@ unmounts all, right-click opens Thunar.
 - `python-pyqt6`, `python-pyqt6-webengine` — Qt6 Python bindings + WebEngine
   module
 - `obs-studio` — screen/video capture and streaming
+- `teams-for-linux` (AUR) — Microsoft Teams unofficial client
+- `davinci-resolve` (AUR) — professional video editing and color grading
 - `okular` — PDF viewer
 - `autofirma-bin` — Spanish gov e-signature client (FNMT/DNIe,
   XAdES/PAdES/CAdES); use the `-bin` AUR (official .deb repackaged) rather
