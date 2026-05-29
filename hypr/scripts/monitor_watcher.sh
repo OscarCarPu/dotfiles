@@ -12,7 +12,20 @@ if [[ ! -f "$SETUP_SCRIPT" ]]; then
     exit 1
 fi
 
+LAST_RECONFIG=0
+
 reconfigure_monitors() {
+    # Debounce: connecting 2 monitors fires multiple monitoradded events, and
+    # hyprctl --batch inside setup_monitors_by_serial.sh fires more. Without a
+    # cooldown each event queues another ~10s reconfigure cycle → ~1 min storm.
+    local now
+    now=$(date +%s)
+    if (( now - LAST_RECONFIG < 20 )); then
+        echo "[$(date '+%Y-%m-%d %H:%M:%S')] Monitor event skipped (cooldown)"
+        return
+    fi
+    LAST_RECONFIG=$now
+
     echo "[$(date '+%Y-%m-%d %H:%M:%S')] Monitor change detected, reconfiguring..."
     sleep 1
     if bash "$SETUP_SCRIPT"; then
@@ -20,6 +33,10 @@ reconfigure_monitors() {
     else
         echo "[$(date '+%Y-%m-%d %H:%M:%S')] Warning: Monitor reconfiguration failed"
     fi
+
+    # Restart waybar so it binds bars to any newly connected outputs.
+    export SVDIR="$HOME/.local/share/runit/sv"
+    sv restart waybar 2>/dev/null || true
 
     # After monitor + workspace shuffle Hyprland sometimes loses keyboard/mouse
     # focus on the active window (terminals go unresponsive). Force-refocus the

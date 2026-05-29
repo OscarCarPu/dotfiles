@@ -1,3 +1,4 @@
 #!/bin/sh
 exec 2>&1
+export XDG_RUNTIME_DIR="/run/user/$(id -u)"
 exec pipewire

@@ -174,6 +174,7 @@ unmounts all, right-click opens Thunar.
 - `teams-for-linux` (AUR) — Microsoft Teams unofficial client
 - `davinci-resolve` (AUR) — professional video editing and color grading
 - `okular` — PDF viewer
+- `zeal` — offline documentation browser (Dash-compatible docsets; Go, Rust, Python, etc.)
 - `autofirma-bin` — Spanish gov e-signature client (FNMT/DNIe,
   XAdES/PAdES/CAdES); use the `-bin` AUR (official .deb repackaged) rather
   than `autofirma`, which the Xunta de Galicia sede rejects with `SAF_21`.

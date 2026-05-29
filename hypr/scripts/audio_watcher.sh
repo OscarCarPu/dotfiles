@@ -21,7 +21,8 @@ restart_audio() {
     LAST_RESTART=$now
 
     echo "$(date): Restarting audio stack..."
-    systemctl --user restart wireplumber pipewire pipewire-pulse
+    export SVDIR="$HOME/.local/share/runit/sv"
+    sv restart pipewire wireplumber pipewire-pulse
     sleep 2
 
     # Wait up to 10s for the dock audio to reappear
@@ -57,7 +58,7 @@ udevadm monitor --subsystem-match=sound --property 2>/dev/null | while read -r l
             for i in $(seq 1 15); do
                 if dock_audio_alive; then
                     echo "$(date): Dock audio reappeared after ${i}s, restarting..."
-                    restart_audio
+                    restart_audio || true
                     break
                 fi
                 sleep 1
@@ -67,7 +68,7 @@ udevadm monitor --subsystem-match=sound --property 2>/dev/null | while read -r l
             # by checking if the sink exists in PipeWire
             if ! wpctl status 2>/dev/null | grep -q "USB3.1"; then
                 echo "$(date): Dock present in ALSA but not in PipeWire, restarting..."
-                restart_audio
+                restart_audio || true
             fi
         fi
     fi
