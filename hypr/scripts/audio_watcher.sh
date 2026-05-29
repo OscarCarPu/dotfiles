@@ -55,14 +55,21 @@ udevadm monitor --subsystem-match=sound --property 2>/dev/null | while read -r l
         if ! dock_audio_alive; then
             echo "$(date): Dock audio disappeared, waiting for it to come back..."
             # Wait up to 15s for device to re-enumerate
+            dock_returned=0
             for i in $(seq 1 15); do
                 if dock_audio_alive; then
+                    dock_returned=1
                     echo "$(date): Dock audio reappeared after ${i}s, restarting..."
                     restart_audio || true
                     break
                 fi
                 sleep 1
             done
+            # Permanent disconnect: restart so WirePlumber falls back to built-in audio
+            if (( dock_returned == 0 )); then
+                echo "$(date): Dock gone after 15s (disconnected), restarting to fall back to built-in..."
+                restart_audio || true
+            fi
         else
             # Dock is still there but something changed - verify audio is working
             # by checking if the sink exists in PipeWire
