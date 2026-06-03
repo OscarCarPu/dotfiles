@@ -128,9 +128,9 @@ fi
 # Show skipped packages up front so the user knows the IgnorePkg list is
 # actually doing its job (e.g. aquamarine 0.11 with the DisplayLink regression).
 if [ -n "$SKIPPED_UPDATES" ]; then
-    TRACKER_SCRIPT="$HOME/.dotfiles/hypr/scripts/tracked_prs.py"
+    TRACKER_SCRIPT="$HOME/.dotfiles/hypr/scripts/tracked_blockers.py"
 
-    # Map each skipped pkg -> "repo#num" via tracked_prs.json (offline, fast).
+    # Map each skipped pkg -> "repo#num" via tracked_blockers.json (offline, fast).
     declare -A SKIP_REF
     if [ -x "$TRACKER_SCRIPT" ]; then
         while IFS=$'\t' read -r pkg ref; do

@@ -5,8 +5,13 @@ local options = {
     kotlin = { "ktlint" },
     rust = { "rustfmt" },
     python = { "ruff_format" },
-    -- css = { "prettier" },
-    -- html = { "prettier" },
+    css = { "prettier" },
+    html = { "prettier" },
+    svelte = { "prettier" },
+    javascript = { "prettier" },
+    typescript = { "prettier" },
+    javascriptreact = { "prettier" },
+    typescriptreact = { "prettier" },
   },
 
   format_on_save = {

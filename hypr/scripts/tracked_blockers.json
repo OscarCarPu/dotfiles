@@ -1,0 +1,33 @@
+[
+  {
+    "name": "aquamarine evdi/DisplayLink fix",
+    "reason": "aquamarine 0.11+ broke DisplayLink/evdi: mouse becomes flaky/laggy with dock connected, dock takes 15s+ to connect (was ~10s), drmGetDevice spam and DVI-I-2 applyCommit failures in Hyprland log, eglQueryDeviceStringEXT errors from aquamarine. Tested 0.12.0 on 2026-06-03 — still broken. Rolled back to 0.10.0-4. elogind/libelogind co-pinned because hyprland 0.54.3 links against libelogind-shared-255.so; upgrading elogind to 257 breaks Hyprland startup at TTY1.",
+    "packages": [
+      "aquamarine",
+      "hyprland",
+      "hyprtoolkit",
+      "hyprland-guiutils",
+      "hyprwayland-scanner",
+      "hyprwire",
+      "xdg-desktop-portal-hyprland",
+      "hyprutils",
+      "hyprgraphics",
+      "hyprlang",
+      "elogind",
+      "libelogind"
+    ],
+    "tracking": [
+      {"kind": "pr",    "repo": "hyprwm/aquamarine", "number": 279},
+      {"kind": "issue", "repo": "hyprwm/aquamarine", "number": 169}
+    ]
+  },
+  {
+    "name": "alsa-lib repo lag — lib32-alsa-lib not rebuilt yet",
+    "reason": "alsa-lib 1.2.16-1 is available but lib32-alsa-lib still requires alsa-lib=1.2.15.3 exactly. Repo hasn't pushed a matching lib32-alsa-lib rebuild yet. Pinning both until they update together.",
+    "packages": [
+      "alsa-lib",
+      "alsa-ucm-conf"
+    ],
+    "tracking": []
+  }
+]
