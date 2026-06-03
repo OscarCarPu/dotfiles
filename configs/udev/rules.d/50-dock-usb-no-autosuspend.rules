@@ -1,0 +1,9 @@
+# The hubs on the DisplayLink dock path ship with power/control=auto and
+# autosuspend_delay_ms=0, so they may suspend mid-enumeration — one plausible
+# contributor to the connect/disconnect flapping of the dock outputs
+# (DisplayLink KB 544228 recommends disabling selective suspend for this).
+# Keep the dock chain awake: the DisplayLink device itself plus the two hubs
+# observed between host and dock.
+ACTION=="add", SUBSYSTEM=="usb", ATTR{idVendor}=="17e9", TEST=="power/control", ATTR{power/control}="on"
+ACTION=="add", SUBSYSTEM=="usb", ATTR{idVendor}=="05e3", ATTR{idProduct}=="0625", TEST=="power/control", ATTR{power/control}="on"
+ACTION=="add", SUBSYSTEM=="usb", ATTR{idVendor}=="2109", ATTR{idProduct}=="0822", TEST=="power/control", ATTR{power/control}="on"

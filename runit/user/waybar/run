@@ -21,14 +21,33 @@ HYPRLAND_INSTANCE_SIGNATURE=$(ls -t "$XDG_RUNTIME_DIR/hypr" 2>/dev/null | head -
 export HYPRLAND_INSTANCE_SIGNATURE
 
 # waybar binds bars to wl_outputs at startup; outputs advertised after that
-# bind get no bar. Check the log a few seconds in and, if a monitor is bare,
-# kill waybar so runit restarts the service.
+# bind get no bar. Check the log once the output list is stable and, if a
+# monitor is bare, kill waybar so runit restarts the service.
 parent=$$
 (
-    sleep 8
-    [ "$PPID" = "$parent" ] || exit
-    expected=$(hyprctl monitors -j 2>/dev/null | grep -c '"description":')
-    [ "$expected" -gt 0 ] || exit
+    # Poll instead of a single fixed deadline: dock outputs on aquamarine
+    # 0.10 can still be enumerating 10s in, and a one-shot check would kill
+    # waybar mid-enumeration only for the respawn to do it again (observed
+    # as a kill-loop at boot-with-dock). Wait until the monitor count is
+    # stable across two consecutive samples (or the ~90s cap), then check
+    # bars exactly once. monitor_watcher.sh handles dock-connect restarts;
+    # this is a safety net.
+    # NB: $PPID can't guard here - it is cached at shell start as the
+    # supervisor's PID, never equal to $$. kill -0 checks the live parent
+    # (exec keeps the PID, so $parent IS the waybar process).
+    prev=-1
+    i=0
+    expected=0
+    while [ "$i" -lt 18 ]; do
+        sleep 5
+        kill -0 "$parent" 2>/dev/null || exit
+        expected=$(hyprctl monitors -j 2>/dev/null | grep -c '"description":')
+        [ "$expected" -gt 0 ] || { i=$((i + 1)); continue; }
+        [ "$expected" = "$prev" ] && break
+        prev=$expected
+        i=$((i + 1))
+    done
+    [ "${expected:-0}" -gt 0 ] || exit
     actual=$(tac log/main/current 2>/dev/null | awk '
         /Using configuration file/ { exit }
         /Bar configured.*for output:/ { outputs[$NF] = 1 }

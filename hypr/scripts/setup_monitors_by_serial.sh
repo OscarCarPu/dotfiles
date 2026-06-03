@@ -3,9 +3,10 @@
 # This ensures correct monitor positioning regardless of KVM port swapping
 set -euo pipefail
 
-# Define monitor serials and their correct configurations
-LEFTMOST_SERIAL="LXLEE0524282"      # Should be at 0x840
-MIDDLE_SERIAL="PC3M665802149"       # Should be at 1920x0 with transform
+# Monitor serials — match labels in hyprland.conf desc: rules
+LEFT_SERIAL="LXLEE0524282"     # left:   Acer Technologies Acer V226HQL
+MIDDLE_SERIAL="PC3M665802149"  # middle: Microstep MSI MP275G (rotated 90°)
+# main: eDP-1 (BOE 0x07D8) — identified by name, has no serial
 
 # Wait for Hyprland IPC to answer with monitors AND populated EDID serials.
 # On boot the `exec` line fires before `hyprctl monitors` returns valid data;
@@ -24,12 +25,12 @@ for _ in $(seq 1 50); do
 done
 
 # Find which ports our monitors are on by querying hyprctl
-LEFTMOST_PORT=$(echo "$MONITORS" | jq -r ".[] | select(.serial==\"$LEFTMOST_SERIAL\") | .name" 2>/dev/null || echo "")
+LEFT_PORT=$(echo "$MONITORS" | jq -r ".[] | select(.serial==\"$LEFT_SERIAL\") | .name" 2>/dev/null || echo "")
 MIDDLE_PORT=$(echo "$MONITORS" | jq -r ".[] | select(.serial==\"$MIDDLE_SERIAL\") | .name" 2>/dev/null || echo "")
-HAS_EDP=0
-echo "$MONITORS" | jq -e '.[] | select(.name=="eDP-1")' > /dev/null 2>&1 && HAS_EDP=1
+HAS_MAIN=0
+echo "$MONITORS" | jq -e '.[] | select(.name=="eDP-1")' > /dev/null 2>&1 && HAS_MAIN=1
 
-if [[ -z "$LEFTMOST_PORT" && -z "$MIDDLE_PORT" && $HAS_EDP -eq 0 ]]; then
+if [[ -z "$LEFT_PORT" && -z "$MIDDLE_PORT" && $HAS_MAIN -eq 0 ]]; then
     echo "Warning: Could not identify any known monitors by serial. Keeping current configuration."
     exit 0
 fi
@@ -47,8 +48,8 @@ fi
 X_OFFSET=0
 BATCH=""
 
-if [[ -n "$LEFTMOST_PORT" ]]; then
-    BATCH+="keyword monitor $LEFTMOST_PORT,1920x1080@60,${X_OFFSET}x840,1 ; "
+if [[ -n "$LEFT_PORT" ]]; then
+    BATCH+="keyword monitor $LEFT_PORT,1920x1080@60,${X_OFFSET}x840,1 ; "
     X_OFFSET=$((X_OFFSET + 1920))
 fi
 
@@ -57,16 +58,16 @@ if [[ -n "$MIDDLE_PORT" ]]; then
     X_OFFSET=$((X_OFFSET + 1080))
 fi
 
-if (( HAS_EDP )); then
+if (( HAS_MAIN )); then
     BATCH+="keyword monitor eDP-1,1920x1080@60,${X_OFFSET}x840,1 ; "
 fi
 
 hyprctl --batch "${BATCH% ; }"
 
 # Workspace assignments after monitor coordinates are settled.
-if [[ -n "$LEFTMOST_PORT" ]]; then
-    hyprctl keyword workspace "1, monitor:$LEFTMOST_PORT, default:true"
-    hyprctl dispatch moveworkspacetomonitor 1 "$LEFTMOST_PORT"
+if [[ -n "$LEFT_PORT" ]]; then
+    hyprctl keyword workspace "1, monitor:$LEFT_PORT, default:true"
+    hyprctl dispatch moveworkspacetomonitor 1 "$LEFT_PORT"
 fi
 
 if [[ -n "$MIDDLE_PORT" ]]; then
@@ -74,7 +75,7 @@ if [[ -n "$MIDDLE_PORT" ]]; then
     hyprctl dispatch moveworkspacetomonitor 2 "$MIDDLE_PORT"
 fi
 
-if (( HAS_EDP )); then
+if (( HAS_MAIN )); then
     hyprctl keyword workspace "3, monitor:eDP-1, default:true"
     hyprctl dispatch moveworkspacetomonitor 3 eDP-1
 fi
