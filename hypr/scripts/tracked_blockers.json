@@ -20,14 +20,5 @@
       {"kind": "pr",    "repo": "hyprwm/aquamarine", "number": 279},
       {"kind": "issue", "repo": "hyprwm/aquamarine", "number": 169}
     ]
-  },
-  {
-    "name": "alsa-lib repo lag — lib32-alsa-lib not rebuilt yet",
-    "reason": "alsa-lib 1.2.16-1 is available but lib32-alsa-lib still requires alsa-lib=1.2.15.3 exactly. Repo hasn't pushed a matching lib32-alsa-lib rebuild yet. Pinning both until they update together.",
-    "packages": [
-      "alsa-lib",
-      "alsa-ucm-conf"
-    ],
-    "tracking": []
   }
 ]
