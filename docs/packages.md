@@ -153,6 +153,7 @@ unmounts all, right-click opens Thunar.
 ## Apps (AUR unless noted)
 
 - `librewolf-bin` — daily browser, opened by `startup_apps.sh`
+- Violentmonkey (LibreWolf add-on) — userscript manager; hosts `configs/uoc-aula-autosubmit.user.js` (submits the UOC Shibboleth login form on `id-provider.uoc.edu` once LibreWolf autofills it)
 - `chromium` — lightweight Chromium for checking web rendering
 - `spotify` — runs on workspace 3
 - `syncthing` — file sync
