@@ -17,8 +17,8 @@
       "libelogind"
     ],
     "tracking": [
-      {"kind": "pr",    "repo": "hyprwm/aquamarine", "number": 279},
-      {"kind": "issue", "repo": "hyprwm/aquamarine", "number": 169}
+      {"kind": "issue", "repo": "hyprwm/aquamarine", "number": 294},
+      {"kind": "pr",    "repo": "hyprwm/aquamarine", "number": 279}
     ]
   }
 ]
