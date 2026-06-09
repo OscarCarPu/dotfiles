@@ -11,3 +11,6 @@ hypr/wallpaper_index.json
 
 # Battery notification state
 battery_notify_state
+
+# Seafile CLI credentials (never commit; only the .example is tracked)
+configs/seafile-cli/credentials

@@ -36,6 +36,7 @@ USER_RUNIT_SERVICES=(
     battery-notify
     waybar
     obsidian-theme
+    seafile
 )
 
 # System-level files (require sudo). Run with --system flag to apply.
@@ -211,6 +212,13 @@ fi
 mkdir -p "$LOCAL_BIN"
 
 for script in "$SCRIPTS_DIR"/*; do
+    # Skip dangling entries: a tracked symlink whose target has gone away (e.g.
+    # a self-updating tool like claude that moved to a new version dir) must
+    # not be linked into ~/.local/bin, or it would clobber a working binary.
+    if [ ! -e "$script" ]; then
+        echo " Skipping $(basename "$script"): broken symlink ($(readlink "$script"))"
+        continue
+    fi
     script_name=$(basename "$script")
     link_file "$script" "$LOCAL_BIN/$script_name"
 done

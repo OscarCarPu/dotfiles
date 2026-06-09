@@ -1,0 +1,11 @@
+#!/bin/sh
+exec 2>&1
+export XDG_RUNTIME_DIR="/run/user/$(id -u)"
+
+# Don't start until the client data store exists (run `seafile-setup` once).
+[ -d "$HOME/seafile-client/seafile-data" ] || exit 1
+
+while :; do
+    seaf-cli list >/dev/null 2>&1 || seaf-cli start >/dev/null 2>&1 || true
+    sleep 30
+done

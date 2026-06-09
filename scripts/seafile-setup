@@ -1,0 +1,80 @@
+#!/bin/sh
+# One-time Seafile sync setup: init the seaf-cli data store, start the daemon,
+# then create + sync a remote library for each folder in FOLDERS.
+#
+# Credentials are sourced from ~/.config/seafile-cli/credentials (chmod 600,
+# git-ignored). Copy configs/seafile-cli/credentials.example there and fill it
+# in. Override paths with SEAFILE_CRED_FILE / SEAFILE_DATA_DIR if needed.
+#
+# Safe to re-run: folders already syncing are skipped, so it won't create
+# duplicate libraries.
+set -eu
+
+CRED_FILE="${SEAFILE_CRED_FILE:-$HOME/.config/seafile-cli/credentials}"
+DATA_DIR="${SEAFILE_DATA_DIR:-$HOME/seafile-client}"
+IGNORE_TPL="${SEAFILE_IGNORE_TPL:-$HOME/.dotfiles/configs/seafile-cli/seafile-ignore.txt}"
+
+FOLDERS="
+$HOME/edu
+$HOME/docs
+$HOME/downloads
+$HOME/media
+"
+
+command -v seaf-cli >/dev/null 2>&1 || {
+    echo "seaf-cli not installed (yay -S seafile)" >&2
+    exit 1
+}
+
+if [ ! -f "$CRED_FILE" ]; then
+    echo "Missing $CRED_FILE" >&2
+    echo "Copy configs/seafile-cli/credentials.example there and fill it in." >&2
+    exit 1
+fi
+# shellcheck source=/dev/null
+. "$CRED_FILE"
+: "${SEAFILE_SERVER:?set SEAFILE_SERVER in $CRED_FILE}"
+: "${SEAFILE_USER:?set SEAFILE_USER in $CRED_FILE}"
+: "${SEAFILE_PASS:?set SEAFILE_PASS in $CRED_FILE}"
+
+# One-time init of the local data store.
+if [ ! -d "$DATA_DIR/seafile-data" ]; then
+    mkdir -p "$DATA_DIR"
+    seaf-cli init -d "$DATA_DIR"
+fi
+
+# Start the daemon if it isn't already up, then wait for its socket.
+seaf-cli start >/dev/null 2>&1 || true
+i=0
+until seaf-cli list >/dev/null 2>&1; do
+    i=$((i + 1))
+    [ "$i" -gt 30 ] && {
+        echo "seaf-daemon did not come up" >&2
+        exit 1
+    }
+    sleep 1
+done
+
+synced=$(seaf-cli list 2>/dev/null || true)
+
+for DIR in $FOLDERS; do
+    [ -d "$DIR" ] || {
+        echo ">> skip $DIR (does not exist)"
+        continue
+    }
+    # Drop the ignore file at the library root so the daemon skips regenerable
+    # junk (.venv, target, node_modules, ...). Refresh it even for libraries
+    # that are already syncing.
+    [ -f "$IGNORE_TPL" ] && cp "$IGNORE_TPL" "$DIR/seafile-ignore.txt"
+    if printf '%s\n' "$synced" | grep -qF "$DIR"; then
+        echo ">> skip $DIR (already syncing; ignore refreshed)"
+        continue
+    fi
+    NAME=$(basename "$DIR")
+    echo ">> Creating library '$NAME' and syncing $DIR"
+    LIB_ID=$(seaf-cli create -s "$SEAFILE_SERVER" -n "$NAME" -u "$SEAFILE_USER" -p "$SEAFILE_PASS")
+    seaf-cli sync -l "$LIB_ID" -s "$SEAFILE_SERVER" -d "$DIR" -u "$SEAFILE_USER" -p "$SEAFILE_PASS"
+done
+
+echo
+seaf-cli status

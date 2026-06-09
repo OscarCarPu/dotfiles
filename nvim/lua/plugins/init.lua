@@ -95,6 +95,21 @@ return {
     opts = {},
   },
 
+  -- Highlight and search TODO, NOTE, WARNING, etc. in comments
+  {
+    "folke/todo-comments.nvim",
+    dependencies = "nvim-lua/plenary.nvim",
+    event = "VeryLazy",
+    opts = {
+      signs = true,
+      keywords = {
+        TODO = { icon = " ", color = "info" },
+        NOTE = { icon = " ", color = "hint", alt = { "INFO" } },
+        WARNING = { icon = " ", color = "warning", alt = { "WARN", "XXX" } },
+      },
+    },
+  },
+
   -- Surround selections with brackets, quotes, tags, etc.
   {
     "kylechui/nvim-surround",

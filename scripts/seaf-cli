@@ -1,0 +1,21 @@
+#!/bin/sh
+# Wrapper around the system seaf-cli (/usr/bin/seaf-cli).
+#
+# The Seafile server sits behind Cloudflare, whose bot protection 403s the
+# default "Python-urllib/x.y" User-Agent that seaf-cli's urllib requests send
+# (the C sync daemon uses "Seafile/x (Linux)" and is allowed, so only the
+# Python web-API calls — login/create/sync token — are affected).
+#
+# We re-run the real seaf-cli under a tiny urllib monkeypatch that sets the
+# default User-Agent to the daemon's, so Cloudflare lets it through. Reading
+# the real script via runpy keeps this upgrade-proof.
+exec python3 -c '
+import runpy, sys, urllib.request as u
+_orig = u.OpenerDirector.__init__
+def _init(self):
+    _orig(self)
+    self.addheaders = [("User-agent", "Seafile/9.0.18 (Linux)")]
+u.OpenerDirector.__init__ = _init
+sys.argv = ["seaf-cli"] + sys.argv[1:]
+runpy.run_path("/usr/bin/seaf-cli", run_name="__main__")
+' "$@"

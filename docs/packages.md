@@ -156,7 +156,7 @@ unmounts all, right-click opens Thunar.
 - Violentmonkey (LibreWolf add-on) — userscript manager; hosts `configs/uoc-aula-autosubmit.user.js` (submits the UOC Shibboleth login form on `id-provider.uoc.edu` once LibreWolf autofills it)
 - `chromium` — lightweight Chromium for checking web rendering
 - `spotify` — runs on workspace 3
-- `syncthing` — file sync
+- `seafile` (AUR) — Seafile command-line sync client (`seaf-cli`)
 - `musescore-bin` — sheet music editor
 - `jre-openjdk` — Java runtime
 - `jdk21-openjdk` — Java 21 development kit
