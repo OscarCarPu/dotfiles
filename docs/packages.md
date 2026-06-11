@@ -124,6 +124,8 @@ unmounts all, right-click opens Thunar.
   `espup` for Xtensa toolchain). `install-packages.sh` runs `rustup default
   stable` to materialize the host toolchain
 - `go` — Go toolchain
+- `gopls`, `gofumpt`, `go-tools` — Go LSP + formatters for nvim (`go-tools`
+  provides `goimports`)
 - `uv` — Python package and project manager
 - `tk` — Tcl/Tk toolkit, provides `tkinter` for Python GUIs
 - `r` — R statistical computing language

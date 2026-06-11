@@ -1,34 +1,47 @@
-# Seafile ignore patterns (gitignore syntax). Placed at the root of each synced
-# library by `seafile-setup`. Keeps regenerable / junk dirs out of sync so the
-# daemon isn't crawling tens of thousands of tiny files.
+# Seafile ignore patterns. Placed at the root of each synced library by
+# `seafile-setup`. Keeps regenerable / junk dirs out of sync so the daemon
+# isn't crawling tens of thousands of tiny files.
 #
-# Patterns mirror what the repos' own .gitignore files exclude (Rust /target,
-# node_modules, .idea, etc.) plus the usual Python/editor cruft.
+# IMPORTANT: Seafile is NOT full gitignore. A bare "name/" only matches at the
+# library ROOT; nested dirs need a "*/name/" pattern too ("*" matches "/", so
+# it covers any depth). Always pair both. Verified empirically.
 
 # Python
 .venv/
+*/.venv/
 venv/
-env/
+*/venv/
 __pycache__/
+*/__pycache__/
 *.pyc
 .ipynb_checkpoints/
+*/.ipynb_checkpoints/
 .mypy_cache/
+*/.mypy_cache/
 .pytest_cache/
+*/.pytest_cache/
 .ruff_cache/
+*/.ruff_cache/
 
 # Rust
 target/
+*/target/
 
 # Node / JS
 node_modules/
+*/node_modules/
 
 # Editors / IDEs
 .idea/
+*/.idea/
 *.iml
 
 # Version control
 .git/
+*/.git/
 
 # OS cruft
 .DS_Store
+*/.DS_Store
 Thumbs.db
+*/Thumbs.db
