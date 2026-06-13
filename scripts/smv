@@ -1,0 +1,27 @@
+#!/usr/bin/env bash
+# smv — mv that stops the Seafile daemon around the move to prevent
+# the daemon treating a local move as a conflicting delete+recreate.
+
+set -euo pipefail
+
+[[ $# -ge 2 ]] || { echo "Usage: smv SOURCE DEST" >&2; exit 1; }
+
+SRC="$1"
+DST="$2"
+SRC_ABS=$(realpath -- "$SRC")
+DST_ABS=$(realpath -m -- "$DST")
+
+_in_seafile() {
+    local target="$1"
+    while read -r _name _id path; do
+        [[ "$target" == "$path" || "$target" == "$path"/* ]] && return 0
+    done < <(seaf-cli list 2>/dev/null | tail -n +2)
+    return 1
+}
+
+if _in_seafile "$SRC_ABS" || _in_seafile "$DST_ABS"; then
+    seaf-cli stop
+    trap 'seaf-cli start' EXIT
+fi
+
+mv -- "$SRC" "$DST"

@@ -28,3 +28,17 @@ and creates + syncs each folder (re-runnable). `seaf-cli status` to monitor.
   applies to not-yet-synced files — add before first sync.
 - **Don't reorganize during the initial upload**: the daemon reverts local
   moves to match the in-progress server snapshot. Wait for `synchronized`.
+
+## Moving files safely — `smv`
+
+`smv SOURCE DEST` is a drop-in for `mv` inside synced libraries. The daemon
+treats a plain `mv` as a delete + recreate, which can create conflict copies.
+`smv` stops the daemon before the rename and restarts it on exit, so Seafile
+sees a clean state.
+
+```bash
+smv ~/docs/old-name.md ~/docs/new-name.md   # same library
+smv ~/docs/report.pdf ~/edu/report.pdf      # cross-library: daemon stopped for the move
+```
+
+If neither path is inside a synced library, `smv` falls back to a plain `mv`.
