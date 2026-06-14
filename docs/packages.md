@@ -190,6 +190,7 @@ unmounts all, right-click opens Thunar.
 ## AUR helper
 
 - `yay-bin`
+- `debtap` (AUR) — converts `.deb` packages to Arch packages
 
 ## Flatpak
 
