@@ -17,7 +17,7 @@ wifi-oscar:
 	nmcli device wifi connect Oscar
 
 celeste:
-	legendary launch Salt --no-wine --override-exe CelesteLauncher.sh
+	legendary launch Salt --no-wine --override-exe CelesteLauncher.sh --offline
 
 olympus:
 	/home/ocp/Games/Olympus/olympus-launch.sh
