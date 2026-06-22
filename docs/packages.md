@@ -166,16 +166,25 @@ unmounts all, right-click opens Thunar.
 - `android-tools` — standalone `adb`/`fastboot`/`mkbootimg` in `/usr/bin` (Arch `[extra]`)
 - `android-udev` — udev rules so non-root users (in `adbusers`) can reach connected devices
 - `obsidian-bin` — markdown notes / knowledge base
-- `openscad-git` — programmers' 3D CAD modeller
-- `prusa-slicer` — 3D-print slicer (Arch `[extra]` repo, enabled via
-  `artix-archlinux-support` in `configs/pacman.conf`); profiles tracked
-  in `configs/PrusaSlicer/`
+- `openscad-git` — programmers' 3D CAD modeller. The BOSL2 library is vendored
+  as a git submodule under `configs/OpenSCAD/libraries/BOSL2` and the whole
+  `configs/OpenSCAD/libraries` dir is symlinked to
+  `~/.local/share/OpenSCAD/libraries` by `install.sh`, so any `.scad` can
+  `include <BOSL2/std.scad>`. `install.sh` runs `git submodule update --init`
+  to populate it. To bump the pinned version:
+  `git -C configs/OpenSCAD/libraries/BOSL2 pull` then commit the submodule.
+- `orca-slicer-bin` (AUR) — 3D-print slicer (Bambu Studio / PrusaSlicer fork).
+  User presets (migrated from PrusaSlicer) are tracked as native Orca JSON in
+  `configs/OrcaSlicer/user/default/{machine,process,filament}/`, symlinked into
+  `~/.config/OrcaSlicer/user/default/`. Each is named "personal-ender" and
+  inherits the Creality Ender-3 0.4 system presets.
 - `libreoffice-still` — office suite (stable branch)
 - `python-pyqt6`, `python-pyqt6-webengine` — Qt6 Python bindings + WebEngine
   module
 - `obs-studio` — screen/video capture and streaming
 - `teams-for-linux` (AUR) — Microsoft Teams unofficial client
 - `davinci-resolve` (AUR) — professional video editing and color grading
+- `vlc` — multimedia player and framework
 - `okular` — PDF viewer
 - `zeal` — offline documentation browser (Dash-compatible docsets; Go, Rust, Python, etc.)
 - `autofirma-bin` — Spanish gov e-signature client (FNMT/DNIe,

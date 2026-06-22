@@ -15,6 +15,7 @@
         "cpu",
         "memory",
         "network",
+        "custom/usb",
         "custom/brightness",
         "pulseaudio#speaker",
         "pulseaudio#mic",
@@ -82,6 +83,15 @@
         "max-length": 80,
         "on-click-right": "nm-connection-editor",
         "format-alt": "{ifname}: {ipaddr}"
+    },
+    "custom/usb": {
+        "format": "{}",
+        "return-type": "json",
+        "exec": "~/.dotfiles/hypr/scripts/usb_status.sh",
+        "interval": 3,
+        "on-click": "udiskie-umount -a",
+        "on-click-right": "thunar /run/media/$USER",
+        "tooltip": true
     },
     "custom/brightness": {
         "format": "󰖨 {}%",

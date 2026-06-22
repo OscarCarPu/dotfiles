@@ -1,0 +1,3 @@
+[submodule "configs/OpenSCAD/libraries/BOSL2"]
+	path = configs/OpenSCAD/libraries/BOSL2
+	url = https://github.com/BelfrySCAD/BOSL2

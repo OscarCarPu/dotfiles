@@ -17,9 +17,10 @@ declare -A DOTFILES=(
     ["configs/mimeapps.list"]="$HOME/.config/mimeapps.list"
     ["configs/gtk-3.0/bookmarks"]="$HOME/.config/gtk-3.0/bookmarks"
     ["configs/gtk-3.0/settings.ini"]="$HOME/.config/gtk-3.0/settings.ini"
-    ["configs/PrusaSlicer/filament"]="$HOME/.config/PrusaSlicer/filament"
-    ["configs/PrusaSlicer/printer"]="$HOME/.config/PrusaSlicer/printer"
-    ["configs/PrusaSlicer/print"]="$HOME/.config/PrusaSlicer/print"
+    ["configs/OrcaSlicer/user/default/filament"]="$HOME/.config/OrcaSlicer/user/default/filament"
+    ["configs/OrcaSlicer/user/default/machine"]="$HOME/.config/OrcaSlicer/user/default/machine"
+    ["configs/OrcaSlicer/user/default/process"]="$HOME/.config/OrcaSlicer/user/default/process"
+    ["configs/OpenSCAD/libraries"]="$HOME/.local/share/OpenSCAD/libraries"
     ["configs/applications/autofirma.desktop"]="$HOME/.local/share/applications/autofirma.desktop"
     ["configs/applications/nvim-kitty.desktop"]="$HOME/.local/share/applications/nvim-kitty.desktop"
     ["claude/skills"]="$HOME/.claude/skills"
@@ -176,6 +177,10 @@ fi
 
 # --- user mode (default) --------------------------------------------------
 
+# Pull in vendored git submodules (e.g. BOSL2 for OpenSCAD, symlinked below).
+echo "Updating git submodules..."
+git -C "$DOTFILES_DIR" submodule update --init --recursive
+
 echo "Symlinking user dotfiles..."
 for src in "${!DOTFILES[@]}"; do
     link_file "$DOTFILES_DIR/$src" "${DOTFILES[$src]}"
@@ -198,6 +203,15 @@ if [ -n "$lw_profile" ]; then
         "$HOME/.librewolf/$lw_profile/user.js"
 else
     echo " Skipping librewolf user.js: no Librewolf profile found (launch it once first)"
+fi
+
+# AutoFirma CA: its launcher only trusts the root CA in Firefox profiles
+# (~/.mozilla/firefox), so LibreWolf never gets it and can't reach the local
+# signing socket. Trust it in the install-default profile here.
+autofirma_ca="$HOME/.afirma/Autofirma/AutoFirma_ROOT.cer"
+if [ -n "$lw_profile" ] && [ -r "$autofirma_ca" ]; then
+    certutil -d "$HOME/.librewolf/$lw_profile" -D -n "AutoFirma ROOT" >/dev/null 2>&1
+    certutil -d "$HOME/.librewolf/$lw_profile" -A -i "$autofirma_ca" -n "AutoFirma ROOT" -t C,,
 fi
 
 # Scripts: per-file symlinks so ~/.local/bin stays a real directory
