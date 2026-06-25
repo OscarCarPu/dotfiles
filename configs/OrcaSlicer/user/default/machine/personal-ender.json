@@ -4,6 +4,6 @@
     "is_custom_defined": "1",
     "version": "2.4.0.0",
     "inherits": "Creality Ender-3 0.4 nozzle",
-    "retraction_length": ["1.5"],
+    "retraction_length": ["4.5"],
     "retraction_speed": ["40"]
 }
