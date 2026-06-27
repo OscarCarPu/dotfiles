@@ -1,0 +1,7 @@
+{
+    "name": "core-one-asa-punteiros",
+    "from": "User",
+    "is_custom_defined": "1",
+    "version": "2.4.0.0",
+    "inherits": "Prusa CORE One HF 0.4 nozzle"
+}

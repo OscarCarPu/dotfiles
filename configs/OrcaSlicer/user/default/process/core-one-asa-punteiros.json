@@ -1,0 +1,21 @@
+{
+    "name": "core-one-asa-punteiros",
+    "from": "User",
+    "is_custom_defined": "1",
+    "version": "2.4.0.0",
+    "inherits": "0.20mm SPEED @CORE One HF 0.4",
+    "compatible_printers": ["core-one-asa-punteiros"],
+    "compatible_printers_condition": "",
+    "layer_height": "0.12",
+    "wall_loops": "5",
+    "bottom_shell_layers": "5",
+    "sparse_infill_density": "40%",
+    "infill_wall_overlap": "40%",
+    "seam_position": "back",
+    "outer_wall_speed": "35",
+    "inner_wall_speed": "70",
+    "detect_thin_wall": "0",
+    "filter_out_gap_fill": "999",
+    "brim_type": "outer_only",
+    "brim_width": "8"
+}
