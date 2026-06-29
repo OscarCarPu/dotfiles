@@ -1,0 +1,9 @@
+{
+    "name": "core-one-pla",
+    "from": "User",
+    "is_custom_defined": "1",
+    "version": "2.4.0.0",
+    "inherits": "0.20mm SPEED @CORE One HF 0.4",
+    "compatible_printers": ["core-one"],
+    "compatible_printers_condition": ""
+}

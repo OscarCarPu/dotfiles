@@ -4,7 +4,7 @@
     "is_custom_defined": "1",
     "version": "2.4.0.0",
     "inherits": "Prusa Generic ASA @CORE One HF 0.4",
-    "compatible_printers": ["core-one-asa-punteiros"],
+    "compatible_printers": ["core-one"],
     "compatible_printers_condition": "",
     "filament_vendor": ["Polymaker"],
     "bed_type": ["Textured PEI Plate"],

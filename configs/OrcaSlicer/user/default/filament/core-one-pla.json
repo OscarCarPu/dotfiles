@@ -1,0 +1,12 @@
+{
+    "name": "core-one-pla",
+    "from": "User",
+    "is_custom_defined": "1",
+    "version": "2.4.0.0",
+    "inherits": "Prusa Generic PLA @CORE One HF 0.4",
+    "compatible_printers": ["core-one"],
+    "compatible_printers_condition": "",
+    "bed_type": ["Textured PEI Plate"],
+    "textured_plate_temp": ["60"],
+    "textured_plate_temp_initial_layer": ["60"]
+}
