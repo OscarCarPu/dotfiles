@@ -5,6 +5,7 @@ export WAYLAND_DISPLAY=wayland-1
 [ -S "$XDG_RUNTIME_DIR/$WAYLAND_DISPLAY" ] || exit 1
 
 while :; do
+    export HYPRLAND_INSTANCE_SIGNATURE="$(ls -t "$XDG_RUNTIME_DIR/hypr" 2>/dev/null | head -1)"
     "$HOME/.dotfiles/hypr/scripts/set_wallpaper.sh"
     sleep 180
 done
