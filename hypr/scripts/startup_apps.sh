@@ -29,19 +29,19 @@ open_web() {
         "https://mail.google.com/mail/u/0/" \
         "https://mail.google.com/mail/u/1/" \
         "https://mail.google.com/mail/u/2/" \
-        "https://mail.google.com/mail/u/3/" \
         "https://gv.lab-ocp.com/tasks/" \
         "https://www.claude.ai/new" \
         "https://web.whatsapp.com/" \
         "$@" &
+        # "https://mail.google.com/mail/u/3/" \
     # aula.uoc.edu must open in a FOREGROUND tab: LibreWolf only autofills the
     # saved login when the tab is focused (background tabs stay empty until
     # clicked), and the uoc-aula-autosubmit userscript needs the filled form to
     # submit. A second librewolf call opens it into the running window as the
     # active tab, so autofill fires and the script logs in.
-    wait_for_class librewolf 100 || true
-    sleep 1
-    librewolf --new-tab "https://aula.uoc.edu/" &
+    # wait_for_class librewolf 100 || true
+    # sleep 1
+    # librewolf --new-tab "https://aula.uoc.edu/" &
 }
 
 # Wait until a window with the given class appears, up to N tenths of a second.
