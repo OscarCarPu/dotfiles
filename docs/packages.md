@@ -178,6 +178,9 @@ unmounts all, right-click opens Thunar.
   `configs/OrcaSlicer/user/default/{machine,process,filament}/`, symlinked into
   `~/.config/OrcaSlicer/user/default/`. Each is named "personal-ender" and
   inherits the Creality Ender-3 0.4 system presets.
+  Note: Orca loads `libwebkit2gtk-4.1`, so it inherits the `libjxl` 0.11 pin.
+  `webkit2gtk-4.1` is held at 2.52.4 in `IgnorePkg` (see `configs/pacman.conf`)
+  because 2.52.5 links `libjxl.so.0.12` and fails to load under the pin.
 - `libreoffice-still` — office suite (stable branch)
 - `python-pyqt6`, `python-pyqt6-webengine` — Qt6 Python bindings + WebEngine
   module
