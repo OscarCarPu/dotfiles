@@ -15,9 +15,11 @@ DOCK_USB_VENDOR="17e9"  # DisplayLink
 COOLDOWN=10
 LAST_RESTART=0
 
-# Raised while we are handling an event that may bounce the PipeWire stack so
+# Raised only while the PipeWire stack is actually being bounced so
 # monitor_watcher.sh holds its waybar restart - waybar aborts when
-# pa_context_connect() fails against a mid-restart PipeWire.
+# pa_context_connect() fails against a mid-restart PipeWire. Raising it for
+# every udev event kept it up through whole dock attach storms and starved
+# monitor_watcher's settle wait (2026-07-18: ~70s dock switch).
 BUSY_FLAG="${XDG_RUNTIME_DIR:-/run/user/$(id -u)}/audio_watcher_busy"
 trap 'rm -f "$BUSY_FLAG"' EXIT
 
@@ -57,6 +59,12 @@ set_dock_default() {
 # default sink, or no built-in fallback at all when an unplug landed within
 # 10s of a re-enumeration restart.
 restart_audio() {
+    touch "$BUSY_FLAG"
+    bounce_audio
+    rm -f "$BUSY_FLAG"
+}
+
+bounce_audio() {
     local now wait_left
     now=$(date +%s)
     wait_left=$(( COOLDOWN - (now - LAST_RESTART) ))
@@ -121,7 +129,6 @@ dock_usb_present && DOCK_PRESENT=1
 # Monitor udev sound subsystem events
 udevadm monitor --subsystem-match=sound --property 2>/dev/null | while read -r line; do
     if [[ "$line" == *"ACTION=add"* ]] || [[ "$line" == *"ACTION=remove"* ]]; then
-        touch "$BUSY_FLAG"
         sleep 2
 
         if ! dock_audio_alive; then
@@ -172,6 +179,5 @@ udevadm monitor --subsystem-match=sound --property 2>/dev/null | while read -r l
 
         DOCK_PRESENT=0
         dock_usb_present && DOCK_PRESENT=1
-        rm -f "$BUSY_FLAG"
     fi
 done

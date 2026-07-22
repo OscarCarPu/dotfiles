@@ -83,6 +83,7 @@ System (`bash install.sh --system`):
 - *Workflow*: [Workflow](docs/workflow.md) — git aliases, Makefile, bookmarks, bt-spotify, boot-bench
 - *Seafile*: [Seafile](docs/seafile.md) — file sync, Cloudflare wrapper, ignore patterns
 - *Claude Code*: [Claude](docs/claude.md) — custom skills
+- *Printing*: [Printing](docs/printing.md) — CUPS driverless queue for the Epson ET-3850
 - *Neovim*: [Neovim](nvim/README.md)
 - *Homelab*: [Homelab](docs/homelab.md)
 

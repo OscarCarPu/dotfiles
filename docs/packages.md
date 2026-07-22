@@ -78,6 +78,13 @@ Used by `scripts/bt-spotify-switch` and the lab Spotify auto-switch flow.
 ALSA-only apps (e.g. MuseScore AppImage) grab the hardware device directly and
 never appear as streams in the mixer.
 
+## Printing
+
+Driverless IPP queue for the network Epson ET-3850 — see
+[`printing.md`](printing.md).
+
+- `cups`, `cups-filters`, `cups-runit`
+
 ## Wayland / Hyprland
 
 - `hyprland`, `xdg-desktop-portal-hyprland`

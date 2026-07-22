@@ -1,24 +1,11 @@
 [
   {
-    "name": "aquamarine evdi/DisplayLink fix",
-    "reason": "aquamarine 0.11+ broke DisplayLink/evdi: mouse becomes flaky/laggy with dock connected, dock takes 15s+ to connect (was ~10s), drmGetDevice spam and DVI-I-2 applyCommit failures in Hyprland log, eglQueryDeviceStringEXT errors from aquamarine. Tested 0.12.0 on 2026-06-03 — still broken. Rolled back to 0.10.0-4. elogind/libelogind co-pinned because hyprland 0.54.3 links against libelogind-shared-255.so; upgrading elogind to 257 breaks Hyprland startup at TTY1.",
-    "packages": [
-      "aquamarine",
-      "hyprland",
-      "hyprtoolkit",
-      "hyprland-guiutils",
-      "hyprwayland-scanner",
-      "hyprwire",
-      "xdg-desktop-portal-hyprland",
-      "hyprutils",
-      "hyprgraphics",
-      "hyprlang",
-      "elogind",
-      "libelogind"
-    ],
+    "name": "aquamarine evdi/DisplayLink retest",
+    "reason": "Pin removed 2026-07-21: the evdi fix (PR #310, rendererRequired=false for evdi driver) shipped in aquamarine 0.12.0 and the page-flip scheduling fix (#312) in 0.13.0, so the 2026-06-03 'still broken on 0.12.0' test is suspect (likely partial upgrade / stale session — the spam code path is unreachable for evdi on >=0.12.0). Retest on 0.13.0-2 + hyprland 0.56.0-2. If hotplug fails but boot-attach works, suspect the kernel-side evdi hotplug bug, not aquamarine. If the drmGetDevice spam reproduces, re-pin (cached 0.10.0-4 rollback) and post the log to aquamarine#294.",
+    "packages": [],
     "tracking": [
       {"kind": "issue", "repo": "hyprwm/aquamarine", "number": 294},
-      {"kind": "pr",    "repo": "hyprwm/aquamarine", "number": 279}
+      {"kind": "issue", "repo": "DisplayLink/evdi", "number": 567}
     ]
   }
 ]

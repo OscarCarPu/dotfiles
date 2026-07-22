@@ -37,10 +37,13 @@ audio_ready() {
 # pulse shim answers, so waybar never starts against a PipeWire stack that is
 # mid-bounce - pa_context_connect() failing aborts waybar outright. A flag
 # older than 60s is stale (audio_watcher's EXIT trap can't run on SIGKILL);
-# treat it as absent instead of paying 30s on every burst.
+# treat it as absent instead of paying the full wait on every burst.
+# Cap at 12s, not more: runit restarts waybar if it crashes and the run-script
+# self-check recovers missed bars, while a long gate delays every dock switch
+# (2026-07-18: two full 30s timeouts made a dock event take ~70s).
 wait_for_audio_settled() {
     local streak=0 flag_age
-    for _ in $(seq 1 30); do
+    for _ in $(seq 1 12); do
         if [[ -e "$AUDIO_BUSY_FLAG" ]]; then
             flag_age=$(( $(date +%s) - $(stat -c %Y "$AUDIO_BUSY_FLAG" 2>/dev/null || echo 0) ))
             if (( flag_age < 60 )); then
@@ -55,7 +58,7 @@ wait_for_audio_settled() {
         fi
         sleep 1
     done
-    log "Warning: audio stack not settled after 30s, restarting waybar anyway"
+    log "Warning: audio stack not settled after 12s, restarting waybar anyway"
 }
 
 # Output set the last waybar restart was issued for - identical re-settles
