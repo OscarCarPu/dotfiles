@@ -1,14 +1,21 @@
 {
 	"bottom_shell_layers": "5",
+	"brim_type": "outer_only",
+	"brim_width": "5",
 	"compatible_printers": [
 		"core-one"
 	],
 	"compatible_printers_condition": "",
+	"default_acceleration": "2000",
+	"default_jerk": "7",
 	"enable_support": "1",
 	"from": "User",
 	"inherits": "0.15mm SPEED @CORE One HF 0.4",
-	"layer_height": "0.12",
+	"initial_layer_speed": "30",
+	"layer_height": "0.16",
 	"name": "core-one-pla-quality",
+	"outer_wall_acceleration": "1500",
+	"outer_wall_jerk": "6",
 	"print_extruder_id": [
 		"1"
 	],
@@ -26,5 +33,6 @@
 	"support_top_z_distance": "0.25",
 	"support_type": "tree(auto)",
 	"version": "2.4.0.0",
+	"wall_generator": "classic",
 	"wall_loops": "4"
 }

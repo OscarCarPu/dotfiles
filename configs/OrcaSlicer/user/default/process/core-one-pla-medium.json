@@ -1,4 +1,6 @@
 {
+	"brim_type": "outer_only",
+	"brim_width": "5",
 	"compatible_printers": [
 		"core-one"
 	],
@@ -6,6 +8,7 @@
 	"enable_support": "1",
 	"from": "User",
 	"inherits": "0.20mm SPEED @CORE One HF 0.4",
+	"initial_layer_speed": "30",
 	"name": "core-one-pla-medium",
 	"print_extruder_id": [
 		"1"
@@ -24,5 +27,6 @@
 	"support_top_z_distance": "0.25",
 	"support_type": "tree(auto)",
 	"version": "2.4.0.0",
+	"wall_generator": "classic",
 	"wall_loops": "3"
 }
