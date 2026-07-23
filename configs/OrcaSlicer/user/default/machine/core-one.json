@@ -1,7 +1,18 @@
 {
-    "name": "core-one",
-    "from": "User",
-    "is_custom_defined": "1",
-    "version": "2.4.0.0",
-    "inherits": "Prusa CORE One HF 0.4 nozzle"
+	"from": "User",
+	"inherits": "Prusa CORE One HF 0.4 nozzle",
+	"name": "core-one",
+	"print_host": "192.168.1.235",
+	"print_host_webui": "prusa-core-one",
+	"printer_extruder_id": [
+		"1"
+	],
+	"printer_extruder_variant": [
+		"Direct Drive Standard"
+	],
+	"printer_settings_id": "core-one",
+	"printhost_authorization_type": "user",
+	"printhost_password": "xsUhhiB9TXTmWyJ",
+	"printhost_user": "maker",
+	"version": "2.4.0.0"
 }

@@ -1,0 +1,18 @@
+{
+    "name": "core-one-pla-figutech",
+    "from": "User",
+    "is_custom_defined": "1",
+    "version": "2.4.0.0",
+    "inherits": "Prusa Generic PLA @CORE One HF 0.4",
+    "filament_vendor": ["Figutech"],
+    "compatible_printers": ["core-one"],
+    "compatible_printers_condition": "",
+    "filament_flow_ratio": ["0.95"],
+    "nozzle_temperature": ["210"],
+    "nozzle_temperature_initial_layer": ["215"],
+    "fan_min_speed": ["100"],
+    "fan_max_speed": ["100"],
+    "bed_type": ["Textured PEI Plate"],
+    "textured_plate_temp": ["60"],
+    "textured_plate_temp_initial_layer": ["60"]
+}
