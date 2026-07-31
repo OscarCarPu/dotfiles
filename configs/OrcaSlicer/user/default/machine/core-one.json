@@ -2,6 +2,10 @@
 	"from": "User",
 	"inherits": "Prusa CORE One HF 0.4 nozzle",
 	"name": "core-one",
+
+	"before_layer_change_gcode": [
+		";BEFORE_LAYER_CHANGE\nG92 E0.0\n;[layer_z]\n{if layer_z > 150 and filament_type[0] == \"ASA\"}\n; torre esbelta en ASA (punteiro): la base son ~93 mm2 para 230 mm de alto, 26:1 de palanca.\n; se baja el limite de aceleracion y de velocidad segun la altura, mas fuerte que la tabla de Prusa\n; (que solo baja a 2000 y nunca llega a limitar los 1000 del perfil).\nM201 X{interpolate_table(layer_z, (0,7000), (150,7000), (180,2500), (200,1200), (215,800), (230,500), (270,500))} Y{interpolate_table(layer_z, (0,7000), (150,7000), (180,2500), (200,1200), (215,800), (230,500), (270,500))}\nM203 X{interpolate_table(layer_z, (0,350), (150,350), (180,200), (200,120), (215,80), (230,60), (270,60))} Y{interpolate_table(layer_z, (0,350), (150,350), (180,200), (200,120), (215,80), (230,60), (270,60))}\n{endif}\n{if layer_z > 150 and filament_type[0] != \"ASA\"}\nM201 X{interpolate_table(layer_z, (0,7000), (150,7000), (200,4000), (270,2000))} Y{interpolate_table(layer_z, (0,7000), (150,7000), (200,4000), (270,2000))}\n{endif}\n"
+	],
 	"print_host": "192.168.1.235",
 	"print_host_webui": "prusa-core-one",
 	"printer_extruder_id": [

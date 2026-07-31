@@ -1,8 +1,8 @@
 {
-	"name": "core-one-pla-quality",
+	"name": "core-one-pla-fast-hf",
 	"from": "User",
-	"inherits": "0.15mm SPEED @CORE One HF 0.4",
-	"print_settings_id": "core-one-pla-quality",
+	"inherits": "0.28mm DRAFT @CORE One HF 0.4",
+	"print_settings_id": "core-one-pla-fast-hf",
 	"compatible_printers": [
 		"core-one"
 	],
