@@ -31,10 +31,10 @@
 	"seam_slope_conditional": "1",
 	"staggered_inner_seams": "1",
 
-	"slowdown_for_curled_perimeters": "0",
+	"slowdown_for_curled_perimeters": "1",
 	"overhang_1_4_speed": "100%",
-	"overhang_2_4_speed": "116",
-	"overhang_3_4_speed": "100",
+	"overhang_2_4_speed": "60",
+	"overhang_3_4_speed": "45",
 	"overhang_4_4_speed": "25",
 
 	"enable_support": "0",
