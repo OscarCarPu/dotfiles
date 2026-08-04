@@ -4,7 +4,7 @@
     "is_custom_defined": "1",
     "version": "2.4.0.0",
     "inherits": "Prusa Generic ASA @CORE One HF 0.4",
-    "compatible_printers": ["core-one"],
+    "compatible_printers": ["core-one", "core-one-obxidian"],
     "compatible_printers_condition": "",
     "bed_type": ["Textured PEI Plate"],
     "nozzle_temperature": ["255"],

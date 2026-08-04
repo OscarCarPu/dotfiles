@@ -13,7 +13,7 @@
 	"initial_layer_print_height": "0.24",
 	"initial_layer_speed": "20",
 	"inner_wall_speed": "60",
-	"name": "ender-pla-generic-stock-quality",
+	"name": "ender-pla-stock-quality",
 	"outer_wall_speed": "30",
 	"print_extruder_id": [
 		"1"
@@ -21,7 +21,7 @@
 	"print_extruder_variant": [
 		"Direct Drive Standard"
 	],
-	"print_settings_id": "ender-pla-generic-stock-quality",
+	"print_settings_id": "ender-pla-stock-quality",
 	"skirt_distance": "6",
 	"skirt_height": "1",
 	"skirt_loops": "1",

@@ -1,8 +1,8 @@
 {
-	"name": "core-one-pla-figutech-hf-draft",
+	"name": "core-one-pla-hf-draft",
 	"from": "User",
 	"inherits": "0.28mm DRAFT @CORE One HF 0.4",
-	"print_settings_id": "core-one-pla-figutech-hf-draft",
+	"print_settings_id": "core-one-pla-hf-draft",
 	"compatible_printers": [
 		"core-one"
 	],

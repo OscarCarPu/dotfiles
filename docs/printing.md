@@ -66,13 +66,42 @@ names because `compatible_printers` in every filament and process refers to them
 ### Naming convention
 
 ```
-{printer}-{material}-{producer}-{nozzle}-{tier}[-{usage}]
+filament:  {printer}-{material}-{producer}-{nozzle}
+process:   {printer}-{material}-{nozzle}-{tier}[-{usage}]
 ```
 
 `tier` is the layer height band, not a subjective label: **draft / speed /
 quality**. `usage` is only present for a special-purpose variant (`punteiros`);
-its absence means general use. Filaments use the same scheme without `tier`.
-Renaming a preset breaks the reference inside any saved 3MF that used it.
+its absence means general use. Renaming a preset breaks the reference inside any
+saved 3MF that used it.
+
+**Processes carry no producer on purpose.** Orca has no filament↔process
+compatibility mechanism — both filter by printer only. Putting a spool brand in a
+process name implies a coupling that does not exist and makes you feel obliged to
+change the process when you change filament. The producer belongs on the
+filament, which is the only place Orca actually uses it.
+
+### One machine preset per nozzle
+
+`core-one` inherits *Prusa CORE One HF 0.4 nozzle*, `core-one-obxidian` inherits
+*Prusa CORE One 0.4 nozzle*. This is not cosmetic. The vendor start gcode emits
+
+```gcode
+M862.1 P[nozzle_diameter] A{(printer_notes=~/.*ABRASIVE_NOZZLE.*/ ? 1 : 0)} F{(printer_notes=~/.*HF_NOZZLE.*/ ? 1 : 0)}
+```
+
+so the `F` flag — "this print requires a high-flow nozzle" — comes from the
+keyword `HF_NOZZLE` in `printer_notes`, which only the HF machine preset carries.
+Slicing with the HF preset while the standard Obxidian is installed emits `F1`
+and the printer refuses the job. `A` works the same way for abrasive nozzles;
+`A0` with a hardened nozzle installed is fine, since having more than required is
+never an error.
+
+Two presets also make the dropdowns behave: every filament and process declares
+`compatible_printers` for exactly one machine, so choosing the machine filters
+both lists down to that nozzle and the wrong combination cannot be picked.
+Machine presets keep plain names — the convention does not cover them, and
+`compatible_printers` everywhere refers to them.
 
 | Nozzle | draft | speed | quality |
 |---|---|---|---|

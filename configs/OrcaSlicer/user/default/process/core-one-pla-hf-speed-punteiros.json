@@ -1,8 +1,8 @@
 {
-	"name": "core-one-pla-figutech-hf-speed-punteiros",
+	"name": "core-one-pla-hf-speed-punteiros",
 	"from": "User",
 	"inherits": "0.20mm SPEED @CORE One HF 0.4",
-	"print_settings_id": "core-one-pla-figutech-hf-speed-punteiros",
+	"print_settings_id": "core-one-pla-hf-speed-punteiros",
 	"compatible_printers": [
 		"core-one"
 	],
