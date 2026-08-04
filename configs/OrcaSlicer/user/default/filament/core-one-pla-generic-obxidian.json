@@ -6,6 +6,8 @@
     "inherits": "Prusa Generic PLA @CORE One",
     "compatible_printers": ["core-one-obxidian"],
     "compatible_printers_condition": "",
+    "nozzle_temperature": ["225"],
+    "nozzle_temperature_initial_layer": ["225"],
     "bed_type": ["Textured PEI Plate"],
     "textured_plate_temp": ["60"],
     "textured_plate_temp_initial_layer": ["60"]
