@@ -249,10 +249,15 @@ Check tessellation properly before acting on that suspicion:
   analytic `3·(1−cos 3.75°) = 6.42 µm` exactly. The wide Z gaps (392 µm) sit
   where the surface is vertical and the radius changes by 26 µm — where Z
   resolution is worthless. Re-exporting would change nothing.
-- The metric that matters is **chord error and facet width, not the number of Z
-  levels**. By that metric `punteiro_do_arriba.stl` *is* too coarse: 203 µm chord
-  error at the z+208 flange, 612 edges over 30 µm. That is ~2 layers, visible,
-  and worth re-exporting at ≤20 µm tolerance.
+- The metric that matters is **chord error, not the number of Z levels**. Compute
+  it as `R·(1 − cos(π/N))` for the actual vertex count N at the actual radius, and
+  **read N off the mesh**, not off a `$fn`-adjacent variable in the `.scad`. A
+  "203 µm chord error at the z+208 flange of `punteiro_do_arriba.stl`" was
+  reported and is wrong: it is exactly `16.5·(1 − cos(π/20))`, i.e. what you get
+  assuming 20 rotational facets, but the bulb is tessellated at 135 angles for
+  **4.5 µm**, and there is no vertex ring at that height at all (model z 195-230
+  is a single straight cone). Both punteiro meshes are already 4× inside a 20 µm
+  budget; neither needs re-exporting.
 
 Two real causes, one fixable:
 
@@ -267,12 +272,28 @@ Two real causes, one fixable:
    `slowdown_for_curled_perimeters` turned off; bucket 4 stays slow for genuine
    near-unsupported bridging.
 2. **The tangent shelf is geometric.** The round-over is tangent to horizontal at
-   both z=0 and z=6, so a layer of height h leaves a shelf `sqrt(6h − h²)` wide:
-   1.077 mm at 0.20, 0.768 mm at 0.10, 0.644 mm at the 0.07 machine minimum. The
-   payoff is square-root at a tangent, so a 30 % layer-height cut buys 16 % —
-   **variable layer height does not rescue this**, and no orientation helps
-   because the section is symmetric and tangent at both ends. Only CAD removes
-   it: chamfer instead of a full semicircular round-over, or a smaller radius.
+   both z=0 and z=6, so a layer of height h leaves a shelf `sqrt(2Rh − h²)` wide.
+   The payoff is square-root, so halving the layer height buys only ~30 %, and
+   **variable layer height does not rescue this**; no orientation helps either,
+   because the section is symmetric and tangent at both ends.
+
+   | outer profile | shelf @ 0.10 | @ 0.07 |
+   |---|---|---|
+   | R3 round-over (as modelled) | 768 µm | 644 µm |
+   | R1 | 436 µm | 368 µm |
+   | R0.5 | 300 µm | 255 µm |
+   | 45° chamfer | **100 µm** | **70 µm** |
+
+   Shrinking the radius obeys the same square root and barely helps. **Only a
+   non-tangent transition breaks the law**: with a chamfer the shelf is
+   `h/tan(angle)`, linear in layer height — 7.7× better than R3 at 0.10 mm and it
+   keeps improving if the layer height ever drops. A truncated arc plus 45°
+   straight runs gets the same 100 µm while keeping the round belly: for Ø48 × 6
+   keep the R3 arc over z 0.879-5.121 (r 23.121 → 24 → 23.121) and run 45°
+   chamfers out to r 22.243 at z=0 and z=6, which preserves the diameter and the
+   height and widens the flat annuli from 1.925 to 3.168 mm. Steeper truncation is
+   better still — 60° gives `h/tan 60° =` 58 µm — at the cost of how much arc
+   survives.
 
 Supports are wrong here too: the only sub-30° downfacing surface is a 0.4 mm lip
 against the plate, and `support_on_build_plate_only` can only deposit a sliver
