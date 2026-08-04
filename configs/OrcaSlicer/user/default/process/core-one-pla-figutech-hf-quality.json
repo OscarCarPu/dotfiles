@@ -15,7 +15,9 @@
 	],
 	"version": "2.4.0.0",
 
-	"sparse_infill_density": "100%",
+	"wall_loops": "6",
+	"precise_outer_wall": "0",
+	"detect_thin_wall": "1",
 	"infill_wall_overlap": "25%",
 	"top_surface_pattern": "monotonic",
 	"ironing_type": "top",

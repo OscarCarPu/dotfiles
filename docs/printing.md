@@ -138,25 +138,46 @@ in the sliced gcode of `parabens.stl`: sparse infill segments have a **median
 length of 1.63 mm** and top-surface lines **1.90 mm**, against 24 822 outer-wall
 segments averaging 0.57 mm.
 
-Two independent failures follow, and neither is a flow problem — which is why
-calibrating the filament did not help and in fact made it worse, because the
-raised flow cap let the profile print *faster*:
+None of it is a flow problem — which is why calibrating the filament did not
+help and in fact made it worse, since the raised flow cap let the profile print
+*faster* (144 → 189 mm/s).
 
-1. **Gaps between adjacent top-surface lines.** With `top_surface_pattern =
-   monotonicline` every line is printed separately with its own travel, start and
-   stop. On a 1.9 mm line the pressure transient *is* the whole line, so the
-   lines never weld to each other. `monotonic` connects consecutive lines with a
-   turn instead — far fewer start/stop events. **monotonicline is better on
-   large surfaces and worse on narrow slivers.**
-2. **Nothing underneath to sit on.** 15 % gyroid inside a 1.6 mm cavity is
-   disconnected stubs, so the top shells sag. On a 4 mm part solid infill costs
-   almost nothing.
+**Root cause: `wall_loops` caps arachne.** The gcode used line widths of 0.492,
+0.546, 0.594 and **0.643 mm** from a 0.45 nominal — arachne widening beads to
+1.43×. That only happens when it is not allowed to add another one. A ~1.3 mm
+letter stroke wants three beads of 0.43; `wall_loops: 2` forces two of 0.64
+instead, and two heavily over-widened beads do not fuse in the middle — they
+leave a valley running the length of every stroke. Where not even widening
+reaches, the leftover sliver is filled by internal solid infill stubs with a
+**median length of 0.35 mm** (6299 of them), each its own start and stop.
 
-`core-one-pla-figutech-hf-quality` is the answer to this: 0.15 mm layers, 100 %
-infill, `monotonic` top surface, ironing on, `small_perimeter_speed` down from
-the vendor's 170 to 60, outer wall 80, outer-wall acceleration halved to 1500,
-and supports off (a flat topper needs none, and its internal slot cannot be
-supported anyway with `support_on_build_plate_only`).
+Raising `wall_loops` to 6 lets arachne cover a narrow stroke entirely with
+properly-sized concentric loops. A loop is continuous, so the start/stop
+transients disappear along with the gaps. Note the punteiros profiles had
+already arrived at `wall_loops: 4` empirically for the same reason.
+
+Two secondary contributors, both inherited from the vendor base:
+
+- `precise_outer_wall: 1` deliberately reduces overlap between the outer wall
+  and the next one so outer dimensions come out exact. The documented side
+  effect is a gap between those two beads. Fine for functional parts, wrong for
+  decorative ones — set it to 0.
+- `top_surface_pattern: monotonicline` prints every line separately with its own
+  travel, start and stop. On a 1.9 mm line the pressure transient *is* the whole
+  line. `monotonic` connects consecutive lines with a turn instead.
+  **monotonicline is better on large surfaces and worse on narrow slivers.**
+
+Both `-quality` profiles now carry `wall_loops: 6`, `precise_outer_wall: 0`,
+`detect_thin_wall: 1`, `monotonic` top surface, ironing on, and
+`infill_wall_overlap: 25%`. Infill density stays at the vendor's 15 %: once the
+perimeters cover the stroke there is nothing left for infill to do, so forcing
+100 % only costs time.
+
+`small_perimeter_speed` is the setting nobody looks at and it governs exactly
+these letter contours — the vendor bases leave it at 145-170 mm/s. It is set per
+profile to land at the same **~4 mm³/s** floor rather than the same speed: 60 at
+0.15 mm, 90 at 0.10 mm. Going below that floor is how the earlier heat-creep jam
+happened.
 
 Also relevant: uneven layer times cause banding on these parts. Solid layers
 move ~2000 mm of extrusion and run at full speed; sparse layers move ~700 mm and
