@@ -212,9 +212,29 @@ perimeters cover the stroke there is nothing left for infill to do, so forcing
 
 `small_perimeter_speed` is the setting nobody looks at and it governs exactly
 these letter contours — the vendor bases leave it at 145-170 mm/s. It is set per
-profile to land at the same **~4 mm³/s** floor rather than the same speed: 60 at
-0.15 mm, 90 at 0.10 mm. Going below that floor is how the earlier heat-creep jam
-happened.
+profile to land near the same **~4 mm³/s** floor rather than at the same speed:
+60 mm/s at 0.20 and 0.15 mm, 90 mm/s at 0.10 mm.
+
+Toppers have their own profile, **`core-one-pla-obxidian-speed-toppers`**, and its
+decisive setting is `line_width`, not anything about layers. The measured minimum
+stroke in `parabens.stl` is **0.716 mm**, and 15.9 % of the text is under 1.35 mm.
+At `line_width: 0.45` arachne would need beads of 0.358 mm to split that stroke in
+two, below `min_bead_width` (85 % = 0.3825), so it lays a single 0.716 mm bead at
+1.59× nominal — the over-widened-bead failure again, this time structural to the
+text rather than caused by a `wall_loops` cap. **At `line_width: 0.40` the floor
+drops to 0.34 and 0.358 fits: two clean beads.**
+
+Second, the letter outlines have local fillet radii of 0.5-1.0 mm, so the toolhead
+is **curvature-bound, not speed-bound**: `sqrt(accel × r)` gives only 32-45 mm/s
+at the inherited 2000 mm/s², i.e. 2.5-3.6 mm³/s sustained for the entire outline
+pass. `outer_wall_acceleration: 4000` lifts that to 63 mm/s and 5.1 mm³/s.
+On text, acceleration is the lever, never speed.
+
+Layer height is irrelevant on a part with no curved-in-Z surface, so this profile
+inherits the 0.20 mm base: 20 layers instead of 40 for the same finish. The
+4.0 mm part has a 0.9 mm connecting web whose top lands 0.1 mm inside a layer at
+0.20 — invisible on a cake topper, and not worth a non-standard layer height or a
+0.1 mm first layer on a textured plate to make it line up.
 
 ### Rounded rings (`anilla.stl`): terracing that is not the slicer's fault
 

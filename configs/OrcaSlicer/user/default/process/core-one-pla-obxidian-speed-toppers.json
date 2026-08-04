@@ -1,0 +1,45 @@
+{
+	"name": "core-one-pla-obxidian-speed-toppers",
+	"from": "User",
+	"inherits": "0.20mm SPEED @CORE One 0.4",
+	"print_settings_id": "core-one-pla-obxidian-speed-toppers",
+	"compatible_printers": [
+		"core-one-obxidian"
+	],
+	"compatible_printers_condition": "",
+	"print_extruder_id": [
+		"1"
+	],
+	"print_extruder_variant": [
+		"Direct Drive Standard"
+	],
+	"version": "2.4.0.0",
+
+	"line_width": "0.4",
+	"outer_wall_line_width": "0.4",
+	"inner_wall_line_width": "0.4",
+
+	"wall_loops": "6",
+	"precise_outer_wall": "0",
+	"detect_thin_wall": "1",
+	"infill_wall_overlap": "25%",
+	"top_surface_pattern": "monotonic",
+	"ironing_type": "top",
+
+	"small_perimeter_speed": "60",
+	"small_perimeter_threshold": "0",
+	"outer_wall_acceleration": "4000",
+	"top_surface_acceleration": "2000",
+	"seam_slope_type": "external",
+	"seam_slope_conditional": "1",
+
+	"enable_support": "0",
+	"support_type": "tree(auto)",
+	"support_style": "default",
+	"support_on_build_plate_only": "1",
+	"support_threshold_angle": "30",
+	"support_critical_regions_only": "0",
+	"support_top_z_distance": "0.2",
+	"support_base_pattern_spacing": "3",
+	"support_interface_spacing": "0.5"
+}
