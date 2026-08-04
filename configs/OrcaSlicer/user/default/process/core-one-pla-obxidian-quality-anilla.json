@@ -1,8 +1,8 @@
 {
-	"name": "core-one-pla-obxidian-quality",
+	"name": "core-one-pla-obxidian-quality-anilla",
 	"from": "User",
 	"inherits": "0.10mm FAST DETAIL @CORE One 0.4",
-	"print_settings_id": "core-one-pla-obxidian-quality",
+	"print_settings_id": "core-one-pla-obxidian-quality-anilla",
 	"compatible_printers": [
 		"core-one-obxidian"
 	],
@@ -20,6 +20,7 @@
 	"precise_outer_wall": "0",
 	"detect_thin_wall": "1",
 	"extra_perimeters_on_overhangs": "1",
+	"wall_transition_filter_deviation": "50%",
 	"infill_wall_overlap": "25%",
 	"top_surface_pattern": "monotonic",
 	"ironing_type": "top",
@@ -27,6 +28,12 @@
 	"seam_slope_conditional": "1",
 	"small_perimeter_speed": "90",
 	"small_perimeter_threshold": "0",
+
+	"slowdown_for_curled_perimeters": "0",
+	"overhang_1_4_speed": "100%",
+	"overhang_2_4_speed": "116",
+	"overhang_3_4_speed": "100",
+	"overhang_4_4_speed": "25",
 
 	"enable_support": "0",
 	"support_type": "tree(auto)",

@@ -270,7 +270,30 @@ Two real causes, one fixable:
    outward flare every bead is ≥49 % supported, so the slowdown buys nothing.
    Buckets 1-3 are raised to 145/116/100 mm/s (6.53/5.22/4.50 mm³/s) and
    `slowdown_for_curled_perimeters` turned off; bucket 4 stays slow for genuine
-   near-unsupported bridging.
+   near-unsupported bridging. **These live in
+   `core-one-pla-obxidian-quality-anilla`, not in the general quality profile** —
+   they are only safe because this flare is convex and every bead is ≥49 %
+   supported. On a real 45° underside or a bridge the same values would droop.
+3. **A separate banding cause on the flare, and probably the dominant one.** The
+   annulus widens 3.00 → 4.93 mm over the first 2 mm of height, so arachne steps
+   its bead count 7→8 at z=0.40, 8→9 at 0.70, 9→10 at 1.20 and 10→11 at 2.00 —
+   **four transitions in 2 mm, three of them in the first 1.2 mm.** Every
+   transition relocates every bead in the section, which reads as a
+   circumferential band exactly where "the rise looks bad". The lever is
+   `wall_transition_filter_deviation` (Orca default 25 %, set to 50 % here): a
+   wider margin holds the same bead count over more height. Keep
+   `wall_distribution_count` at its default 1 so the width variation is absorbed
+   by the innermost bead and the **outer** wall keeps a constant width.
+
+Supports cannot help this flare, and the arithmetic says why: the largest
+per-layer horizontal step is **0.231 mm**, while `support_top_z_distance` is
+0.2 mm snapped to two layers. The support surface would sit 0.2 mm *below* a ledge
+that protrudes 0.231 mm — it never touches what it is meant to hold. Zero gap
+would touch, and then has to be cut off the ⌀48 rim, the most visible surface on
+the part. The support would also be a 0.231 mm-wide, one-layer annular ring, which
+is not manufacturable. What *does* work is
+`extra_perimeters_on_overhangs: 1` — it attacks the same problem from the inside,
+adding perimeters in the overhanging region so each bead lands on more material.
 2. **The tangent shelf is geometric.** The round-over is tangent to horizontal at
    both z=0 and z=6, so a layer of height h leaves a shelf `sqrt(2Rh − h²)` wide.
    The payoff is square-root, so halving the layer height buys only ~30 %, and
@@ -295,10 +318,7 @@ Two real causes, one fixable:
    better still — 60° gives `h/tan 60° =` 58 µm — at the cost of how much arc
    survives.
 
-Supports are wrong here too: the only sub-30° downfacing surface is a 0.4 mm lip
-against the plate, and `support_on_build_plate_only` can only deposit a sliver
-inside a 0.2 mm gap against the most visible surface on the part. None of the
-five workload models needs support.
+None of the five workload models needs support.
 
 Also check where a model sits in Z before slicing: `punteiro_do_arriba.stl` is
 exported at z 76..312, i.e. 42 mm above the 270 mm `printable_height`, and both
