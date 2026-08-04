@@ -179,6 +179,28 @@ profile to land at the same **~4 mm³/s** floor rather than the same speed: 60 a
 0.15 mm, 90 at 0.10 mm. Going below that floor is how the earlier heat-creep jam
 happened.
 
+### Tall slender parts (`punteiros`): plate several at once
+
+A ~93 mm² × 230 mm punteiro at 0.10 mm is 2300 layers of only 214 mm of
+extrusion each. That takes 1.78 s at the profile's speeds, so
+`slow_down_layer_time` (8 s) stretches every one of them by **4.5×** — the
+speeds written in the profile never apply. The result is 27 mm/s average, i.e.
+**1.2 mm³/s sustained for over five hours** with the hotend at 225 °C in a
+closed chamber. That is the heat-creep jam, and no combination of process
+settings avoids it: `slow_down_layer_time` is a *filament* setting and raising it
+just trades a jam for a deformed tower, which is what the rule exists to prevent.
+
+The fix is on the plate, not in the profile: **print five at once**. Per-layer
+extrusion goes to ~1070 mm, each layer takes 8.9 s naturally with no throttling
+at all, flow rises to ~5.4 mm³/s, and the cooling requirement is satisfied
+because the head is away from any given part 80 % of the time. Both problems
+disappear together.
+
+Second trap on tapering parts: `wall_generator: classic` with `wall_loops: 4`
+needs 3.6 mm of section for the walls to fit, and the classic generator cannot
+vary bead width — it silently drops what does not fit. On a part that comes to a
+point, the point is what disappears. Use `arachne` plus `detect_thin_wall: 1`.
+
 Also relevant: uneven layer times cause banding on these parts. Solid layers
 move ~2000 mm of extrusion and run at full speed; sparse layers move ~700 mm and
 get stretched to the 8 s minimum, so bands of layers print at different speeds

@@ -15,8 +15,9 @@
 	],
 	"version": "2.4.0.0",
 
-	"wall_generator": "classic",
+	"wall_generator": "arachne",
 	"wall_loops": "4",
+	"detect_thin_wall": "1",
 	"sparse_infill_density": "100%",
 	"infill_wall_overlap": "25%",
 	"top_shell_layers": "8",
