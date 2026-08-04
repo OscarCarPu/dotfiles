@@ -5,7 +5,7 @@
     "version": "2.4.0.0",
     "inherits": "Prusa Generic PLA @CORE One",
     "filament_vendor": ["Figutech"],
-    "compatible_printers": ["core-one"],
+    "compatible_printers": ["core-one-obxidian"],
     "compatible_printers_condition": "",
     "filament_flow_ratio": ["1.02"],
     "nozzle_temperature": ["225"],

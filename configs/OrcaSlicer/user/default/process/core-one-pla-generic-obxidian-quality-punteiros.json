@@ -4,7 +4,7 @@
 	"inherits": "0.10mm FAST DETAIL @CORE One 0.4",
 	"print_settings_id": "core-one-pla-generic-obxidian-quality-punteiros",
 	"compatible_printers": [
-		"core-one"
+		"core-one-obxidian"
 	],
 	"compatible_printers_condition": "",
 	"print_extruder_id": [
