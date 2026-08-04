@@ -103,11 +103,19 @@ both lists down to that nozzle and the wrong combination cannot be picked.
 Machine presets keep plain names — the convention does not cover them, and
 `compatible_printers` everywhere refers to them.
 
-| Nozzle | draft | speed | quality |
+| Nozzle | material | speed | quality |
 |---|---|---|---|
-| CORE One HF | 0.28 DRAFT | 0.20 SPEED | 0.15 SPEED |
-| CORE One Obxidian | — | 0.20 SPEED | 0.10 FAST DETAIL |
-| Ender stock | 0.24 Draft | 0.16 Optimal | 0.12 Fine |
+| CORE One HF | ASA only | — | 0.15 SPEED (punteiros) |
+| CORE One Obxidian | PLA | 0.20 SPEED | 0.10 FAST DETAIL |
+| Ender stock | PLA | 0.16 Optimal | 0.12 Fine (+ 0.24 draft) |
+
+**The high-flow nozzle is not used for PLA any more** and its PLA profiles were
+deleted. Enclosed chamber plus high flow is the combination that produced the
+heat-creep jam, and none of the five real workloads gets near 15 mm³/s anyway.
+HF now exists only for ASA punteiros. PLA runs on the Obxidian with the chamber
+**open**, which is also why the ~4 mm³/s sustained-flow floor below is a
+conservative guard rather than a hard limit — with ambient air over the heatsink
+the margin is much wider than when it was measured.
 
 Every profile is a thin delta over a Prusa/Creality vendor base via `inherits`.
 Resolve the full chain before judging a value — most of the config is inherited
@@ -207,6 +215,53 @@ these letter contours — the vendor bases leave it at 145-170 mm/s. It is set p
 profile to land at the same **~4 mm³/s** floor rather than the same speed: 60 at
 0.15 mm, 90 at 0.10 mm. Going below that floor is how the earlier heat-creep jam
 happened.
+
+### Rounded rings (`anilla.stl`): terracing that is not the slicer's fault
+
+`anilla.stl` is a ⌀48 × 6 ring whose outer rim is a true R3.000 semicircular
+round-over, `r(z) = 21 + sqrt(9 − (z−3)²)`. It printed visibly coarser than
+modelled, and the first hypothesis — a coarsely tessellated STL — was **wrong**.
+Check tessellation properly before acting on that suspicion:
+
+- 25 distinct Z levels over 6 mm looks like 0.25 mm facets, but they are the 25
+  vertices of a 24-segment semicircle sampled at **uniform arc length**, not
+  uniform Z. Measured chord error is **6.4 µm median, 9.5 µm max**, matching the
+  analytic `3·(1−cos 3.75°) = 6.42 µm` exactly. The wide Z gaps (392 µm) sit
+  where the surface is vertical and the radius changes by 26 µm — where Z
+  resolution is worthless. Re-exporting would change nothing.
+- The metric that matters is **chord error and facet width, not the number of Z
+  levels**. By that metric `punteiro_do_arriba.stl` *is* too coarse: 203 µm chord
+  error at the z+208 flange, 612 edges over 30 µm. That is ~2 layers, visible,
+  and worth re-exporting at ≤20 µm tolerance.
+
+Two real causes, one fixable:
+
+1. **The overhang classifier misfires on a convex flare.** For six consecutive
+   layers in the bottom 0.8 mm, the per-layer radial step is 0.51 → 0.25 of a
+   line width, so Orca buckets the outer bead as an overhang and drops it to the
+   inherited `overhang_2_4_speed: 30` / `overhang_3_4_speed: 25` — **1.12-1.35
+   mm³/s** — while the same layer's inner walls run at 145 mm/s (6.53 mm³/s). A
+   5:1 flow step, twice per layer, exactly where the detail is lost. On an
+   outward flare every bead is ≥49 % supported, so the slowdown buys nothing.
+   Buckets 1-3 are raised to 145/116/100 mm/s (6.53/5.22/4.50 mm³/s) and
+   `slowdown_for_curled_perimeters` turned off; bucket 4 stays slow for genuine
+   near-unsupported bridging.
+2. **The tangent shelf is geometric.** The round-over is tangent to horizontal at
+   both z=0 and z=6, so a layer of height h leaves a shelf `sqrt(6h − h²)` wide:
+   1.077 mm at 0.20, 0.768 mm at 0.10, 0.644 mm at the 0.07 machine minimum. The
+   payoff is square-root at a tangent, so a 30 % layer-height cut buys 16 % —
+   **variable layer height does not rescue this**, and no orientation helps
+   because the section is symmetric and tangent at both ends. Only CAD removes
+   it: chamfer instead of a full semicircular round-over, or a smaller radius.
+
+Supports are wrong here too: the only sub-30° downfacing surface is a 0.4 mm lip
+against the plate, and `support_on_build_plate_only` can only deposit a sliver
+inside a 0.2 mm gap against the most visible surface on the part. None of the
+five workload models needs support.
+
+Also check where a model sits in Z before slicing: `punteiro_do_arriba.stl` is
+exported at z 76..312, i.e. 42 mm above the 270 mm `printable_height`, and both
+`punteiro_do_abajo*` at z −6..82. All must be dropped to the plate.
 
 ### Tall slender parts (`punteiros`): plate several at once
 
