@@ -1,8 +1,8 @@
 {
-	"name": "core-one-pla-punteiros-obxidian",
+	"name": "core-one-pla-generic-obxidian-quality-punteiros",
 	"from": "User",
 	"inherits": "0.10mm FAST DETAIL @CORE One 0.4",
-	"print_settings_id": "core-one-pla-punteiros-obxidian",
+	"print_settings_id": "core-one-pla-generic-obxidian-quality-punteiros",
 	"compatible_printers": [
 		"core-one"
 	],

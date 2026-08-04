@@ -1,0 +1,40 @@
+{
+	"name": "core-one-pla-figutech-hf-quality",
+	"from": "User",
+	"inherits": "0.15mm SPEED @CORE One HF 0.4",
+	"print_settings_id": "core-one-pla-figutech-hf-quality",
+	"compatible_printers": [
+		"core-one"
+	],
+	"compatible_printers_condition": "",
+	"print_extruder_id": [
+		"1"
+	],
+	"print_extruder_variant": [
+		"Direct Drive Standard"
+	],
+	"version": "2.4.0.0",
+
+	"sparse_infill_density": "100%",
+	"infill_wall_overlap": "25%",
+	"top_surface_pattern": "monotonic",
+	"ironing_type": "top",
+
+	"outer_wall_speed": "80",
+	"inner_wall_speed": "120",
+	"small_perimeter_speed": "60",
+	"small_perimeter_threshold": "0",
+	"top_surface_speed": "60",
+	"outer_wall_acceleration": "1500",
+	"top_surface_acceleration": "1500",
+
+	"enable_support": "0",
+	"support_type": "tree(auto)",
+	"support_style": "default",
+	"support_on_build_plate_only": "1",
+	"support_threshold_angle": "30",
+	"support_critical_regions_only": "0",
+	"support_top_z_distance": "0.15",
+	"support_base_pattern_spacing": "3",
+	"support_interface_spacing": "0.5"
+}

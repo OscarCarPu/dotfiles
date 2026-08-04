@@ -1,8 +1,8 @@
 {
-	"name": "core-one-pla-medium-hf",
+	"name": "core-one-pla-figutech-hf-speed",
 	"from": "User",
 	"inherits": "0.20mm SPEED @CORE One HF 0.4",
-	"print_settings_id": "core-one-pla-medium-hf",
+	"print_settings_id": "core-one-pla-figutech-hf-speed",
 	"compatible_printers": [
 		"core-one"
 	],

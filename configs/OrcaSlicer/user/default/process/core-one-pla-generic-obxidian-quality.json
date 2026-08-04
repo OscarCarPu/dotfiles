@@ -1,8 +1,8 @@
 {
-	"name": "core-one-pla-quality-obxidian",
+	"name": "core-one-pla-generic-obxidian-quality",
 	"from": "User",
 	"inherits": "0.10mm FAST DETAIL @CORE One 0.4",
-	"print_settings_id": "core-one-pla-quality-obxidian",
+	"print_settings_id": "core-one-pla-generic-obxidian-quality",
 	"compatible_printers": [
 		"core-one"
 	],

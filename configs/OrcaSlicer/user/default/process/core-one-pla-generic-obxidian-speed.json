@@ -1,8 +1,8 @@
 {
-	"name": "core-one-pla-medium-obxidian",
+	"name": "core-one-pla-generic-obxidian-speed",
 	"from": "User",
 	"inherits": "0.20mm SPEED @CORE One 0.4",
-	"print_settings_id": "core-one-pla-medium-obxidian",
+	"print_settings_id": "core-one-pla-generic-obxidian-speed",
 	"compatible_printers": [
 		"core-one"
 	],

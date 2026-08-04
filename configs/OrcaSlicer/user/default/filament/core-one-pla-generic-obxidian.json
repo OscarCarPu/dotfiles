@@ -1,9 +1,9 @@
 {
-    "name": "core-one-pla",
+    "name": "core-one-pla-generic-obxidian",
     "from": "User",
     "is_custom_defined": "1",
     "version": "2.4.0.0",
-    "inherits": "Prusa Generic PLA @CORE One HF 0.4",
+    "inherits": "Prusa Generic PLA @CORE One",
     "compatible_printers": ["core-one"],
     "compatible_printers_condition": "",
     "bed_type": ["Textured PEI Plate"],
