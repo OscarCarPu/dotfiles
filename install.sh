@@ -47,6 +47,7 @@ declare -A SYSTEM_DOTFILES=(
     ["configs/NetworkManager/dispatcher.d/10-eth-no-offloads"]="/etc/NetworkManager/dispatcher.d/10-eth-no-offloads"
     ["configs/udev/rules.d/50-dock-usb-no-autosuspend.rules"]="/etc/udev/rules.d/50-dock-usb-no-autosuspend.rules"
     ["runit/system-overrides/elogind-run"]="/etc/runit/sv/elogind/run"
+    ["runit/system-overrides/agetty-tty1-conf"]="/etc/runit/sv/agetty-tty1/conf"
     ["configs/pacman.conf"]="/etc/pacman.conf"
 )
 

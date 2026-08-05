@@ -57,31 +57,44 @@ wait_for_class() {
     return 1
 }
 
+# Hyprland 0.55+ uses a Lua config, and `hyprctl dispatch` now evaluates its
+# argument as Lua. The old positional forms (`hyprctl dispatch workspace 3`,
+# `... exec '[workspace 2 silent] kitty'`) are Lua parse errors and exit 7,
+# which under `set -e` killed this script before it launched anything.
+# See docs/desktop.md#config-format.
+go_workspace() {
+    hyprctl dispatch "hl.dsp.focus({workspace = $1})" >/dev/null
+}
+
 # Kitty is dispatched onto ws2 with the per-launch workspace selector.
+exec_on_workspace() {
+    local cmd="$1" ws="$2"
+    hyprctl dispatch "hl.dsp.exec_cmd(\"$cmd\", {workspace = \"$ws silent\"})" >/dev/null
+}
 
 normal_setup() {
-    hyprctl dispatch workspace 3
+    go_workspace 3
     spotify &
     wait_for_class Spotify || true
-    hyprctl dispatch workspace 1
+    go_workspace 1
     open_web
-    hyprctl dispatch exec '[workspace 2 silent] kitty'
+    exec_on_workspace "kitty" 2
 }
 
 learn_rust() {
-    hyprctl dispatch workspace 3
+    go_workspace 3
     spotify &
     wait_for_class Spotify || true
-    hyprctl dispatch workspace 1
+    go_workspace 1
     open_web "https://doc.rust-lang.org/book/"
-    hyprctl dispatch exec '[workspace 2 silent] kitty --directory ~/dev/play/rust/thebook/'
+    exec_on_workspace "kitty --directory $HOME/dev/play/rust/thebook/" 2
 }
 
 musescore() {
-    hyprctl dispatch workspace 3
+    go_workspace 3
     spotify &
     wait_for_class Spotify || true
-    hyprctl dispatch workspace 1
+    go_workspace 1
     open_web
     mscore &
 }

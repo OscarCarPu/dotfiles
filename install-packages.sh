@@ -123,8 +123,8 @@ if [ -n "${HYPRLAND_INSTANCE_SIGNATURE:-}" ]; then
     echo "Refreshing Hyprland env (XDG_DATA_DIRS, PATH) from /etc/profile..."
     new_xdg=$(env -i HOME="$HOME" PATH=/usr/bin:/usr/sbin bash -lc 'printf %s "$XDG_DATA_DIRS"')
     new_path=$(env -i HOME="$HOME" PATH=/usr/bin:/usr/sbin bash -lc 'printf %s "$PATH"')
-    hyprctl keyword env "XDG_DATA_DIRS,$new_xdg" >/dev/null
-    hyprctl keyword env "PATH,$new_path" >/dev/null
+    hyprctl eval "hl.env(\"XDG_DATA_DIRS\", \"$new_xdg\")" >/dev/null
+    hyprctl eval "hl.env(\"PATH\", \"$new_path\")" >/dev/null
 fi
 
 echo "Done."

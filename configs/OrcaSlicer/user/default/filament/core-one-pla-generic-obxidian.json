@@ -10,5 +10,7 @@
     "nozzle_temperature_initial_layer": ["225"],
     "bed_type": ["Textured PEI Plate"],
     "textured_plate_temp": ["60"],
-    "textured_plate_temp_initial_layer": ["60"]
+    "textured_plate_temp_initial_layer": ["60"],
+    "slow_down_min_speed": ["30"],
+    "dont_slow_down_outer_wall": ["1"]
 }

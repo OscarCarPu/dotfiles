@@ -1,0 +1,24 @@
+#!/bin/sh
+# /etc/runit/sv/agetty-tty1/conf — autologin `ocp` on tty1.
+#
+# bash/.bash_profile then execs start-hyprland, so the machine boots straight
+# into Hyprland with no login prompt.
+#
+# Why this lives in the repo: the `runit` package owns this path and does NOT
+# list it in its backup array, so pacman overwrites it silently on upgrade —
+# no .pacnew, no warning. That is exactly what wiped autologin on 2026-08-01
+# (runit 2.2.0-1 -> 2.3.1-2, same transaction as hyprland 0.56.0 -> 0.56.1).
+# configs/pacman.conf carries a matching NoUpgrade glob so pacman now leaves
+# this file alone and drops a .pacnew instead.
+#
+# Sourced by /etc/runit/sv/agetty-tty1/run, which execs:
+#   setsid ${GETTY} ${GETTY_ARGS} "${tty}" "${BAUD_RATE}" "${TERM_NAME}"
+
+if [ -x /sbin/agetty -o -x /bin/agetty ]; then
+	# util-linux specific settings. busybox getty has no --autologin, so it
+	# keeps the stock behaviour (a normal login prompt).
+	GETTY_ARGS="--noclear --autologin ocp"
+fi
+
+BAUD_RATE=38400
+TERM_NAME=linux

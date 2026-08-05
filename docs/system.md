@@ -87,6 +87,42 @@ audio services via `sv restart`.
 
 ## 4. Login flow
 
+Boot goes straight to Hyprland with no prompt: `agetty` autologins `ocp` on
+tty1, and `~/.bash_profile` execs the compositor.
+
+### TTY1 autologin
+
+`runit/system-overrides/agetty-tty1-conf` → `/etc/runit/sv/agetty-tty1/conf`
+sets:
+
+```sh
+GETTY_ARGS="--noclear --autologin ocp"
+```
+
+The `agetty-tty1/run` script sources `./conf` and execs
+`setsid agetty $GETTY_ARGS tty1 38400 linux`, so `--autologin` makes it call
+`login -f -- ocp` and skip the password.
+
+**This file is package-owned and not in `runit`'s backup array**, so pacman
+overwrites it silently on upgrade — no `.pacnew`, no warning. That is how the
+`runit` 2.2.0-1 → 2.3.1-2 upgrade on 2026-08-01 wiped autologin (it shipped in
+the same transaction as `hyprland` 0.56.0 → 0.56.1, which is why it looked
+like a Hyprland regression). `configs/pacman.conf` now carries:
+
+```
+NoUpgrade   = etc/runit/sv/agetty-*/conf
+```
+
+so pacman keeps ours and drops a `.pacnew` alongside instead. If autologin
+ever stops working again, check whether that file is back to the stock
+default:
+
+```bash
+pacman -Qkk runit          # "0 altered files" means ours was clobbered
+```
+
+### Compositor launch
+
 `bash/.bash_profile` is symlinked to `~/.bash_profile`. On TTY1, when no
 display is attached, it:
 

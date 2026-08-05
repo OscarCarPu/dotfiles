@@ -10,7 +10,10 @@ Package list lives in [`packages.md`](packages.md).
 
 ## Keybindings
 
-Modifier `$mainMod = SUPER`. Source: [`hypr/hyprland.conf`](../hypr/hyprland.conf).
+Modifier `mainMod = "SUPER"`. Source: [`hypr/hyprland.lua`](../hypr/hyprland.lua).
+
+> **Config format:** hyprlang (`hyprland.conf`) is deprecated since Hyprland
+> 0.55. The config is now Lua — see [Config format](#config-format) below.
 
 ### Apps
 
@@ -55,12 +58,113 @@ Modifier `$mainMod = SUPER`. Source: [`hypr/hyprland.conf`](../hypr/hyprland.con
 | `XF86AudioRaiseVolume/LowerVolume` | Volume ±5% |
 | `XF86AudioMute` | Toggle sink mute |
 
+## Config format
+
+Hyprland deprecated hyprlang (`hyprland.conf`) in 0.55. From 0.56 it loads
+`~/.config/hypr/hyprland.lua` when present and only falls back to the legacy
+file otherwise — the startup log line to check is:
+
+```
+[cfg] Lua config not found, using legacy config at ~/.config/hypr/hyprland.conf
+```
+
+`hypr/hyprland.conf` is kept in the repo as a rollback only; delete
+`hyprland.lua` and restart Hyprland to fall back to it.
+
+**The provider is chosen at launch.** `hyprctl reload` re-reads the format the
+session started with, so it cannot switch hyprlang → Lua. Confirm which one a
+running session uses with:
+
+```bash
+hyprctl systeminfo | grep configProvider     # -> "lua" or "hyprlang"
+```
+
+Do not delete `hyprland.conf` while a hyprlang session is live: Hyprland
+notices the file vanish and regenerates a 6-bind *stub* in its place, which a
+later reload would then adopt.
+
+### Validating a change
+
+`--verify-config` parses the config without starting a compositor, and catches
+both unknown option keys and bad dispatcher names:
+
+```bash
+Hyprland --verify-config -c ~/.config/hypr/hyprland.lua   # -> "config ok"
+```
+
+### `hyprctl` from scripts
+
+Switching the config to Lua also changes the **CLI**, which is what actually
+broke the startup flow after the migration:
+
+- `hyprctl dispatch` now evaluates its argument as **Lua**. The positional
+  form is a parse error and exits **7**:
+  ```
+  $ hyprctl dispatch workspace 3
+  error: [string "return hl.dispatch(workspace 3)"]:1: ')' expected near '3'
+  $ hyprctl dispatch 'hl.dsp.focus({workspace = 3})'
+  ok
+  ```
+- `hyprctl keyword` refuses to run at all — and still **exits 0**, so the
+  failure is silent:
+  ```
+  $ hyprctl keyword general:border_size 2
+  keyword can't work with non-legacy parsers. Use eval.
+  ```
+  Use `hyprctl eval '<lua>'` instead. This also replaces `hyprctl --batch` of
+  `keyword` lines: several statements in one `eval` chunk apply atomically.
+- Query subcommands (`monitors`, `clients`, `activewindow`, `devices`) are
+  unchanged.
+- `hl.dsp.exec_cmd` still runs through a shell — pipes, redirects and
+  `$(...)` all work, so the `grim -g "$(slurp)" | wl-copy` binds are fine.
+- Warnings (`Workspace not found`, `window not found`) exit **0**; only a Lua
+  parse/type error exits 7.
+
+Script call sites already migrated: `startup_apps.sh` (`go_workspace` /
+`exec_on_workspace` helpers), `setup_monitors_by_serial.sh`,
+`monitor_watcher.sh`, `touchpad.sh`, `install-packages.sh`.
+
+Anything under `set -e` that calls `hyprctl dispatch` dies on the spot if the
+syntax is stale — that is exactly how `startup_apps.sh` failed while every
+other autostart entry kept running.
+
+### API cheat sheet
+
+Full reference: <https://wiki.hypr.land/Configuring/Start/>.
+
+| Legacy hyprlang | Lua |
+|-----------------|-----|
+| `monitor = desc:…,1920x1080@60,0x0,1` | `hl.monitor({ output = "desc:…", mode = "1920x1080@60", position = "0x0", scale = 1 })` |
+| `general { gaps_in = 5 }` | `hl.config({ general = { gaps_in = 5 } })` |
+| `exec-once = foo` | `hl.on("hyprland.start", function() hl.exec_cmd("foo") end)` |
+| `exec = foo` | `hl.on("config.reloaded", function() hl.exec_cmd("foo") end)` |
+| `bezier = name, …` | `hl.curve("name", { type = "bezier", points = {…} })` |
+| `animation = windows, 1, 7, name` | `hl.animation({ leaf = "windows", enabled = true, speed = 7, bezier = "name" })` |
+| `bind = SUPER, Q, killactive` | `hl.bind("SUPER + Q", hl.dsp.window.close())` |
+| `binde = …` | `hl.bind(…, { repeating = true })` |
+| `bindm = …` | `hl.bind(…, { mouse = true })` |
+| `movefocus, l` | `hl.dsp.focus({ direction = "l" })` |
+| `workspace, 3` | `hl.dsp.focus({ workspace = 3 })` |
+| `movetoworkspace, 3` | `hl.dsp.window.move({ workspace = 3 })` |
+| `cyclenext` | `hl.dsp.window.cycle_next({})` |
+| `movecurrentworkspacetomonitor, l` | `hl.dsp.workspace.move({ monitor = "l" })` |
+| `windowrule { … }` | `hl.window_rule({ name = …, match = { … }, … })` |
+
+Gotchas found during the port:
+
+- `config.reloaded` also fires on the **initial** parse. Anything registered
+  under both it and `hyprland.start` runs twice at boot.
+- Directions are `l` / `r` / `u` / `d`. The upstream example config writes
+  `"left"`, which only works because the parser reads the first character.
+- Colors stay strings (`"rgb(fab387)"`); gradients become
+  `{ colors = { … }, angle = 45 }`.
+
 ## Theme & visuals
 
 Unified [Catppuccin Mocha](https://catppuccin.com/palette) palette across
 the desktop layer — the same hex values appear in:
 
-- `hypr/hyprland.conf` — active border gradient (`peach` → `blue`),
+- `hypr/hyprland.lua` — active border gradient (`peach` → `blue`),
   `dim_inactive`, soft `shadow`
 - `waybar/style.css` — module accents and the `tooltip` border
 - `wofi/style.css` — launcher window border + selected-entry color
@@ -74,7 +178,7 @@ pixelated inside wofi.
 ### Waybar lifecycle
 
 Waybar runs as a **runit user service** (`runit/user/waybar/`) instead of
-an `exec-once` from `hyprland.conf`. Two reasons:
+an autostart entry in `hyprland.lua`. Two reasons:
 
 - The runit run script waits for `$XDG_RUNTIME_DIR/wayland-N` and a live
   Hyprland IPC signature before launching, so an exec-once race against
@@ -91,11 +195,13 @@ tail -f ~/.local/share/runit/sv/waybar/log/main/current
 
 ### Window gaps
 
-`gaps_out = 10,5,10,5` in `hypr/hyprland.conf` (top, right, bottom, left).
-The 5px gutters on the sides make tiled windows align almost flush with the
-full-width waybar; vertical gaps stay at 10px so the bar visibly floats
-above the tiling area. Use the comma syntax — space-separated values are
-silently parsed as a single value applied to all sides.
+`gaps_out = { top = 10, right = 5, bottom = 10, left = 5 }` in
+`hypr/hyprland.lua`. The 5px gutters on the sides make tiled windows align
+almost flush with the full-width waybar; vertical gaps stay at 10px so the
+bar visibly floats above the tiling area. The Lua type is `css_gaps` — an
+integer, or a table with any of `top`/`right`/`bottom`/`left`, so the old
+"comma syntax vs spaces" footgun is gone. Verify with
+`hyprctl getoption general:gaps_out -j` (prints `"css": "10 5 10 5"`).
 
 ## Power menu (Super+V)
 
@@ -146,7 +252,7 @@ positions, regardless of which DisplayLink port the dock assigned. If you
 swap monitors, update the serials in that script. On boot it polls
 `hyprctl monitors -j` until Hyprland answers with a populated list (10s cap,
 mirrors waybar's "wait for the compositor" pattern) before reading serials,
-so the `exec` line in `hyprland.conf` doesn't lose the race against
+so the `config.reloaded` hook in `hyprland.lua` doesn't lose the race against
 DisplayLink enumeration.
 
 `hypr/scripts/monitor_watcher.sh` listens to Hyprland's event socket (via
@@ -155,7 +261,7 @@ removed (KVM switching, unplugging the dock, etc.). It also persists the
 workspace → monitor mapping under `$XDG_STATE_HOME/hypr/` so workspaces
 return to the same physical screen after a replug.
 
-Both are launched as `exec-once` from `hypr/hyprland.conf`.
+Both are launched from the `hyprland.start` hook in `hypr/hyprland.lua`.
 
 ## Startup apps
 
@@ -193,7 +299,7 @@ by the clipboard history binding below.
 ## Clipboard history
 
 `cliphist` stores every clipboard entry that `wl-paste --watch` sees. Two
-watchers are launched as `exec-once` from `hyprland.conf` — one for text,
+watchers are launched from the `hyprland.start` hook in `hyprland.lua` — one for text,
 one for images.
 
 | Key | Action |
@@ -204,7 +310,7 @@ History lives at `~/.cache/cliphist/db`. Wipe it with `cliphist wipe`.
 
 ## Notifications (SwayNC)
 
-`swaync` runs as `exec-once` and is exposed in waybar as the
+`swaync` runs from the `hyprland.start` hook and is exposed in waybar as the
 `custom/notification` module (between the USB indicator and the CPU
 block):
 
@@ -234,7 +340,7 @@ Config + theme live in [`swaync/`](../swaync/).
 
 Auto-mount stack so a USB stick "just appears" when plugged in:
 
-- `udiskie -a -n` runs from `hyprland.conf` as `exec-once`. It listens
+- `udiskie -a -n` runs from the `hyprland.start` hook in `hyprland.lua`. It listens
   for udev events and asks `udisks2` to mount removable devices under
   `/run/media/$USER/<label>/`. `polkit` already grants the active-session
   user passwordless mount, so no custom rule is needed.
@@ -267,5 +373,5 @@ symlinked repo). They are intentionally **not** tracked:
   previous wallpaper rotator; the current `set_wallpaper.sh` does not read
   or write it. Safe to ignore if it reappears.
 - `monitors.conf`, `workspaces.conf` — used to live here as nwg-displays
-  output and an empty placeholder. Removed: nothing in `hyprland.conf`
+  output and an empty placeholder. Removed: nothing in `hyprland.lua`
   sources them. If you reintroduce one, add a `source = …` directive.

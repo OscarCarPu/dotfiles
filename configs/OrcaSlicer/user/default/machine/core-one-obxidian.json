@@ -11,5 +11,7 @@
 	"printhost_authorization_type": "user",
 	"printhost_password": "***REMOVED***",
 	"printhost_user": "maker",
-	"version": "2.4.0.0"
+	"version": "2.4.0.0",
+	"wipe": "1",
+	"wipe_distance": "2"
 }

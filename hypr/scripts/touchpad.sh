@@ -27,7 +27,7 @@ set_touchpad() {
     local val
     [ "$1" = "1" ] && val="true" || val="false"
     for dev in "${DEVICES[@]}"; do
-        hyprctl keyword "device[$dev]:enabled" "$val" 2>/dev/null || true
+        hyprctl eval "hl.device({name = \"$dev\", enabled = $val})" 2>/dev/null || true
     done
     echo "$1" > "$STATE_FILE"
 }

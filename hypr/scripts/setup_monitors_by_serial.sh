@@ -40,43 +40,49 @@ fi
 # was unplugged, blocking the cursor from crossing between the two extremes.
 # Widths: leftmost 1920, middle rotated -> 1080, eDP-1 1920.
 #
-# Apply all monitor moves in one --batch so Hyprland never sees a transient
-# state where two monitors share coordinates. Issuing the keywords serially
-# briefly placed e.g. a freshly-connected LEFTMOST at 0x840 while eDP-1 still
-# sat there, which fired the "overlapping monitors" warning and dropped
-# waybar from the output it had been bound to.
+# Apply all monitor moves in a single `hyprctl eval` chunk so Hyprland never
+# sees a transient state where two monitors share coordinates. Issuing them
+# serially briefly placed e.g. a freshly-connected LEFTMOST at 0x840 while
+# eDP-1 still sat there, which fired the "overlapping monitors" warning and
+# dropped waybar from the output it had been bound to.
+#
+# Hyprland 0.55+ parses a Lua config, and `hyprctl keyword` refuses to run
+# against it ("keyword can't work with non-legacy parsers. Use eval.") — while
+# still exiting 0, so the failure is silent. One eval of several hl.monitor()
+# statements replaces the old `--batch` of `keyword monitor` lines and is
+# atomic for the same reason. See docs/desktop.md#config-format.
 X_OFFSET=0
-BATCH=""
+LUA=""
 
 if [[ -n "$LEFT_PORT" ]]; then
-    BATCH+="keyword monitor $LEFT_PORT,1920x1080@60,${X_OFFSET}x840,1 ; "
+    LUA+="hl.monitor({output = \"$LEFT_PORT\", mode = \"1920x1080@60\", position = \"${X_OFFSET}x840\", scale = 1, transform = 0}) "
     X_OFFSET=$((X_OFFSET + 1920))
 fi
 
 if [[ -n "$MIDDLE_PORT" ]]; then
-    BATCH+="keyword monitor $MIDDLE_PORT,1920x1080@60,${X_OFFSET}x0,1,transform,1 ; "
+    LUA+="hl.monitor({output = \"$MIDDLE_PORT\", mode = \"1920x1080@60\", position = \"${X_OFFSET}x0\", scale = 1, transform = 1}) "
     X_OFFSET=$((X_OFFSET + 1080))
 fi
 
 if (( HAS_MAIN )); then
-    BATCH+="keyword monitor eDP-1,1920x1080@60,${X_OFFSET}x840,1 ; "
+    LUA+="hl.monitor({output = \"eDP-1\", mode = \"1920x1080@60\", position = \"${X_OFFSET}x840\", scale = 1, transform = 0}) "
 fi
 
-hyprctl --batch "${BATCH% ; }"
+hyprctl eval "$LUA"
 
 # Workspace assignments after monitor coordinates are settled.
 if [[ -n "$LEFT_PORT" ]]; then
-    hyprctl keyword workspace "1, monitor:$LEFT_PORT, default:true"
-    hyprctl dispatch moveworkspacetomonitor 1 "$LEFT_PORT"
+    hyprctl eval "hl.workspace_rule({workspace = 1, monitor = \"$LEFT_PORT\", default = true})"
+    hyprctl dispatch "hl.dsp.workspace.move({workspace = 1, monitor = \"$LEFT_PORT\"})"
 fi
 
 if [[ -n "$MIDDLE_PORT" ]]; then
-    hyprctl keyword workspace "2, monitor:$MIDDLE_PORT, default:true"
-    hyprctl dispatch moveworkspacetomonitor 2 "$MIDDLE_PORT"
+    hyprctl eval "hl.workspace_rule({workspace = 2, monitor = \"$MIDDLE_PORT\", default = true})"
+    hyprctl dispatch "hl.dsp.workspace.move({workspace = 2, monitor = \"$MIDDLE_PORT\"})"
 fi
 
 if (( HAS_MAIN )); then
-    hyprctl keyword workspace "3, monitor:eDP-1, default:true"
-    hyprctl dispatch moveworkspacetomonitor 3 eDP-1
+    hyprctl eval 'hl.workspace_rule({workspace = 3, monitor = "eDP-1", default = true})'
+    hyprctl dispatch 'hl.dsp.workspace.move({workspace = 3, monitor = "eDP-1"})'
 fi
 

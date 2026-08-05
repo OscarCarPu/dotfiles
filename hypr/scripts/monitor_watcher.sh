@@ -122,12 +122,12 @@ handle_monitor_burst() {
         local active_addr
         active_addr=$(hyprctl activewindow 2>/dev/null | awk '/^Window /{print $2; exit}' || true)
         if [[ -n "$active_addr" ]]; then
-            hyprctl dispatch focuswindow "address:$active_addr" >/dev/null 2>&1 || true
+            hyprctl dispatch "hl.dsp.focus({window = \"address:$active_addr\"})" >/dev/null 2>&1 || true
         else
             # No active window? Refocus the currently focused monitor instead.
             local focused_mon
             focused_mon=$(hyprctl monitors 2>/dev/null | awk '/^Monitor /{name=$2} /focused: yes/{print name; exit}' || true)
-            [[ -n "$focused_mon" ]] && hyprctl dispatch focusmonitor "$focused_mon" >/dev/null 2>&1 || true
+            [[ -n "$focused_mon" ]] && hyprctl dispatch "hl.dsp.focus({monitor = \"$focused_mon\"})" >/dev/null 2>&1 || true
         fi
 
         # Our own keyword/batch calls in the setup script can fire further
