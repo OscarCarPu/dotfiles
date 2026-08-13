@@ -1,40 +1,37 @@
 {
-	"name": "core-one-pla-obxidian-quality",
-	"from": "User",
-	"inherits": "0.10mm FAST DETAIL @CORE One 0.4",
-	"print_settings_id": "core-one-pla-obxidian-quality",
 	"compatible_printers": [
 		"core-one-obxidian"
 	],
 	"compatible_printers_condition": "",
+	"detect_thin_wall": "1",
+	"enable_support": "1",
+	"extra_perimeters_on_overhangs": "1",
+	"from": "User",
+	"infill_wall_overlap": "25%",
+	"inherits": "0.10mm FAST DETAIL @CORE One 0.4",
+	"ironing_speed": "60",
+	"ironing_type": "top",
+	"name": "core-one-pla-obxidian-quality",
+	"precise_outer_wall": "0",
 	"print_extruder_id": [
 		"1"
 	],
 	"print_extruder_variant": [
 		"Direct Drive Standard"
 	],
-	"version": "2.4.0.0",
-	"sparse_infill_pattern": "gyroid",
-
-	"wall_loops": "6",
-	"precise_outer_wall": "0",
-	"detect_thin_wall": "1",
-	"extra_perimeters_on_overhangs": "1",
-	"infill_wall_overlap": "25%",
-	"top_surface_pattern": "monotonic",
-	"ironing_type": "top",
-	"seam_slope_type": "external",
+	"print_settings_id": "core-one-pla-obxidian-quality",
 	"seam_slope_conditional": "1",
+	"seam_slope_type": "external",
 	"small_perimeter_speed": "90",
-	"small_perimeter_threshold": "0",
-
-	"enable_support": "0",
-	"support_type": "tree(auto)",
-	"support_style": "default",
-	"support_on_build_plate_only": "1",
-	"support_threshold_angle": "30",
-	"support_critical_regions_only": "0",
-	"support_top_z_distance": "0.2",
+	"sparse_infill_pattern": "gyroid",
 	"support_base_pattern_spacing": "3",
-	"support_interface_spacing": "0.5"
+	"support_interface_spacing": "0.5",
+	"support_on_build_plate_only": "1",
+	"support_style": "default",
+	"support_threshold_angle": "30",
+	"support_top_z_distance": "0.2",
+	"support_type": "tree(auto)",
+	"top_surface_pattern": "monotonic",
+	"version": "2.4.0.0",
+	"wall_loops": "6"
 }

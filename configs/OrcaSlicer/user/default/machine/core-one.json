@@ -18,5 +18,7 @@
 	"printhost_authorization_type": "user",
 	"printhost_password": "***REMOVED***",
 	"printhost_user": "maker",
-	"version": "2.4.0.0"
+	"version": "2.4.0.0",
+	"z_hop": "0.5",
+	"z_hop_types": "Normal Lift"
 }
