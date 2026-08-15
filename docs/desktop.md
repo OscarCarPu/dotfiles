@@ -25,7 +25,7 @@ Modifier `mainMod = "SUPER"`. Source: [`hypr/hyprland.lua`](../hypr/hyprland.lua
 | `SUPER + P` | Spotify |
 | `SUPER + S` | SoundCloud (Librewolf) |
 | `SUPER + Q` | Kill active window |
-| `SUPER + V` | Power menu — shutdown, reboot, update |
+| `SUPER + V` | Power menu — lock, suspend, logout, shutdown, reboot, update |
 | `SUPER + N` | Toggle SwayNC notification panel |
 | `SUPER + W` | Rotate wallpaper (`set_wallpaper.sh`) |
 | `SUPER + SHIFT + V` | Clipboard history (cliphist + wofi) |
@@ -214,32 +214,108 @@ A wofi selection menu for power actions and system updates.
 | `󰚰  Update + Shutdown` | Opens update terminal, then shuts down |
 | `󰚰  Update + Reboot` | Opens update terminal, then reboots |
 | `󰚰  Update Only` | Opens update terminal, no power action |
+| `󰌾  Lock` | Runs `hyprlock`/`swaylock`; hidden if neither is installed |
+| `󰤄  Suspend` | `loginctl suspend` |
 | `󰅖  Cancel` | Dismiss menu |
+
+The power actions keep the positions they have always had, new entries are
+appended rather than inserted, and `Cancel` stays last, so the order stays
+predictable under muscle memory. Only one power session can be open at a time
+(`flock`) — two update terminals would race on the pacman database lock.
 
 **Update terminal flow** (Artix-aware — no `systemd` in the critical list,
 includes `runit`/`elogind`):
 
-1. Shows the latest Arch Linux news (Artix tracks the same packages)
-2. Syncs repo DBs once with `sudo pacman -Sy`, then lists pending updates
-   via `pacman -Qu` (repos) + `yay -Qua` (AUR). No dependency on
-   `checkupdates` from `pacman-contrib`.
-3. Prints every package with three colors:
+1. Every slow call is launched before anything is printed: the database sync,
+   the Arch news fetch and `yay -Qua`. The proceed/abort decision is never
+   behind a network round-trip.
+2. Repo databases are synced into a **private copy** under `fakeroot` (the
+   `checkupdates` trick), so listing updates needs no password, and the real
+   database is never left synced-but-not-upgraded — a bare `pacman -Sy`
+   arms the next `pacman -S` for a partial upgrade every time you answer "no".
+3. Held-back packages are split out first. `pacman` marks its own with
+   `[ignored]` (it has already resolved globs and `IgnoreGroup`); AUR lines
+   are matched against `pacman-conf IgnorePkg`. Each is annotated with its
+   upstream `repo#num` from [`tracked_blockers.py --refs`](../hypr/scripts/tracked_blockers.py)
+   (offline, instant).
+4. Prints every package with three colors:
    - `!!` red — critical (`linux`, `nvidia`, `mesa`, `glibc`, `pacman`,
-     `runit`, `elogind`, …)
+     `runit`, `elogind`, plus the `hyprland`/`aquamarine`/`evdi` stack)
    - `**` yellow — explicitly installed by the user (`pacman -Qe`)
    - dim gray — pulled in as a dependency
-   And a footer with the explicit / dep counts.
-4. **Optional**: prompts to fetch upstream release notes for the
-   highlighted packages via [`release_notes.py`](../hypr/scripts/release_notes.py)
-   — parallel fetches against the GitHub Releases API with a fallback
-   to recent Arch GitLab packaging commits. No LLM, no API keys.
-5. Confirms, then runs `sudo pacman -Su` (DBs already synced) and
-   `yay -Sua`.
-6. After update, lists any `.pacnew` files under `/etc`. Offers `pacdiff`
-   if `pacman-contrib` is installed; otherwise prints the file paths so
-   you can merge manually.
+   And a footer with the highlighted / dep counts. Below it, `++` magenta —
+   packages in the resolved transaction that are **not** upgrades of anything
+   installed: new dependencies and replacements. `pacman -Qu` cannot see
+   these, so they come from `pacman -Su --print` against the private database
+   (unprivileged, and overlapped with the listing so it costs no wall time).
+5. Arch news, filtered to items **published since the last upgrade**
+   (timestamp from `/var/log/pacman.log`). The same three headlines on every
+   run is how a warning banner becomes invisible.
+6. Release notes for the highlighted packages via
+   [`release_notes.py`](../hypr/scripts/release_notes.py) — parallel fetches
+   against the GitHub Releases API with a fallback to recent Arch GitLab
+   packaging commits. No LLM, no API keys. Prefetched during step 4, so they
+   are already on screen when the confirm prompt appears.
+7. Confirms **once**, then runs `sudo pacman -Syu --noconfirm` — the first
+   password prompt of the flow — and `yay -Sua --noconfirm`. This is where
+   sync and upgrade happen atomically. `--noconfirm` because the `y/N` above
+   already is the decision: asking twice for the same thing only trains you to
+   hit Enter without reading. The tradeoff is that pacman no longer asks about
+   replacements or provider choices either, which is what step 4's `++` block
+   exists to surface beforehand.
+8. Live assessment of the held-back packages from
+   [`tracked_blockers.py`](../hypr/scripts/tracked_blockers.py) (one `claude`
+   call per blocker) is started back at step 3 and rendered here: it informs
+   "should I unpin?", not "should I update?". Results are cached on the
+   content they were derived from — blocker definition, incoming versions,
+   upstream issue state — so `claude` only runs when something upstream moved.
+   `--refresh` forces a re-assessment.
+9. Resolves the `.pacnew` config files — the ones pacman refuses to overwrite
+   because you edited them — via
+   [`merge_pacnew.py`](../hypr/scripts/merge_pacnew.py). See below. Anything it
+   declines to touch is listed via `pacdiff -o`, which asks the package
+   database and so also covers `.pacnew`/`.pacsave` outside `/etc`; `pacdiff`
+   is offered for those.
+10. The power action confirms with a 30s timer: Enter goes now, **Ctrl+C or
+    Ctrl+D cancels**, and walking away lets it proceed — which is the point
+    of picking `Update + Shutdown` in the first place.
 
-Source: [`hypr/scripts/shutdown.sh`](../hypr/scripts/shutdown.sh).
+### Automatic `.pacnew` merging
+
+[`merge_pacnew.py`](../hypr/scripts/merge_pacnew.py) makes the decision
+`pacdiff` would otherwise walk you through file by file.
+
+It is a real 3-way merge first: the pristine **old** default is extracted from
+the previously installed package in `/var/cache/pacman/pkg` (newest cached
+version strictly older than the installed one), and `git merge-file`
+reconciles your edits against upstream's. Most `.pacnew` files resolve that way
+with no model involved at all. `claude --print` is asked only for the hunks git
+leaves conflicted — it receives the merge output with the conflict markers in
+place — and for files with no cached base, where there is no third point to
+triangulate from. Local values win on a genuine collision: that is the edit you
+made on purpose.
+
+Never merged automatically, because this runs unattended and often right
+before a shutdown: `fstab`, `crypttab`, `mkinitcpio.conf`, `default/grub`,
+`/boot/*`, `passwd`/`shadow`/`group`, `sudoers*`, `pam.d/*`, `nsswitch.conf`,
+`sshd_config`, `securetty`, `shells`, `runit/*`. A bad merge there is a broken
+boot or a login you cannot pass. Those are left as `.pacnew` for `pacdiff`.
+
+Before anything is written: the result must carry no leftover conflict
+markers, must not be suspiciously short (truncation guard), and must pass a
+syntax check where one exists (`pacman-conf --config` for `pacman.conf`).
+Symlinks are resolved first — several `/etc` files here point into this repo,
+so the merge lands in the repo and shows up in `git diff`. The previous
+contents are saved to `$XDG_STATE_HOME/hypr/pacnew-backups/` and a diff of
+every applied change is printed.
+
+Run it standalone with `--dry-run` to see what it would do, or `--no-claude`
+to restrict it to merges git can settle alone.
+
+Source: [`hypr/scripts/shutdown.sh`](../hypr/scripts/shutdown.sh). Apps that
+should exit cleanly before a power action are listed in
+[`graceful_quit.sh`](../hypr/scripts/graceful_quit.sh) (10s cap, shared across
+the whole list), shared by both halves of the script.
 
 The actual shutdown / reboot calls go through `loginctl` (provided by
 `elogind` on Artix); see [`system.md`](system.md#7-power--shutdown).

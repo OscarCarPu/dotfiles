@@ -12,7 +12,8 @@ Anything else is recognised after the first byte and switches to passthrough
 (immediate per-char flush) for the rest of the line. Prompts always start with
 `::` or other non-`warning` prefixes, so they reach the user instantly.
 
-Designed for: `cmd 2> >(filter_pin_noise.py >&2)`.
+Driven by shutdown.sh's `run_filtered`, which pipes stderr through a FIFO so
+the caller can wait for this filter to drain before printing anything else.
 """
 
 from __future__ import annotations

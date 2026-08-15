@@ -73,6 +73,7 @@ System (`bash install.sh --system`):
 - `configs/sysctl.d/90-disable-ipv6.conf` → `/etc/sysctl.d/90-disable-ipv6.conf`
 - `configs/modules-load.d/evdi.conf` → `/etc/modules-load.d/evdi.conf`
 - `configs/pacman.conf` → `/etc/pacman.conf`
+- `configs/chrony.conf` → `/etc/chrony.conf`
 - `runit/system/displaylink/{run,log/run}` → `/etc/runit/sv/displaylink/...`
 
 # More docs

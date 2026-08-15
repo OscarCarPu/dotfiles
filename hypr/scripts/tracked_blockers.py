@@ -6,17 +6,25 @@ of pacman packages to a human reason and optionally one or more GitHub
 PRs/issues. Blockers without upstream refs (e.g. repo lag) get pacman repo
 data passed to Claude instead.
 
+Assessments are cached on the *content* they were derived from — the blocker
+definition, the incoming versions and the upstream issue state — so claude is
+only invoked when something upstream actually moved, not once per update run.
+
 Modes:
   tracked_blockers.py pkg1 pkg2 ...           Print live Claude assessment block
   tracked_blockers.py --refs pkg1 pkg2 ...    Print `pkg<TAB>repo#num` (offline, fast)
+  tracked_blockers.py --refresh pkg1 ...      As above, ignoring the cache
 Both modes also accept package names on stdin.
 """
 
 from __future__ import annotations
 
+import hashlib
 import json
+import os
 import subprocess
 import sys
+import time
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from pathlib import Path
 from urllib.request import Request, urlopen
@@ -24,6 +32,12 @@ from urllib.request import Request, urlopen
 DATA_FILE = Path(__file__).with_name("tracked_blockers.json")
 UA = {"User-Agent": "arch-update-helper/1.0"}
 TIMEOUT = 10
+
+CACHE_FILE = Path(
+    os.environ.get("XDG_CACHE_HOME", Path.home() / ".cache")
+) / "hypr" / "tracked_blockers_cache.json"
+# Backstop only — the content hash is what normally invalidates an entry.
+CACHE_TTL = 7 * 24 * 3600
 
 BOLD   = "\033[1m"
 CYAN   = "\033[1;36m"
@@ -51,7 +65,32 @@ def fetch_pacman_info(packages: list[str]) -> str:
         return ""
 
 
-def assess_blocker(entry: dict, skipped: dict[str, str]) -> str:
+def load_cache() -> dict:
+    try:
+        return json.loads(CACHE_FILE.read_text())
+    except (OSError, json.JSONDecodeError):
+        return {}
+
+
+def save_cache(cache: dict) -> None:
+    now = time.time()
+    fresh = {k: v for k, v in cache.items() if now - v.get("ts", 0) < CACHE_TTL}
+    try:
+        CACHE_FILE.parent.mkdir(parents=True, exist_ok=True)
+        tmp = CACHE_FILE.with_name(CACHE_FILE.name + ".tmp")
+        tmp.write_text(json.dumps(fresh))
+        tmp.replace(CACHE_FILE)
+    except OSError:
+        pass
+
+
+def assess_blocker(
+    entry: dict, skipped: dict[str, str], cache: dict, use_cache: bool = True
+) -> tuple[str, str]:
+    """Return (assessment, cache_key). The GitHub fetches always run — they are
+    fast and they *are* the cache key: if upstream has not moved and the
+    incoming versions are unchanged, the prompt is byte-identical and claude is
+    never invoked."""
     ref_sections = []
     for ref in entry.get("tracking", []):
         kind, repo, number = ref["kind"], ref["repo"], ref["number"]
@@ -115,6 +154,12 @@ def assess_blocker(entry: dict, skipped: dict[str, str]) -> str:
         f"If still active: say why, and whether there has been recent activity or it looks stalled."
     )
 
+    key = hashlib.sha256(prompt.encode()).hexdigest()
+    if use_cache:
+        hit = cache.get(key)
+        if hit and time.time() - hit.get("ts", 0) < CACHE_TTL:
+            return hit["assessment"], key
+
     claude_bin = (
         subprocess.run(["which", "claude"], capture_output=True, text=True).stdout.strip()
         or "/home/ocp/.local/bin/claude"
@@ -124,13 +169,16 @@ def assess_blocker(entry: dict, skipped: dict[str, str]) -> str:
             [claude_bin, "--print", prompt],
             capture_output=True, text=True, timeout=60,
         )
-        return result.stdout.strip() or result.stderr.strip() or "(no response)"
+        text = result.stdout.strip() or result.stderr.strip() or "(no response)"
     except FileNotFoundError:
-        return "(claude CLI not found)"
+        return "(claude CLI not found)", ""
     except subprocess.TimeoutExpired:
-        return "(claude timed out)"
+        return "(claude timed out)", ""
     except Exception as e:
-        return f"(error: {e})"
+        return f"(error: {e})", ""
+
+    # Only successful assessments are worth remembering.
+    return text, (key if result.returncode == 0 and result.stdout.strip() else "")
 
 
 def collect_skipped(argv: list[str]) -> dict[str, str]:
@@ -170,6 +218,11 @@ def main() -> int:
     if argv and argv[0] == "--refs":
         return cmd_refs(collect_skipped(argv[1:]))
 
+    use_cache = True
+    if argv and argv[0] == "--refresh":
+        use_cache = False
+        argv = argv[1:]
+
     skipped = collect_skipped(argv)
     if not skipped:
         return 0
@@ -184,12 +237,15 @@ def main() -> int:
     if not relevant:
         return 0
 
+    cache = load_cache()
     with ThreadPoolExecutor(max_workers=8) as pool:
         futs = {
             pool.submit(
                 assess_blocker,
                 entry,
                 {p: skipped[p] for p in entry["packages"] if p in skipped},
+                cache,
+                use_cache,
             ): entry["name"]
             for entry in relevant
         }
@@ -197,9 +253,12 @@ def main() -> int:
         for f in as_completed(futs, timeout=90):
             name = futs[f]
             try:
-                assessments[name] = f.result()
+                assessments[name], key = f.result()
+                if key:
+                    cache[key] = {"ts": time.time(), "assessment": assessments[name]}
             except Exception:
                 assessments[name] = "(error)"
+    save_cache(cache)
 
     print(f"\n{BOLD}[ Tracked blockers ]{RESET}")
     for entry in relevant:

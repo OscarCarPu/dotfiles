@@ -49,6 +49,7 @@ declare -A SYSTEM_DOTFILES=(
     ["runit/system-overrides/elogind-run"]="/etc/runit/sv/elogind/run"
     ["runit/system-overrides/agetty-tty1-conf"]="/etc/runit/sv/agetty-tty1/conf"
     ["configs/pacman.conf"]="/etc/pacman.conf"
+    ["configs/chrony.conf"]="/etc/chrony.conf"
 )
 
 # Sudoers drop-ins. Cannot be symlinked — sudo refuses files not owned by
@@ -71,6 +72,7 @@ SYSTEM_RUNIT_SERVICES=(
 SYSTEM_RUNIT_ACTIVATE=(
     displaylink
     docker
+    chrony
 )
 
 # Groups the invoking user (`$SUDO_USER`) should belong to. Applied in

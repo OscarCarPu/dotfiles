@@ -61,6 +61,10 @@ USB-Ethernet watchdog fix:
 - `networkmanager`, `networkmanager-runit`
 - `openssh`
 - `cloudflared-bin` (AUR) — homelab tunnel client
+- `chrony`, `chrony-runit` — NTP client; nothing else disciplines the clock, so
+  without it the laptop drifts (minutes per week). `install.sh --system`
+  symlinks `configs/chrony.conf` to `/etc/chrony.conf` and activates the
+  `chrony` runit service
 
 ## Bluetooth
 
@@ -151,9 +155,12 @@ unmounts all, right-click opens Thunar.
 - `fd`, `fzf`, `ripgrep` — search
 - `htop`, `ncdu`, `tree` — inspection
 - `unzip` — `.zip` archive extraction
-- `pacman-contrib` — provides `pacdiff` for `.pacnew` merging inside
-  `shutdown.sh`. The script falls back to listing `.pacnew` paths if it is
-  missing.
+- `pacman-contrib` — provides `pacdiff`, used by `shutdown.sh` both to list
+  files pending a merge (`pacdiff -o`) and to merge them. The script falls
+  back to listing `.pacnew` paths under `/etc` if it is missing.
+- `fakeroot` (pulled in by `base-devel`/`yay`) — lets `shutdown.sh` sync repo
+  databases into a private copy, so listing updates needs no password and the
+  real database is never left in a partial-upgrade state.
 - `python-pyotp` — TOTP code generation library
 - `python-seaborn` — statistical data visualisation library
 - `python-scipy` — scientific computing library (optimization, signal processing, stats)
