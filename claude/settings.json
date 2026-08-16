@@ -1,0 +1,22 @@
+{
+  "permissions": {
+    "defaultMode": "auto"
+  },
+  "model": "opus[1m]",
+  "skillOverrides": {
+    "learning-ai-guide": "user-invocable-only"
+  },
+  "statusLine": {
+    "type": "command",
+    "command": "~/.claude/statusline.sh",
+    "padding": 0
+  },
+  "enabledPlugins": {
+    "pyright-lsp@claude-plugins-official": true,
+    "rust-analyzer-lsp@claude-plugins-official": true,
+    "frontend-design@claude-plugins-official": true,
+    "gopls-lsp@claude-plugins-official": true
+  },
+  "theme": "dark",
+  "skipAutoPermissionPrompt": true
+}

@@ -2,8 +2,19 @@
 
 # Claude Code
 
-Personal Claude Code configuration tracked in this repo: custom skills under
-`claude/skills/`, symlinked into `~/.claude/skills/` by `install.sh`.
+Personal Claude Code configuration tracked in this repo, all symlinked into
+`~/.claude/` by `install.sh`:
+
+| Repo path | Target | What |
+|---|---|---|
+| `claude/skills/` | `~/.claude/skills/` | custom skills |
+| `claude/settings.json` | `~/.claude/settings.json` | model, theme, permission mode, enabled plugins |
+| `claude/statusline.sh` | `~/.claude/statusline.sh` | status line: model · effort · context bar |
+
+`settings.json` is rewritten by Claude Code itself when you change something
+through `/config`. That writes *through* the symlink, so the change lands in
+this repo and shows up in `git status` — commit it or revert it, but do not be
+surprised to find the file dirty after a config change.
 
 Skills are auto-loaded by Claude Code from `~/.claude/skills/<name>/SKILL.md`.
 Each `SKILL.md` has a YAML frontmatter (`name`, `description`) — the

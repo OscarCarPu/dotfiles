@@ -7,6 +7,8 @@ declare -A DOTFILES=(
     ["home/Makefile"]="$HOME/Makefile"
     ["hypr"]="$HOME/.config/hypr"
     ["nvim"]="$HOME/.config/nvim"
+    ["kitty/kitty.conf"]="$HOME/.config/kitty/kitty.conf"
+    ["ssh/config"]="$HOME/.ssh/config"
     ["waybar"]="$HOME/.config/waybar"
     ["wofi"]="$HOME/.config/wofi"
     ["swaync"]="$HOME/.config/swaync"
@@ -30,6 +32,8 @@ declare -A DOTFILES=(
     ["configs/applications/nvim-kitty.desktop"]="$HOME/.local/share/applications/nvim-kitty.desktop"
     ["configs/applications/ardour9.desktop"]="$HOME/.local/share/applications/ardour9.desktop"
     ["claude/skills"]="$HOME/.claude/skills"
+    ["claude/settings.json"]="$HOME/.claude/settings.json"
+    ["claude/statusline.sh"]="$HOME/.claude/statusline.sh"
     ["configs/librewolf.overrides.cfg"]="$HOME/.librewolf/librewolf.overrides.cfg"
 )
 
@@ -80,6 +84,8 @@ SYSTEM_RUNIT_ACTIVATE=(
     displaylink
     docker
     chrony
+    bluetoothd
+    cupsd
 )
 
 # Groups the invoking user (`$SUDO_USER`) should belong to. Applied in

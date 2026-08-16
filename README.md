@@ -23,9 +23,11 @@ An Artix Hyprland configuration for my daily computer.
 - `runit/user/`: User runit services (pipewire stack, set-wallpaper, battery-notify, obsidian-theme, seafile, seafile-watch)
 - `runit/system/`: System runit services (displaylink)
 - `obsidian/`: Shared Obsidian config (appearance, plugins, theme) — symlinked into every vault by the `obsidian-theme` runit service
+- `kitty/`: Kitty terminal configuration
+- `ssh/`: SSH client config (host aliases + Cloudflare `ProxyCommand`; no keys)
 - `scripts/`: Custom system tools (`~/.local/bin`)
 - `configs/`: Small configuration files (sysctl, modules-load, gtk, NetworkManager)
-- `claude/`: Claude Code skills (`claude/skills/` → `~/.claude/skills/`)
+- `claude/`: Claude Code config — skills, `settings.json`, statusline
 - `docs/`: Documentation
 
 # Installation
@@ -73,6 +75,8 @@ User (`bash install.sh`):
 - `home/Makefile` → `~/Makefile`
 - `hypr` → `~/.config/hypr`
 - `nvim` → `~/.config/nvim`
+- `kitty/kitty.conf` → `~/.config/kitty/kitty.conf`
+- `ssh/config` → `~/.ssh/config`
 - `waybar` → `~/.config/waybar`
 - `wofi` → `~/.config/wofi`
 - `swaync` → `~/.config/swaync`
@@ -82,6 +86,8 @@ User (`bash install.sh`):
 - `configs/gtk-3.0/bookmarks` → `~/.config/gtk-3.0/bookmarks`
 - `configs/gtk-3.0/settings.ini` → `~/.config/gtk-3.0/settings.ini`
 - `claude/skills` → `~/.claude/skills`
+- `claude/settings.json` → `~/.claude/settings.json`
+- `claude/statusline.sh` → `~/.claude/statusline.sh`
 - `scripts/*` → `~/.local/bin/`
 - `runit/user/<svc>/{run,log/run}` → `~/.local/share/runit/sv/<svc>/...`
 
@@ -91,6 +97,7 @@ System (`bash install.sh --system`):
 - `configs/pacman.conf` → `/etc/pacman.conf`
 - `configs/chrony.conf` → `/etc/chrony.conf`
 - `runit/system/displaylink/{run,log/run}` → `/etc/runit/sv/displaylink/...`
+- activates: `displaylink`, `docker`, `chrony`, `bluetoothd`, `cupsd`
 
 # More docs
 

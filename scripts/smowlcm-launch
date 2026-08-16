@@ -1,0 +1,11 @@
+#!/bin/bash
+# SmowlCM (UOC exam proctoring) leaves Singleton* lock files behind when it is
+# killed instead of closed, and then refuses to start again — mid-exam, which
+# is the worst possible moment to debug it. Clear them when no instance is
+# actually running, then hand over to the real binary.
+if ! pgrep -x SmowlCM >/dev/null 2>&1 && ! pgrep -x smowlcm >/dev/null 2>&1; then
+    rm -f "$HOME/.config/SmowlCM/SingletonLock" \
+        "$HOME/.config/SmowlCM/SingletonSocket" \
+        "$HOME/.config/SmowlCM/SingletonCookie"
+fi
+exec /usr/bin/smowlcm "$@"

@@ -1,0 +1,14 @@
+# Homelab hosts, reached through the Cloudflare tunnel rather than an open
+# port — `cloudflared access ssh` terminates the tunnel and pipes the session
+# over stdio, so ssh never needs a routable address.
+#
+# No keys, no secrets: `~/.ssh/id_ed25519` is deliberately not in this repo.
+# Without it these hosts resolve but will not authenticate.
+
+Host ssh.lab-ocp.com
+	ProxyCommand /usr/bin/cloudflared access ssh --hostname %h
+	User ocp
+
+Host git-ssh.lab-ocp.com
+	ProxyCommand /usr/bin/cloudflared access ssh --hostname %h
+	User git

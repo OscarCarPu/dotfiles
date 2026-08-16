@@ -60,7 +60,11 @@ USB-Ethernet watchdog fix:
 
 - `networkmanager`, `networkmanager-runit`
 - `openssh`
-- `cloudflared-bin` (AUR) — homelab tunnel client
+- `cloudflared-bin` (AUR) — homelab tunnel client; `~/.ssh/config` routes
+  `ssh.lab-ocp.com` and `git-ssh.lab-ocp.com` through it via `ProxyCommand`
+- `nss` — provides `certutil`, which `install.sh` uses to trust the AutoFirma
+  root CA in the LibreWolf profile. Pulled in as a dependency by every browser,
+  but listed because the install step breaks without it
 - `chrony`, `chrony-runit` — NTP client; nothing else disciplines the clock, so
   without it the laptop drifts (minutes per week). `install.sh --system`
   symlinks `configs/chrony.conf` to `/etc/chrony.conf` and activates the
@@ -253,7 +257,6 @@ unmounts all, right-click opens Thunar.
   module
 - `obs-studio` — screen/video capture and streaming
 - `teams-for-linux` (AUR) — Microsoft Teams unofficial client
-- `davinci-resolve` (AUR) — professional video editing and color grading
 - `vlc` — multimedia player and framework
 - `okular` — PDF viewer
 - `zeal` — offline documentation browser (Dash-compatible docsets; Go, Rust, Python, etc.)
