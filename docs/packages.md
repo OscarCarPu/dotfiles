@@ -56,6 +56,12 @@ USB-Ethernet watchdog fix:
 
 - `ethtool` — used by `configs/NetworkManager/dispatcher.d/10-eth-no-offloads`
 
+Power:
+
+- `powertop` — diagnoses what is draining the battery (per-device wakeups and
+  power states). Read-only inspection; the actual governor switching is
+  `hypr/scripts/power_profile.sh` + `configs/sudoers.d/10-cpu-governor`
+
 ## Network
 
 - `networkmanager`, `networkmanager-runit`
@@ -176,6 +182,9 @@ unmounts all, right-click opens Thunar.
 
 - `udisks2` — D-Bus mount service
 - `udiskie` — auto-mount daemon (notifies on hotplug)
+- `dosfstools` — `mkfs.fat` / `fsck.fat`. Needed to create the ESP during a
+  from-scratch install (see [`bootstrap.md`](bootstrap.md)) and to repair FAT
+  USB sticks that `udisks2` refuses to mount
 - `gvfs` — virtual filesystem layer for the file manager
 - `thunar` — file manager
 
@@ -228,6 +237,16 @@ unmounts all, right-click opens Thunar.
 - `librewolf-bin` — daily browser, opened by `startup_apps.sh`
 - Violentmonkey (LibreWolf add-on) — userscript manager; hosts `configs/uoc-aula-autosubmit.user.js` (submits the UOC Shibboleth login form on `id-provider.uoc.edu` once LibreWolf autofills it)
 - `chromium` — lightweight Chromium for checking web rendering
+- `firefox` — kept alongside LibreWolf as the stock-behaviour reference: when a
+  site breaks, it tells you whether it is LibreWolf's hardening or the site
+- `google-chrome` — the Blink build some sites (and DRM/proctoring flows)
+  require and refuse to accept Chromium for
+- `smowlcm` (AUR) — SMOWL proctoring client for UOC exams. Launched through
+  `scripts/smowlcm-launch`, which clears the `Singleton*` locks it leaves
+  behind when killed instead of closed — otherwise it refuses to start,
+  mid-exam
+- `discord` — voice/text chat
+- `stremio-enhanced-bin` (AUR) — Stremio client with plugin/theme support
 - `spotify` — runs on workspace 3
 - `seafile` (AUR) — Seafile command-line sync client (`seaf-cli`)
 - `musescore-bin` — sheet music editor
@@ -268,6 +287,21 @@ unmounts all, right-click opens Thunar.
   `DISPLAY=:0` so the Swing GUI works when launched from Wayland clients
   (Librewolf passes only `WAYLAND_DISPLAY`, so AutoFirma dies with
   `HeadlessException`).
+
+## Games
+
+Launchers, plus the runtimes their games need. `home/Makefile` has the
+`celeste` and `olympus` targets that drive the Celeste stack.
+
+- `steam` — Valve's launcher; needs `[lib32]` enabled (see
+  [`system.md`](system.md#lib32-repository-artix-multilib))
+- `legendary` — CLI Epic Games launcher; the `celeste` Makefile target runs
+  `legendary launch Salt --no-wine --offline`
+- `love` — LÖVE 2D engine, the runtime several Celeste mods ship against
+- `dotnet-sdk-8.0` — .NET runtime/SDK; Olympus (the Celeste mod manager in
+  `~/Games/Olympus`) is a .NET application
+- `prismlauncher` — Minecraft launcher with instance management
+- `curseforge` (AUR) — CurseForge client, for Minecraft modpacks
 
 ## AUR helper
 
