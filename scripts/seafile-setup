@@ -13,13 +13,12 @@ set -eu
 CRED_FILE="${SEAFILE_CRED_FILE:-$HOME/.config/seafile-cli/credentials}"
 DATA_DIR="${SEAFILE_DATA_DIR:-$HOME/seafile-client}"
 IGNORE_TPL="${SEAFILE_IGNORE_TPL:-$HOME/.dotfiles/configs/seafile-cli/seafile-ignore.txt}"
+LIB_LIST="${SEAFILE_LIB_LIST:-$HOME/.dotfiles/configs/seafile-cli/libraries}"
 
-FOLDERS="
-$HOME/edu
-$HOME/docs
-$HOME/downloads
-$HOME/media
-"
+# Library list is shared with the `seafile-watch` service so the two can't
+# drift. One name per line, comments and blanks ignored.
+FOLDERS=$(sed -e 's/#.*//' -e 's/[[:space:]]*$//' "$LIB_LIST" |
+    grep -v '^$' | sed "s|^|$HOME/|")
 
 command -v seaf-cli >/dev/null 2>&1 || {
     echo "seaf-cli not installed (yay -S seafile)" >&2

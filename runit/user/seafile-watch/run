@@ -1,0 +1,10 @@
+#!/bin/sh
+exec 2>&1
+export XDG_RUNTIME_DIR="/run/user/$(id -u)"
+
+# Poll every 5 min. The script itself only alerts once a library has been
+# unhealthy for 30 min, so this cadence just controls detection latency.
+while :; do
+    "$HOME/.dotfiles/hypr/scripts/seafile_watch.sh"
+    sleep 300
+done

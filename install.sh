@@ -44,6 +44,7 @@ USER_RUNIT_SERVICES=(
     waybar
     obsidian-theme
     seafile
+    seafile-watch
 )
 
 # System-level files (require sudo). Run with --system flag to apply.

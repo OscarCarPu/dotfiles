@@ -1,0 +1,11 @@
+# Seafile libraries, one per line, as paths relative to $HOME.
+#
+# Single source of truth: `seafile-setup` creates and syncs these, and the
+# `seafile-watch` runit service alerts when any of them stops being healthy.
+# Adding a line here and re-running `seafile-setup` is all it takes to add a
+# library; the watcher picks it up on its next poll.
+
+edu
+docs
+downloads
+media
