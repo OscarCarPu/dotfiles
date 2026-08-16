@@ -1,0 +1,25 @@
+@prefix lv2:  <http://lv2plug.in/ns/lv2core#> .
+@prefix pset: <http://lv2plug.in/ns/ext/presets#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+
+# An LV2 preset is bound to a plugin URI, and LSP ships 12 variants of the
+# parametric equalizer (x8/x16/x32 by mono/stereo/lr/ms). They all share the
+# same port symbols, so one preset declares appliesTo for every variant and
+# shows up whichever one gets loaded.
+
+<http://ocp.dotfiles/lv2/presets/gaita-aire-libre>
+	a pset:Preset ;
+	lv2:appliesTo
+		<http://lsp-plug.in/plugins/lv2/para_equalizer_x8_mono> ,
+		<http://lsp-plug.in/plugins/lv2/para_equalizer_x8_stereo> ,
+		<http://lsp-plug.in/plugins/lv2/para_equalizer_x8_lr> ,
+		<http://lsp-plug.in/plugins/lv2/para_equalizer_x8_ms> ,
+		<http://lsp-plug.in/plugins/lv2/para_equalizer_x16_mono> ,
+		<http://lsp-plug.in/plugins/lv2/para_equalizer_x16_stereo> ,
+		<http://lsp-plug.in/plugins/lv2/para_equalizer_x16_lr> ,
+		<http://lsp-plug.in/plugins/lv2/para_equalizer_x16_ms> ,
+		<http://lsp-plug.in/plugins/lv2/para_equalizer_x32_mono> ,
+		<http://lsp-plug.in/plugins/lv2/para_equalizer_x32_stereo> ,
+		<http://lsp-plug.in/plugins/lv2/para_equalizer_x32_lr> ,
+		<http://lsp-plug.in/plugins/lv2/para_equalizer_x32_ms> ;
+	rdfs:seeAlso <gaita-aire-libre.ttl> .

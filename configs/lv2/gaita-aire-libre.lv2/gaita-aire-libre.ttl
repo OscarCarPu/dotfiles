@@ -1,0 +1,102 @@
+@prefix lv2:  <http://lv2plug.in/ns/lv2core#> .
+@prefix pset: <http://lv2plug.in/ns/ext/presets#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+
+<http://ocp.dotfiles/lv2/presets/gaita-aire-libre>
+	a pset:Preset ;
+	lv2:appliesTo
+		<http://lsp-plug.in/plugins/lv2/para_equalizer_x8_mono> ,
+		<http://lsp-plug.in/plugins/lv2/para_equalizer_x8_stereo> ,
+		<http://lsp-plug.in/plugins/lv2/para_equalizer_x8_lr> ,
+		<http://lsp-plug.in/plugins/lv2/para_equalizer_x8_ms> ,
+		<http://lsp-plug.in/plugins/lv2/para_equalizer_x16_mono> ,
+		<http://lsp-plug.in/plugins/lv2/para_equalizer_x16_stereo> ,
+		<http://lsp-plug.in/plugins/lv2/para_equalizer_x16_lr> ,
+		<http://lsp-plug.in/plugins/lv2/para_equalizer_x16_ms> ,
+		<http://lsp-plug.in/plugins/lv2/para_equalizer_x32_mono> ,
+		<http://lsp-plug.in/plugins/lv2/para_equalizer_x32_stereo> ,
+		<http://lsp-plug.in/plugins/lv2/para_equalizer_x32_lr> ,
+		<http://lsp-plug.in/plugins/lv2/para_equalizer_x32_ms> ;
+	rdfs:label "gaita-aire-libre" ;
+
+	lv2:port
+	[ lv2:symbol "g_in"  ; pset:value 1.0 ] ,
+	[ lv2:symbol "g_out" ; pset:value 1.0 ] ,
+
+	# Medicion de referencia (75 s de punteiro sin ronco, S/N 34.7 dB),
+	# energia por tercios de octava relativa al maximo:
+	#   500:-14.0  630:-11.0  800:-11.3  1k:-6.3  1250:-4.2  1600:-1.2
+	#   2k:-2.9  2500:0.0  3150:-2.9  4k:-12.2  5k:-3.9  6300:-11.5
+	#   8k:-20.8  10k:-16.2  12500:-13.4  16k:-14.3
+	# El bloque 1000-3150 esta plano y alto: no hay un pico que cortar,
+	# hay una meseta. De ahi que los cortes estrechos no quitaran nada.
+
+	# --- banda 0: paso alto 300 Hz ------------------------------------
+	# Por debajo de 400 Hz la S/N medida es <= 5.5 dB: solo ruido de sala,
+	# ventilador y manejo. La fundamental es 527 Hz (Do5), asi que a
+	# 300 Hz el corte no toca el instrumento.
+	[ lv2:symbol "ft_0" ; pset:value 2   ] ,
+	[ lv2:symbol "fm_0" ; pset:value 0   ] ,
+	[ lv2:symbol "s_0"  ; pset:value 1   ] ,
+	[ lv2:symbol "f_0"  ; pset:value 300.0 ] ,
+	[ lv2:symbol "g_0"  ; pset:value 1.0 ] ,
+	[ lv2:symbol "q_0"  ; pset:value 0.0 ] ,
+	[ lv2:symbol "w_0"  ; pset:value 4.0 ] ,
+
+	# --- banda 1: cuerpo +4 dB @ 650 Hz, ancha ------------------------
+	# Centrada sobre la fundamental. Con 500-800 Hz a -11/-14 dB respecto
+	# al bloque agudo, no basta con bajar arriba: hay que devolver peso
+	# abajo o el resultado suena apagado en vez de redondo.
+	[ lv2:symbol "ft_1" ; pset:value 1   ] ,
+	[ lv2:symbol "fm_1" ; pset:value 0   ] ,
+	[ lv2:symbol "f_1"  ; pset:value 650.0 ] ,
+	[ lv2:symbol "g_1"  ; pset:value 1.584893 ] ,
+	[ lv2:symbol "q_1"  ; pset:value 0.7 ] ,
+	[ lv2:symbol "w_1"  ; pset:value 1.91 ] ,
+
+	# --- banda 2: la meseta -8 dB @ 2200 Hz, MUY ancha ----------------
+	# Q 0.5 = ~2.5 octavas, o sea de 1 kHz a 4.5 kHz. Es la banda que
+	# define el caracter: baja el bloque entero en vez de hacerle un
+	# agujero al centro. Aqui es donde se gana o se pierde lo estridente.
+	[ lv2:symbol "ft_2" ; pset:value 1   ] ,
+	[ lv2:symbol "fm_2" ; pset:value 0   ] ,
+	[ lv2:symbol "f_2"  ; pset:value 2200.0 ] ,
+	[ lv2:symbol "g_2"  ; pset:value 0.398107 ] ,
+	[ lv2:symbol "q_2"  ; pset:value 0.5 ] ,
+	[ lv2:symbol "w_2"  ; pset:value 2.54 ] ,
+
+	# --- banda 3: filo de palleta -6.5 dB @ 5200 Hz -------------------
+	# 5 kHz vuelve a subir a -3.9 dB tras el hueco de 4 kHz, ya fuera del
+	# alcance del corte ancho de arriba. Profundizado a -6.5 dB.
+	[ lv2:symbol "ft_3" ; pset:value 1   ] ,
+	[ lv2:symbol "fm_3" ; pset:value 0   ] ,
+	[ lv2:symbol "f_3"  ; pset:value 5200.0 ] ,
+	[ lv2:symbol "g_3"  ; pset:value 0.472063 ] ,
+	[ lv2:symbol "q_3"  ; pset:value 1.0 ] ,
+	[ lv2:symbol "w_3"  ; pset:value 1.39 ] ,
+
+	# --- banda 4: paso bajo 7 kHz -------------------------------------
+	# Antes era un shelf de -5 dB, insuficiente. De 10 a 16 kHz hay
+	# -13/-16 dB de energia sin serie armonica detras: soplido de palleta
+	# y ruido de captura. Bajado a 7 kHz en la tercera pasada: a 9 kHz
+	# todavia dejaba pasar agudos de sobra.
+	[ lv2:symbol "ft_4" ; pset:value 4   ] ,
+	[ lv2:symbol "fm_4" ; pset:value 0   ] ,
+	[ lv2:symbol "s_4"  ; pset:value 0   ] ,
+	[ lv2:symbol "f_4"  ; pset:value 7000.0 ] ,
+	[ lv2:symbol "g_4"  ; pset:value 1.0 ] ,
+	[ lv2:symbol "q_4"  ; pset:value 0.0 ] ,
+	[ lv2:symbol "w_4"  ; pset:value 4.0 ] ,
+
+	# --- bandas 5-15 apagadas -----------------------------------------
+	[ lv2:symbol "ft_5"  ; pset:value 0 ] ,
+	[ lv2:symbol "ft_6"  ; pset:value 0 ] ,
+	[ lv2:symbol "ft_7"  ; pset:value 0 ] ,
+	[ lv2:symbol "ft_8"  ; pset:value 0 ] ,
+	[ lv2:symbol "ft_9"  ; pset:value 0 ] ,
+	[ lv2:symbol "ft_10" ; pset:value 0 ] ,
+	[ lv2:symbol "ft_11" ; pset:value 0 ] ,
+	[ lv2:symbol "ft_12" ; pset:value 0 ] ,
+	[ lv2:symbol "ft_13" ; pset:value 0 ] ,
+	[ lv2:symbol "ft_14" ; pset:value 0 ] ,
+	[ lv2:symbol "ft_15" ; pset:value 0 ] .

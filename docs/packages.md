@@ -75,12 +75,65 @@ Used by `scripts/bt-spotify-switch` and the lab Spotify auto-switch flow.
 
 ## Audio
 
-- `pipewire`, `pipewire-pulse`, `pipewire-alsa`, `wireplumber`
+- `pipewire`, `pipewire-pulse`, `pipewire-alsa`, `pipewire-jack`, `wireplumber`
 - `pavucontrol` — GUI mixer
 
 `pipewire-alsa` redirects ALSA's `default` PCM through PipeWire. Without it,
 ALSA-only apps (e.g. MuseScore AppImage) grab the hardware device directly and
 never appear as streams in the mixer.
+
+`pipewire-jack` conflicts with `jack2` and replaces it. Ardour links against
+`libjack`; with real jack2 installed it starts its own JACK server and fights
+PipeWire for the card.
+
+## Music production
+
+- `ardour` — DAW: multitrack recording, overdub, mixing, metronome
+- `lsp-plugins`, `x42-plugins` — LV2 suites (parametric EQ, compressor, gate,
+  tuner, meters)
+- `realtime-privileges` — rtprio 98 / memlock limits for the audio engine
+- `fmit` (AUR) — standalone chromatic instrument tuner
+
+`realtime-privileges` drops limits in `/etc/security/limits.d/` that only apply
+to members of the `realtime` group, added by `install.sh --system`. Without
+them the engine loses cycles and drops out mid-take.
+
+Launch Ardour via [`scripts/ardour`](../scripts/ardour), which restores the
+short name (the binary is `ardour9`) and wraps it in `pw-jack -p 256` so the
+graph quantum drops from 1024 (~45 ms round-trip, audible when overdubbing) to
+256 (~12 ms) while it runs.
+
+Ardour's `config` and `ui_config` are symlinked from `configs/ardour9/`. The
+rest of `~/.config/ardour9/` is cache (`plugin_metadata`, `sfdb`, `recent`) and
+stays untracked.
+
+### LV2 presets
+
+`~/.lv2` is a symlink to `configs/lv2/`, so every preset bundle in there is
+tracked — including ones Ardour saves itself, since that is where it writes.
+
+`gaita-aire-libre.lv2` is a preset for the LSP Parametric Equalizer, built from
+a measured 75 s sample of the punteiro played without the roncón (34.7 dB S/N).
+The measurements behind each band are in the preset's comments.
+
+An LV2 preset binds to a plugin URI, and LSP ships **12** equalizer variants
+(x8/x16/x32 × mono/stereo/lr/ms) — a preset naming only one is invisible from
+the other eleven. Since they share port symbols, the preset lists all twelve in
+`lv2:appliesTo`. After editing a preset, check what a host will actually see
+with [`scripts/lv2-presets`](../scripts/lv2-presets), which queries liblilv —
+the same library Ardour uses — and so tells a broken bundle apart from a host
+that cached an old plugin list:
+
+```
+lv2-presets para_equalizer      # all 12 variants, with their presets
+```
+
+Two things the profile assumes, both from that sample:
+
+- **No roncón.** Below 400 Hz the sample was pure noise, so band 0 high-passes
+  at 300 Hz. With a drone sounding, drop that to ~90 Hz or the roncón goes with
+  it.
+- **Punteiro in Do.** The fundamental measured 527 Hz (Do5, +13 cents).
 
 ## Printing
 

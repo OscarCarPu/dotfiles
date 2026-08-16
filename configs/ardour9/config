@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Ardour>
+  <Config>
+    <Option name="capture-buffer-seconds" value="10"/>
+    <Option name="playback-buffer-seconds" value="10"/>
+    <Option name="default-session-parent-dir" value="/home/ocp"/>
+    <Option name="clip-library-dir" value="/home/ocp/.local/share/sounds/clips"/>
+    <Option name="plugin-cache-version" value="7002"/>
+    <Option name="plugin-path-vst" value="/usr/local/lib/vst:/usr/lib/vst"/>
+    <Option name="plugin-path-lxvst" value="/usr/local/lib64/lxvst:/usr/local/lib/lxvst:/usr/lib64/lxvst:/usr/lib/lxvst:/usr/local/lib64/linux_vst:/usr/local/lib/linux_vst:/usr/lib64/linux_vst:/usr/lib/linux_vst:/usr/lib/vst:/usr/local/lib/vst"/>
+    <Option name="plugin-path-vst3" value=""/>
+  </Config>
+  <Metadata/>
+  <ControlProtocols>
+    <Protocol name="Ableton Push 2" active="0"/>
+    <Protocol name="ContourDesign" active="0"/>
+    <Protocol name="Generic MIDI" active="0"/>
+    <Protocol name="MCP HTTP Server (Experimental)" active="0"/>
+    <Protocol name="Mackie" active="0"/>
+    <Protocol name="Novation Launch Control XL" active="0"/>
+    <Protocol name="Novation Launchkey 4" active="0"/>
+    <Protocol name="Novation Launchpad Mini" active="0"/>
+    <Protocol name="Novation Launchpad Pro" active="0"/>
+    <Protocol name="Novation Launchpad X" active="0"/>
+    <Protocol name="Open Sound Control (OSC)" active="0"/>
+    <Protocol name="PreSonus FaderPort" active="0"/>
+    <Protocol name="PreSonus FaderPort16" active="0"/>
+    <Protocol name="PreSonus FaderPort2" active="0"/>
+    <Protocol name="PreSonus FaderPort8" active="0"/>
+    <Protocol name="SSL 360: UF8 UF1" active="0"/>
+    <Protocol name="Softube Console1" active="0"/>
+    <Protocol name="Steinberg CC121" active="0"/>
+    <Protocol name="Tascam US-2400" active="0"/>
+    <Protocol name="WebSockets Server (Experimental)" active="0"/>
+  </ControlProtocols>
+  <TransportMasters current="MIDI Clock">
+    <TransportMaster type="JACK" removeable="0" name="JACK" sclock_synced="0" collect="1" allowed_transport_requests=""/>
+    <TransportMaster type="MTC" removeable="0" name="MTC" fr2997="0" sclock_synced="0" collect="1" allowed_transport_requests="">
+      <Port/>
+    </TransportMaster>
+    <TransportMaster type="LTC" removeable="0" name="LTC" fr2997="0" sclock_synced="0" collect="1" allowed_transport_requests="">
+      <Port/>
+    </TransportMaster>
+    <TransportMaster type="MIDIClock" removeable="0" name="MIDI Clock" sclock_synced="0" collect="1" allowed_transport_requests="">
+      <Port/>
+    </TransportMaster>
+  </TransportMasters>
+</Ardour>

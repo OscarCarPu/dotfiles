@@ -21,8 +21,14 @@ declare -A DOTFILES=(
     ["configs/OrcaSlicer/user/default/machine"]="$HOME/.config/OrcaSlicer/user/default/machine"
     ["configs/OrcaSlicer/user/default/process"]="$HOME/.config/OrcaSlicer/user/default/process"
     ["configs/OpenSCAD/libraries"]="$HOME/.local/share/OpenSCAD/libraries"
+    # Whole dir, not per-bundle: any new .lv2 preset bundle dropped in here
+    # (or saved by Ardour, which writes to ~/.lv2) is tracked automatically.
+    ["configs/lv2"]="$HOME/.lv2"
+    ["configs/ardour9/config"]="$HOME/.config/ardour9/config"
+    ["configs/ardour9/ui_config"]="$HOME/.config/ardour9/ui_config"
     ["configs/applications/autofirma.desktop"]="$HOME/.local/share/applications/autofirma.desktop"
     ["configs/applications/nvim-kitty.desktop"]="$HOME/.local/share/applications/nvim-kitty.desktop"
+    ["configs/applications/ardour9.desktop"]="$HOME/.local/share/applications/ardour9.desktop"
     ["claude/skills"]="$HOME/.claude/skills"
     ["configs/librewolf.overrides.cfg"]="$HOME/.librewolf/librewolf.overrides.cfg"
 )
@@ -82,6 +88,7 @@ SYSTEM_GROUPS=(
     uucp
     android-sdk
     adbusers
+    realtime
 )
 
 DOTFILES_DIR=$(pwd)

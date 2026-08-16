@@ -1,0 +1,15 @@
+#!/bin/bash
+# Ardour launcher. Two jobs, both of which the packaged `ardour9` binary and
+# its .desktop entry get wrong for this machine:
+#
+#   - The binary is versioned (`ardour9`), so plain `ardour` isn't a command.
+#     This wrapper sits ahead of /usr/bin in PATH and restores the short name.
+#   - PipeWire runs at a 1024-frame quantum (~45 ms round-trip), which is
+#     inaudible for playback but a clearly audible delay when overdubbing.
+#     `pw-jack -p` drops the graph to 256 frames (~12 ms) for the lifetime of
+#     Ardour only; the quantum goes back to 1024 when it exits. Raise to 512 if
+#     the internal HDA card starts reporting xruns.
+#
+# 48000 matches wireplumber's clock.allowed-rates; anything else resamples.
+
+exec pw-jack -p 256 -s 48000 ardour9 "$@"

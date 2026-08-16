@@ -1,0 +1,23 @@
+[Desktop Entry]
+# Overrides /usr/share/applications/ardour9.desktop so launching Ardour from
+# wofi goes through scripts/ardour (pw-jack -p 256) instead of the bare
+# ardour9 binary. Without this the launcher path leaves the graph at the
+# global 1024 quantum — ~45 ms round-trip, audible when overdubbing — while
+# the terminal path is fine, which makes the latency look intermittent.
+#
+# Absolute path on purpose: .bash_profile execs Hyprland before sourcing
+# .bashrc, so the compositor — and every launcher under it — never gets the
+# ~/.local/bin entry that .bashrc adds. A bare `Exec=ardour` resolves in a
+# terminal and nowhere else. Same reason autofirma.desktop spells out
+# /usr/bin/autofirma.
+Name=Ardour
+Comment=Ardour Digital Audio Workstation
+Exec=/home/ocp/.local/bin/ardour
+Icon=ardour9
+Terminal=false
+MimeType=application/x-ardour;
+Type=Application
+Categories=AudioVideo;Audio;AudioEditing;X-Recorders;X-Multitrack;X-Jack;
+StartupWMClass=Ardour
+X-NSM-Capable=true
+X-NSM-Exec=ardour9

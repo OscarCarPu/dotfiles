@@ -1,0 +1,65 @@
+#!/usr/bin/env python3
+"""List the LV2 presets a host will see for a plugin.
+
+Ardour, Carla and friends all discover presets through liblilv, so asking lilv
+directly separates "my preset bundle is wrong" from "the host cached an old
+plugin list". Takes a plugin URI, or a substring to match against every plugin
+lilv knows about.
+
+    lv2-presets para_equalizer_x16_mono
+    lv2-presets http://lsp-plug.in/plugins/lv2/para_equalizer_x16_mono
+    lv2-presets para_equalizer          # every variant
+"""
+import ctypes
+import sys
+
+L = ctypes.CDLL("liblilv-0.so.0")
+for name, restype, argtypes in [
+    ("lilv_world_new", ctypes.c_void_p, []),
+    ("lilv_world_load_all", None, [ctypes.c_void_p]),
+    ("lilv_new_uri", ctypes.c_void_p, [ctypes.c_void_p, ctypes.c_char_p]),
+    ("lilv_world_get_all_plugins", ctypes.c_void_p, [ctypes.c_void_p]),
+    ("lilv_plugins_begin", ctypes.c_void_p, [ctypes.c_void_p]),
+    ("lilv_plugins_get", ctypes.c_void_p, [ctypes.c_void_p, ctypes.c_void_p]),
+    ("lilv_plugins_next", ctypes.c_void_p, [ctypes.c_void_p, ctypes.c_void_p]),
+    ("lilv_plugins_is_end", ctypes.c_bool, [ctypes.c_void_p, ctypes.c_void_p]),
+    ("lilv_plugin_get_uri", ctypes.c_void_p, [ctypes.c_void_p]),
+    ("lilv_plugin_get_related", ctypes.c_void_p, [ctypes.c_void_p, ctypes.c_void_p]),
+    ("lilv_nodes_begin", ctypes.c_void_p, [ctypes.c_void_p]),
+    ("lilv_nodes_get", ctypes.c_void_p, [ctypes.c_void_p, ctypes.c_void_p]),
+    ("lilv_nodes_next", ctypes.c_void_p, [ctypes.c_void_p, ctypes.c_void_p]),
+    ("lilv_nodes_is_end", ctypes.c_bool, [ctypes.c_void_p, ctypes.c_void_p]),
+    ("lilv_node_as_string", ctypes.c_char_p, [ctypes.c_void_p]),
+]:
+    fn = getattr(L, name)
+    fn.restype, fn.argtypes = restype, argtypes
+
+if len(sys.argv) != 2:
+    sys.exit(__doc__)
+needle = sys.argv[1]
+
+world = L.lilv_world_new()
+L.lilv_world_load_all(world)
+plugins = L.lilv_world_get_all_plugins(world)
+preset_class = L.lilv_new_uri(world, b"http://lv2plug.in/ns/ext/presets#Preset")
+
+matched = 0
+it = L.lilv_plugins_begin(plugins)
+while not L.lilv_plugins_is_end(plugins, it):
+    plugin = L.lilv_plugins_get(plugins, it)
+    uri = L.lilv_node_as_string(L.lilv_plugin_get_uri(plugin)).decode()
+    if needle in uri:
+        matched += 1
+        presets = []
+        related = L.lilv_plugin_get_related(plugin, preset_class)
+        pit = L.lilv_nodes_begin(related)
+        while not L.lilv_nodes_is_end(related, pit):
+            presets.append(L.lilv_node_as_string(L.lilv_nodes_get(related, pit)).decode())
+            pit = L.lilv_nodes_next(related, pit)
+        print(f"{uri}  ({len(presets)} presets)")
+        for p in sorted(presets):
+            print(f"    {p}")
+    it = L.lilv_plugins_next(plugins, it)
+
+if not matched:
+    sys.exit(f"no plugin URI matched {needle!r}")
