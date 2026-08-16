@@ -114,5 +114,24 @@ System (`bash install.sh --system`):
 
 # Maintenance
 
+```bash
+bash install.sh            # user symlinks, services, scripts, git filters
+bash install.sh --system   # /etc files, sudoers, system services, groups (sudo)
+bash install.sh --check    # read-only drift report; non-zero exit on drift
+bash install.sh --prune    # remove what the repo stopped declaring
+```
+
 - No symlink, no entry — everything must go through `install.sh`
 - Document as you go
+- `--check` also runs at the end of the `Super+V` update flow, since an update
+  is when the machine drifts. It verifies symlinks, scripts, user and system
+  services, groups, `packages.md` against `pacman -Qqe`, the credential
+  filters, Seafile library health, and whether every repo in `~/dev` has a
+  remote and is pushed.
+- `install.sh` never deletes your data: a target that is a real file or
+  directory is moved to `<target>.pre-dotfiles.<timestamp>` before the symlink
+  goes in.
+- Apps that rewrite their config atomically (Ardour, and anything else that
+  saves via temp-file + rename) **replace the symlink with a real file**. That
+  is what `--check`'s "is not a symlink" finding means — re-run `install.sh`
+  to relink, after salvaging anything you wanted from the backup.

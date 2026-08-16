@@ -459,6 +459,22 @@ if [ -n "$PACNEW_FILES" ]; then
     fi
 fi
 
+# --- Step 8: dotfiles drift -------------------------------------------------
+# An update is exactly when the machine drifts from the repo: a package lands
+# that packages.md never heard of, a .pacnew merge unlinks an /etc file, an app
+# replaces a symlink with a real file. This is the one flow that already has
+# your attention, so the report goes here rather than in a cron job nobody
+# reads. Read-only — it never changes anything.
+DOTFILES_DIR="$(cd "$SCRIPTS_DIR/../.." && pwd)"
+if [ -x "$DOTFILES_DIR/install.sh" ] || [ -f "$DOTFILES_DIR/install.sh" ]; then
+    echo -e "\n\033[1;34m[ Dotfiles drift ]\033[0m"
+    (cd "$DOTFILES_DIR" && bash install.sh --check) ||
+        echo -e "\033[0;90mFix with: cd ~/.dotfiles && bash install.sh [--system|--prune]\033[0m"
+fi
+# No prompt here on purpose: the EXIT trap's confirm_power already holds the
+# terminal for 30 s, which is the window to read this. A blocking read would
+# strand the machine on if you walked away.
+
 exit 0
 INNEREOF
 )

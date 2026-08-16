@@ -31,30 +31,9 @@ fi
 
 # --- parse packages.md ----------------------------------------------------
 
-# Convention in packages.md: each list item starts "- `pkg`[, `pkg`]*"
-# followed by optional " — prose" where further backticks are just references.
-# Capture only the leading comma-separated run of packages.
-mapfile -t pkgs < <(awk '
-    /^## / {
-        heading = substr($0, 4)
-        include = (heading != "Base system" && \
-                   heading != "External programs (not via pacman)")
-        next
-    }
-    include && /^- `[a-z0-9]/ {
-        line = $0
-        sub(/^- /, "", line)
-        while (match(line, /^`[a-z0-9][a-z0-9._+-]*`/)) {
-            print substr(line, RSTART + 1, RLENGTH - 2)
-            line = substr(line, RSTART + RLENGTH)
-            if (match(line, /^,[ \t]+/)) {
-                line = substr(line, RSTART + RLENGTH)
-            } else {
-                break
-            }
-        }
-    }
-' "$PACKAGES_MD")
+# Parser lives in lib/packages.awk, shared with `install.sh --check` so the
+# two cannot disagree about what the document declares.
+mapfile -t pkgs < <(awk -f "$DOTFILES_DIR/lib/packages.awk" "$PACKAGES_MD")
 
 if [ "${#pkgs[@]}" -eq 0 ]; then
     echo "No packages parsed from $PACKAGES_MD — aborting." >&2

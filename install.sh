@@ -112,9 +112,18 @@ fi
 link_file() {
     local src="$1" target="$2"
     mkdir -p "$(dirname "$target")"
-    if [ -e "$target" ] || [ -L "$target" ]; then
-        echo " Removing existing: $target"
-        rm -rf "$target"
+    if [ -L "$target" ]; then
+        # A symlink carries no data of its own — safe to replace outright.
+        rm -f "$target"
+    elif [ -e "$target" ]; then
+        # A real file or directory is somebody's data: an app's presets, a
+        # config written before this repo existed. `rm -rf` here is the one way
+        # this script can destroy something unrecoverable (first run on a
+        # machine that already has ~/.lv2 presets or OrcaSlicer profiles), so
+        # move it aside instead and let the user decide.
+        local backup="$target.pre-dotfiles.$(date +%Y%m%d%H%M%S)"
+        echo " Backing up existing: $target -> $backup"
+        mv "$target" "$backup"
     fi
     echo " Symlinking: $src -> $target"
     ln -sf "$src" "$target"
@@ -138,6 +147,229 @@ sudo_install_sudoers() {
     sudo install -m 0440 -o root -g root "$src" "$target"
     sudo visudo -cf "$target" >/dev/null
 }
+
+# --- check mode -------------------------------------------------------------
+# Read-only drift report: everything this repo claims to govern, verified
+# against the machine. The repo is additive — it links what it declares and
+# never notices what it stopped declaring, or what was installed behind its
+# back — so without this the two silently diverge. Exits non-zero on drift so
+# it can gate a script.
+
+if [ "${1:-}" = "--check" ]; then
+    drift=0
+    section() { printf '\n\033[1m%s\033[0m\n' "$1"; }
+    ok() { printf '  \033[32m✓\033[0m %s\n' "$1"; }
+    bad()  { printf '  \033[31m✗\033[0m %s\n' "$1"; drift=$((drift + 1)); }
+    warn() { printf '  \033[33m!\033[0m %s\n' "$1"; drift=$((drift + 1)); }
+
+    section "User symlinks"
+    missing=0
+    for src in "${!DOTFILES[@]}"; do
+        target="${DOTFILES[$src]}"
+        want="$DOTFILES_DIR/$src"
+        if [ ! -L "$target" ]; then
+            bad "$target is not a symlink (expected -> $want)"
+            missing=$((missing + 1))
+        elif [ "$(readlink "$target")" != "$want" ]; then
+            bad "$target -> $(readlink "$target") (expected $want)"
+            missing=$((missing + 1))
+        elif [ ! -e "$target" ]; then
+            bad "$target is a broken symlink"
+            missing=$((missing + 1))
+        fi
+    done
+    [ "$missing" -eq 0 ] && ok "${#DOTFILES[@]} entries linked"
+
+    section "Scripts in ~/.local/bin"
+    missing=0
+    for script in "$DOTFILES_DIR/scripts"/*; do
+        [ -e "$script" ] || continue
+        target="$HOME/.local/bin/$(basename "$script")"
+        if [ ! -L "$target" ] || [ "$(readlink "$target")" != "$script" ]; then
+            bad "$(basename "$script") not linked into ~/.local/bin"
+            missing=$((missing + 1))
+        fi
+    done
+    [ "$missing" -eq 0 ] && ok "all scripts linked"
+
+    section "User runit services"
+    svdir="$HOME/.local/share/runit/sv"
+    before=$drift
+    for svc in "${USER_RUNIT_SERVICES[@]}"; do
+        if [ ! -e "$svdir/$svc/run" ]; then
+            bad "$svc declared but not installed"
+        elif ! SVDIR="$svdir" sv status "$svc" 2>/dev/null | grep -q '^run:'; then
+            bad "$svc is not running: $(SVDIR="$svdir" sv status "$svc" 2>&1 | head -1)"
+        fi
+    done
+    for dir in "$svdir"/*/; do
+        [ -d "$dir" ] || continue
+        svc=$(basename "$dir")
+        declared=0
+        for d in "${USER_RUNIT_SERVICES[@]}"; do [ "$d" = "$svc" ] && declared=1; done
+        # Orphan: install.sh created it, then the declaration went away. runit
+        # keeps supervising it forever.
+        [ "$declared" -eq 0 ] && warn "$svc is installed but no longer declared (--prune removes it)"
+    done
+    [ "$drift" -eq "$before" ] && ok "${#USER_RUNIT_SERVICES[@]} services installed and running"
+
+    section "System files"
+    for src in "${!SYSTEM_DOTFILES[@]}"; do
+        target="${SYSTEM_DOTFILES[$src]}"
+        want="$DOTFILES_DIR/$src"
+        [ -L "$target" ] && [ "$(readlink "$target")" = "$want" ] ||
+            bad "$target not linked to $want (run: bash install.sh --system)"
+    done
+    # /etc/sudoers.d is 0750 root:root, so a plain test always fails as a
+    # normal user. Only report when passwordless sudo can actually look.
+    for src in "${!SYSTEM_SUDOERS[@]}"; do
+        target="${SYSTEM_SUDOERS[$src]}"
+        if sudo -n true 2>/dev/null; then
+            sudo -n test -e "$target" || bad "$target missing"
+        else
+            printf '  \033[2m·\033[0m %s (needs sudo to verify)\n' "$target"
+        fi
+    done
+    for svc in "${SYSTEM_RUNIT_ACTIVATE[@]}"; do
+        [ -e "/etc/runit/runsvdir/default/$svc" ] ||
+            bad "$svc not activated in /etc/runit/runsvdir/default"
+    done
+    [ -e /etc/runit/runsvdir/default/logind ] &&
+        bad "duplicate logind service present (run: bash install.sh --system)"
+
+    section "Groups"
+    for grp in "${SYSTEM_GROUPS[@]}"; do
+        if ! getent group "$grp" >/dev/null; then
+            warn "group $grp does not exist (package not installed?)"
+        elif ! id -nG "$USER" | tr ' ' '\n' | grep -qx "$grp"; then
+            bad "$USER not in group $grp (run: bash install.sh --system, then re-login)"
+        fi
+    done
+
+    section "Packages"
+    pkgs_md="$DOTFILES_DIR/docs/packages.md"
+    declared=$(mktemp) && unmanaged=$(mktemp) && installed=$(mktemp)
+    trap 'rm -f "$declared" "$unmanaged" "$installed"' EXIT
+    awk -f "$DOTFILES_DIR/lib/packages.awk" "$pkgs_md" | sort -u >"$declared"
+    awk -v want_unmanaged=1 -f "$DOTFILES_DIR/lib/packages.awk" "$pkgs_md" | sort -u >"$unmanaged"
+    pacman -Qqe | sort -u >"$installed"
+
+    undocumented=$(comm -23 "$installed" <(sort -u "$declared" "$unmanaged"))
+    if [ -n "$undocumented" ]; then
+        warn "installed explicitly but not in packages.md — a rebuild would not get these:"
+        printf '      %s\n' $undocumented
+    fi
+    # Declared-but-absent is only real drift when nothing provides it at all:
+    # plenty of entries are pulled in as dependencies rather than explicitly.
+    while read -r p; do
+        [ -n "$p" ] && ! pacman -Qq "$p" >/dev/null 2>&1 &&
+            bad "declared in packages.md but not installed: $p"
+    done <"$declared"
+    [ -z "$undocumented" ] && ok "$(wc -l <"$declared") declared packages accounted for"
+
+    section "Credential filters"
+    if [ "$(git -C "$DOTFILES_DIR" config --get filter.orcasecret.clean)" ]; then
+        staged=$(git -C "$DOTFILES_DIR" show \
+            ":configs/OrcaSlicer/user/default/machine/core-one.json" 2>/dev/null |
+            grep -c 'printhost_password": "[^"]' || true)
+        [ "${staged:-0}" -eq 0 ] && ok "orcasecret filter active, no credential in the index" ||
+            bad "a credential is staged in an OrcaSlicer preset"
+    else
+        bad "orcasecret git filter not registered (run: bash install.sh)"
+    fi
+    [ -f "$HOME/.config/dotfiles/secrets.env" ] ||
+        bad "$HOME/.config/dotfiles/secrets.env missing"
+
+    section "File sync"
+    lib_list="$DOTFILES_DIR/configs/seafile-cli/libraries"
+    if ! sync_status=$(timeout 30 seaf-cli status 2>/dev/null); then
+        bad "seaf-cli status failed — daemon down?"
+    else
+        while read -r lib; do
+            [ -z "$lib" ] && continue
+            line=$(printf '%s\n' "$sync_status" | grep -E "^$lib[[:space:]]" || true)
+            if [ -z "$line" ]; then
+                bad "library '$lib' is not being synced"
+            elif ! printf '%s' "$line" | grep -q 'synchronized'; then
+                warn "library '$lib': $(printf '%s' "$line" | awk '{print $2}')"
+            fi
+        done < <(sed -e 's/#.*//' -e 's/[[:space:]]*$//' "$lib_list" | grep -v '^$')
+        ok "$(printf '%s\n' "$sync_status" | grep -c synchronized) libraries synchronized"
+    fi
+
+    section "Git repos in ~/dev"
+    # Not synced by Seafile on purpose — the remote IS the backup. So a repo
+    # without one, or with work that never left the machine, has no backup.
+    found=0
+    while read -r gitdir; do
+        repo="${gitdir%/.git}"
+        rel="${repo#"$HOME"/}"
+        if ! git -C "$repo" remote get-url origin >/dev/null 2>&1; then
+            bad "$rel has no remote — it exists only on this disk"
+            found=1
+            continue
+        fi
+        unpushed=$(git -C "$repo" log --branches --not --remotes --oneline 2>/dev/null | wc -l)
+        dirty=$(git -C "$repo" status --porcelain 2>/dev/null | wc -l)
+        [ "$unpushed" -gt 0 ] && { warn "$rel has $unpushed unpushed commit(s)"; found=1; }
+        [ "$dirty" -gt 0 ] && { warn "$rel has $dirty uncommitted change(s)"; found=1; }
+    done < <(find "$HOME/dev" -maxdepth 4 -name .git -type d 2>/dev/null)
+    [ "$found" -eq 0 ] && ok "every repo has a remote and is fully pushed"
+
+    section "Stale links"
+    stale=$(find "$HOME" "$HOME/.config" "$HOME/.local/share" "$HOME/.local/bin" \
+        -maxdepth 2 -xtype l 2>/dev/null |
+        while read -r l; do
+            case "$(readlink "$l")" in "$DOTFILES_DIR"*) echo "$l" ;; esac
+        done)
+    if [ -n "$stale" ]; then
+        warn "broken symlinks pointing into the repo (--prune removes them):"
+        printf '      %s\n' $stale
+    else
+        ok "no broken links into the repo"
+    fi
+
+    printf '\n'
+    if [ "$drift" -eq 0 ]; then
+        printf '\033[32mNo drift: the machine matches the repo.\033[0m\n'
+        exit 0
+    fi
+    printf '\033[33m%d item(s) of drift.\033[0m\n' "$drift"
+    exit 1
+fi
+
+# --- prune mode -------------------------------------------------------------
+# Removes what the repo stopped declaring. Only touches things install.sh
+# itself created: user services and symlinks pointing into this directory.
+
+if [ "${1:-}" = "--prune" ]; then
+    svdir="$HOME/.local/share/runit/sv"
+    for dir in "$svdir"/*/; do
+        [ -d "$dir" ] || continue
+        svc=$(basename "$dir")
+        declared=0
+        for d in "${USER_RUNIT_SERVICES[@]}"; do [ "$d" = "$svc" ] && declared=1; done
+        [ "$declared" -eq 1 ] && continue
+        echo "Removing undeclared user service: $svc"
+        SVDIR="$svdir" sv down "$svc" >/dev/null 2>&1 || true
+        sleep 1
+        rm -rf "${svdir:?}/$svc"
+    done
+
+    find "$HOME" "$HOME/.config" "$HOME/.local/share" "$HOME/.local/bin" \
+        -maxdepth 2 -xtype l 2>/dev/null |
+        while read -r l; do
+            case "$(readlink "$l")" in
+            "$DOTFILES_DIR"*)
+                echo "Removing broken link: $l -> $(readlink "$l")"
+                rm -f "$l"
+                ;;
+            esac
+        done
+
+    echo "Done (prune). Run 'bash install.sh --check' to confirm."
+    exit 0
+fi
 
 # --- system mode ----------------------------------------------------------
 
