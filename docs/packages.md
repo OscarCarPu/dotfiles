@@ -113,9 +113,21 @@ short name (the binary is `ardour9`) and wraps it in `pw-jack -p 256` so the
 graph quantum drops from 1024 (~45 ms round-trip, audible when overdubbing) to
 256 (~12 ms) while it runs.
 
-Ardour's `config` and `ui_config` are symlinked from `configs/ardour9/`. The
-rest of `~/.config/ardour9/` is cache (`plugin_metadata`, `sfdb`, `recent`) and
-stays untracked.
+Ardour's `config` and `ui_config` are **copied** from `configs/ardour9/`, not
+symlinked. Ardour saves via temp-file + rename, which replaces a symlink with a
+real file — it silently detached itself once already, and the live file had
+grown from 48 to 102 lines of window geometry by the time `--check` noticed.
+
+So `install.sh` seeds them only when missing, and never overwrites what Ardour
+has since written. To promote the live version back into the repo:
+
+```bash
+bash install.sh --capture     # copies live -> repo, then review the diff
+git diff -- configs/ardour9/  # expect UI noise; commit only real settings
+```
+
+The rest of `~/.config/ardour9/` is cache (`plugin_metadata`, `sfdb`, `recent`)
+and stays untracked.
 
 ### LV2 presets
 
@@ -252,8 +264,12 @@ unmounts all, right-click opens Thunar.
 - `musescore-bin` — sheet music editor
 - `jre-openjdk` — Java runtime
 - `jdk21-openjdk` — Java 21 development kit
-- `android-sdk`, `android-sdk-platform-tools`, `android-sdk-cmdline-tools-latest` — Android SDK + `adb`/`fastboot` + `sdkmanager`
-- `android-tools` — standalone `adb`/`fastboot`/`mkbootimg` in `/usr/bin` (Arch `[extra]`)
+- `android-sdk`, `android-sdk-platform-tools`, `android-sdk-cmdline-tools-latest` — Android SDK + `sdkmanager`. **Not automated**: the AUR package
+  does not create the `android-sdk` group the setup step assumed, so it
+  skipped silently on every run and no platform was ever installed. Run
+  `sdkmanager` by hand (as root) if you need a platform; uninstall all three if
+  you do not build Android apps
+- `android-tools` — standalone `adb`/`fastboot`/`mkbootimg` in `/usr/bin` (Arch `[extra]`). This is what you actually need to talk to a phone
 - `android-udev` — udev rules so non-root users (in `adbusers`) can reach connected devices
 - `obsidian-bin` — markdown notes / knowledge base
 - `openscad-git` — programmers' 3D CAD modeller. The BOSL2 library is vendored
@@ -291,10 +307,9 @@ unmounts all, right-click opens Thunar.
 ## Games
 
 Launchers, plus the runtimes their games need. `home/Makefile` has the
-`celeste` and `olympus` targets that drive the Celeste stack.
+`celeste` and `olympus` targets that drive the Celeste stack. Steam is
+deliberately absent — removed 2026-08-16, nothing here depends on it.
 
-- `steam` — Valve's launcher; needs `[lib32]` enabled (see
-  [`system.md`](system.md#lib32-repository-artix-multilib))
 - `legendary` — CLI Epic Games launcher; the `celeste` Makefile target runs
   `legendary launch Salt --no-wine --offline`
 - `love` — LÖVE 2D engine, the runtime several Celeste mods ship against

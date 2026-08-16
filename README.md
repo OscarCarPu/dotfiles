@@ -118,6 +118,7 @@ System (`bash install.sh --system`):
 bash install.sh            # user symlinks, services, scripts, git filters
 bash install.sh --system   # /etc files, sudoers, system services, groups (sudo)
 bash install.sh --check    # read-only drift report; non-zero exit on drift
+bash install.sh --capture  # pull app-owned config (Ardour) back into the repo
 bash install.sh --prune    # remove what the repo stopped declaring
 ```
 
@@ -131,7 +132,8 @@ bash install.sh --prune    # remove what the repo stopped declaring
 - `install.sh` never deletes your data: a target that is a real file or
   directory is moved to `<target>.pre-dotfiles.<timestamp>` before the symlink
   goes in.
-- Apps that rewrite their config atomically (Ardour, and anything else that
-  saves via temp-file + rename) **replace the symlink with a real file**. That
-  is what `--check`'s "is not a symlink" finding means — re-run `install.sh`
-  to relink, after salvaging anything you wanted from the backup.
+- Apps that rewrite their config atomically (temp-file + rename) **replace a
+  symlink with a real file** and silently detach from this repo. Those are
+  seeded instead of symlinked (`SEED_FILES` in `install.sh` — currently
+  Ardour): copied in when missing, never overwritten afterwards, and pulled
+  back with `--capture` when you want to keep a change.

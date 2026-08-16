@@ -26,8 +26,8 @@ declare -A DOTFILES=(
     # Whole dir, not per-bundle: any new .lv2 preset bundle dropped in here
     # (or saved by Ardour, which writes to ~/.lv2) is tracked automatically.
     ["configs/lv2"]="$HOME/.lv2"
-    ["configs/ardour9/config"]="$HOME/.config/ardour9/config"
-    ["configs/ardour9/ui_config"]="$HOME/.config/ardour9/ui_config"
+    # NOTE: Ardour's config is NOT here — it is seeded, not symlinked. See
+    # SEED_FILES below.
     ["configs/applications/autofirma.desktop"]="$HOME/.local/share/applications/autofirma.desktop"
     ["configs/applications/nvim-kitty.desktop"]="$HOME/.local/share/applications/nvim-kitty.desktop"
     ["configs/applications/ardour9.desktop"]="$HOME/.local/share/applications/ardour9.desktop"
@@ -35,6 +35,24 @@ declare -A DOTFILES=(
     ["claude/settings.json"]="$HOME/.claude/settings.json"
     ["claude/statusline.sh"]="$HOME/.claude/statusline.sh"
     ["configs/librewolf.overrides.cfg"]="$HOME/.librewolf/librewolf.overrides.cfg"
+)
+
+# Files COPIED rather than symlinked, because the app rewrites them with
+# temp-file + rename — which replaces a symlink with a real file and silently
+# detaches it from this repo (Ardour did exactly that between 2026-08-15 and
+# 2026-08-16, and the live file had grown 48 -> 102 lines of window geometry).
+#
+# Seeded only when the target is missing, so a re-run never clobbers settings
+# you changed in the app. To promote the live version back into the repo after
+# tuning something worth keeping:
+#
+#   bash install.sh --capture
+#
+# which copies target -> repo so you can review the diff and commit the parts
+# you want. Expect UI noise (window positions, recent files) in that diff.
+declare -A SEED_FILES=(
+    ["configs/ardour9/config"]="$HOME/.config/ardour9/config"
+    ["configs/ardour9/ui_config"]="$HOME/.config/ardour9/ui_config"
 )
 
 # User-level runit services. Only `run` and `log/run` are symlinked into each
@@ -93,7 +111,6 @@ SYSTEM_RUNIT_ACTIVATE=(
 SYSTEM_GROUPS=(
     docker
     uucp
-    android-sdk
     adbusers
     realtime
 )
@@ -148,6 +165,24 @@ sudo_install_sudoers() {
     sudo visudo -cf "$target" >/dev/null
 }
 
+# --- capture mode -------------------------------------------------------------
+# The reverse of seeding: pull an app-owned config back into the repo so its
+# changes can be reviewed and committed. Never runs automatically — the live
+# file carries UI state you usually do not want tracked.
+
+if [ "${1:-}" = "--capture" ]; then
+    for src in "${!SEED_FILES[@]}"; do
+        target="${SEED_FILES[$src]}"
+        [ -f "$target" ] || { echo " Skipping $src: $target does not exist"; continue; }
+        echo " Capturing: $target -> $src"
+        cp "$target" "$DOTFILES_DIR/$src"
+    done
+    echo
+    echo "Review before committing — the live files carry window geometry:"
+    echo "  git -C $DOTFILES_DIR diff -- configs/"
+    exit 0
+fi
+
 # --- check mode -------------------------------------------------------------
 # Read-only drift report: everything this repo claims to govern, verified
 # against the machine. The repo is additive — it links what it declares and
@@ -179,6 +214,22 @@ if [ "${1:-}" = "--check" ]; then
         fi
     done
     [ "$missing" -eq 0 ] && ok "${#DOTFILES[@]} entries linked"
+
+    section "Seeded config files"
+    before=$drift
+    for src in "${!SEED_FILES[@]}"; do
+        target="${SEED_FILES[$src]}"
+        if [ ! -e "$target" ]; then
+            bad "$target missing (run: bash install.sh)"
+        elif [ -L "$target" ]; then
+            bad "$target is a symlink — should be a real copy (run: bash install.sh)"
+        elif ! cmp -s "$target" "$DOTFILES_DIR/$src"; then
+            # Expected and harmless: the app has been running. Informational
+            # only, so it does not count as drift.
+            printf '  \033[2m·\033[0m %s differs from the repo (bash install.sh --capture to save)\n' "$target"
+        fi
+    done
+    [ "$drift" -eq "$before" ] && ok "${#SEED_FILES[@]} files seeded as real copies"
 
     section "Scripts in ~/.local/bin"
     missing=0
@@ -238,6 +289,7 @@ if [ "${1:-}" = "--check" ]; then
         bad "duplicate logind service present (run: bash install.sh --system)"
 
     section "Groups"
+    before=$drift
     for grp in "${SYSTEM_GROUPS[@]}"; do
         if ! getent group "$grp" >/dev/null; then
             warn "group $grp does not exist (package not installed?)"
@@ -245,6 +297,7 @@ if [ "${1:-}" = "--check" ]; then
             bad "$USER not in group $grp (run: bash install.sh --system, then re-login)"
         fi
     done
+    [ "$drift" -eq "$before" ] && ok "member of all ${#SYSTEM_GROUPS[@]} groups"
 
     section "Packages"
     pkgs_md="$DOTFILES_DIR/docs/packages.md"
@@ -477,6 +530,22 @@ fi
 echo "Symlinking user dotfiles..."
 for src in "${!DOTFILES[@]}"; do
     link_file "$DOTFILES_DIR/$src" "${DOTFILES[$src]}"
+done
+
+echo "Seeding app-owned config files..."
+for src in "${!SEED_FILES[@]}"; do
+    target="${SEED_FILES[$src]}"
+    if [ -L "$target" ]; then
+        # Left over from when these were symlinked. Replace with a real copy.
+        echo " Converting symlink to a real file: $target"
+        rm -f "$target"
+    elif [ -e "$target" ]; then
+        echo " Keeping existing: $target (bash install.sh --capture to save it)"
+        continue
+    fi
+    mkdir -p "$(dirname "$target")"
+    echo " Seeding: $src -> $target"
+    cp "$DOTFILES_DIR/$src" "$target"
 done
 
 echo "Symlinking user runit services..."
