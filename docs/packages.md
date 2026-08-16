@@ -268,6 +268,12 @@ echo 'test' | pandoc -o /tmp/t.pdf   # exits 0 and writes a PDF, or names the mi
 ```
 
 - `git`, `github-cli`
+- `git-filter-repo` — history rewriting. Kept installed because this repo is
+  mirrored to a public GitHub remote, so a credential committed by accident has
+  to be purged from every commit, not just removed in a new one. The guard
+  against needing it is the clean/smudge filter in
+  [`printing.md`](printing.md#prusalink-password); this is the cleanup when the
+  guard was not there yet
 - `docker`, `docker-runit`, `docker-compose`, `docker-buildx` — container
   runtime + BuildKit CLI plugin. `install.sh --system` activates the `docker`
   runit service and adds the invoking user to the `docker` group
@@ -308,12 +314,13 @@ echo 'test' | pandoc -o /tmp/t.pdf   # exits 0 and writes a PDF, or names the mi
 - `musescore-bin` — sheet music editor
 - `jre-openjdk` — Java runtime
 - `jdk21-openjdk` — Java 21 development kit
-- `android-sdk`, `android-sdk-platform-tools`, `android-sdk-cmdline-tools-latest` — Android SDK + `sdkmanager`. **Not automated**: the AUR package
-  does not create the `android-sdk` group the setup step assumed, so it
-  skipped silently on every run and no platform was ever installed. Run
-  `sdkmanager` by hand (as root) if you need a platform; uninstall all three if
-  you do not build Android apps
-- `android-tools` — standalone `adb`/`fastboot`/`mkbootimg` in `/usr/bin` (Arch `[extra]`). This is what you actually need to talk to a phone
+- `android-tools` — standalone `adb`/`fastboot`/`mkbootimg` in `/usr/bin` (Arch
+  `[extra]`). This is all you need to talk to a phone. The full Android SDK
+  (`android-sdk`, `android-sdk-platform-tools`,
+  `android-sdk-cmdline-tools-latest`) was **removed 2026-08-16**: its setup step
+  assumed an `android-sdk` group the AUR package never creates, so it skipped
+  silently on every run and no platform was ever installed. Reinstall those
+  three and run `sdkmanager` by hand if you ever build Android apps
 - `android-udev` — udev rules so non-root users (in `adbusers`) can reach connected devices
 - `obsidian-bin` — markdown notes / knowledge base
 - `openscad-git` — programmers' 3D CAD modeller. The BOSL2 library is vendored
