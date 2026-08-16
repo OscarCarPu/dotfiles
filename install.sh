@@ -177,6 +177,16 @@ if [ "${1:-}" = "--system" ]; then
         echo "Skipping group setup: no non-root invoking user (set SUDO_USER)."
     fi
 
+    # elogind-runit ships two service entries for the same daemon (`elogind`
+    # and `logind`, the latter a symlink to the former) and both get linked
+    # into runsvdir, so two supervisors race for it on every cold boot. A
+    # package update can relink it, so this runs on every --system pass.
+    if [ -e /etc/runit/runsvdir/default/logind ]; then
+        echo "Removing duplicate logind service (races with elogind)..."
+        sudo rm -f /etc/runit/runsvdir/default/logind
+        sudo pkill -f "runsv logind" || true
+    fi
+
     echo "Reloading udev rules (sudo)..."
     sudo udevadm control --reload-rules
     sudo udevadm trigger

@@ -30,19 +30,35 @@ An Artix Hyprland configuration for my daily computer.
 
 # Installation
 
+Starting from a blank disk? Everything that has to happen before these commands
+work — partitioning, base install, locale, bootloader, first services — is in
+[`docs/bootstrap.md`](docs/bootstrap.md).
+
+On a booting Artix with a user and a network:
+
 ```bash
 git clone https://github.com/OscarCarPu/dotfiles.git ~/.dotfiles
 cd ~/.dotfiles
+
+# Local credentials (PrusaLink, ...) — kept out of the repo
+install -Dm600 configs/secrets.env.example ~/.config/dotfiles/secrets.env
+$EDITOR ~/.config/dotfiles/secrets.env
 
 # Packages from docs/packages.md (bootstraps yay if needed) + uv-managed
 # Python tooling (pyright, ruff) for nvim
 bash install-packages.sh
 
-# User-level symlinks (configs, runit user services, scripts)
+# User-level symlinks (configs, runit user services, scripts, git filters)
 bash install.sh
 
 # System-level symlinks (sudo): /etc/sysctl.d, /etc/modules-load.d, /etc/runit/sv
 bash install.sh --system
+
+# Log out and back in (new groups), then file sync — ~26 GB on a first run
+seafile-setup
+
+# Confirm the machine matches the repo
+bash install.sh --check
 ```
 
 The package list lives in [`docs/packages.md`](docs/packages.md). System
@@ -78,6 +94,7 @@ System (`bash install.sh --system`):
 
 # More docs
 
+- *Bootstrap*: [Bootstrap](docs/bootstrap.md) — blank disk → this exact system, step by step
 - *Packages*: [Packages](docs/packages.md) — single source of truth for what's installed
 - *System*: [System](docs/system.md) — kernel, runit, drivers, network, post-install fixes
 - *Desktop*: [Desktop](docs/desktop.md) — Hyprland, Waybar, monitors, startup, power menu

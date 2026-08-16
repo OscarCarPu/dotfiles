@@ -12,18 +12,25 @@ For personal scripts (git, makefile, bt-spotify) see [`workflow.md`](workflow.md
 
 ## 1. First-time bring-up
 
-Install packages from [`packages.md`](packages.md), then:
+Full procedure from a blank disk — partitioning, base install, locale,
+bootloader, first services — is in [`bootstrap.md`](bootstrap.md).
+
+Short version, on a booting Artix:
 
 ```bash
 git clone https://github.com/OscarCarPu/dotfiles.git ~/.dotfiles
 cd ~/.dotfiles
+bash install-packages.sh  # packages.md + toolchains
 bash install.sh           # user symlinks
 bash install.sh --system  # /etc symlinks (sudo)
+bash install.sh --check   # drift report
 ```
 
 This places everything from the [Symlink list](../README.md#symlink-list).
 
 ## 2. AUR helper
+
+`install-packages.sh` bootstraps `yay-bin` itself if it is missing. By hand:
 
 ```bash
 sudo pacman -S --needed base-devel git
@@ -34,13 +41,10 @@ git clone https://aur.archlinux.org/yay.git /tmp/yay && (cd /tmp/yay && makepkg 
 
 ### System (DisplayLink)
 
-`install.sh --system` puts the service definition under
-`/etc/runit/sv/displaylink`. Activate:
-
-```bash
-sudo ln -s /etc/runit/sv/displaylink /run/runit/service/      # now
-sudo ln -s /etc/runit/sv/displaylink /etc/runit/runsvdir/default/   # on every boot
-```
+`install.sh --system` puts the service definition under `/etc/runit/sv/displaylink`
+**and activates it** by linking it into `/etc/runit/runsvdir/default/` (via the
+`current` → `default` symlink), along with everything else in
+`SYSTEM_RUNIT_ACTIVATE`. No manual `ln` needed.
 
 `evdi.conf` in `/etc/modules-load.d/` autoloads the `evdi` kernel module so
 `DisplayLinkManager` finds it ready.
@@ -152,6 +156,9 @@ These are one-time corrections on top of stock Artix.
 `logind` — the latter is a symlink to the former). Both get linked into
 `/etc/runit/runsvdir/default/`, so two supervisors race for the same daemon
 on every cold boot.
+
+`install.sh --system` removes it on every pass (a package update can relink
+it). By hand:
 
 ```bash
 sudo rm /etc/runit/runsvdir/default/logind
