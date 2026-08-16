@@ -13,13 +13,24 @@ script bootstraps `yay` if missing, installs every listed package via
 (`pyright`, `ruff`) used by nvim.
 
 Convention for parsers: a list item starts with one or more comma-separated
-backticked package names (`- \`pkg1\`, \`pkg2\` — prose`). Backticks in the
+backticked package names (`` - `pkg1`, `pkg2` — prose ``). Backticks in the
 prose after the em-dash are references, not packages.
 
-To verify against reality:
+A list too long for one line may wrap, but **only while the line ends in a
+comma** — that trailing comma is the sole signal that the list continues. A
+continuation line that starts with a backtick but follows a line ending in
+prose is read as prose, not as packages. (Getting this wrong is not
+theoretical: it silently dropped 4 of the 7 `texlive-*` collections.)
+
+The parser lives in [`lib/packages.awk`](../lib/packages.awk) and is shared by
+`install-packages.sh` and `install.sh --check`, so what gets installed and what
+gets audited can never disagree.
+
+To verify this file against reality, use the real parser — never a throwaway
+`grep`, which is exactly how the wrapped-list bug went unnoticed:
 
 ```bash
-diff <(pacman -Qqe | sort) <(grep -E '^- `[a-z]' docs/packages.md | sed 's/^- `//;s/`.*//' | sort -u)
+bash install.sh --check          # full report, packages included
 ```
 
 ## Base system
@@ -221,8 +232,41 @@ unmounts all, right-click opens Thunar.
 - `rstudio-desktop-bin` (AUR) — R IDE
 - `texlive-basic`, `texlive-latex`, `texlive-latexrecommended`,
   `texlive-latexextra`, `texlive-fontsrecommended`, `texlive-xetex`,
-  `texlive-plaingeneric` — LaTeX engine + collections needed by
-  `rmarkdown`/`knitr` to knit PDFs from R
+  `texlive-plaingeneric` — the LaTeX toolchain behind **PDF export**, used by
+  `rmarkdown`/`knitr` in RStudio and by `jupyter-nbconvert --to pdf`. See
+  [Why all seven](#why-all-seven-texlive-collections) below.
+### Why all seven texlive collections
+
+Arch splits TeX Live into collections, and "render a document to PDF" is not
+one of them — both `rmarkdown` and `nbconvert` shell out to `pandoc`, which
+generates LaTeX from a template and hands it to an engine. The template pulls
+packages from across the split, so a partial install fails at *compile* time
+with a `! LaTeX Error: File 'xxx.sty' not found`, long after everything looked
+installed.
+
+| Collection | What it provides here |
+|---|---|
+| `texlive-basic` | the TeX engine itself, `kpathsea`, `tlmgr` — nothing renders without it |
+| `texlive-latex` | the LaTeX format and its core packages |
+| `texlive-latexrecommended` | the packages pandoc's default template assumes exist (`booktabs`, `caption`, `hyperref`, …) |
+| `texlive-latexextra` | the long tail the template also reaches for — `framed`, used by knitr for every shaded code chunk |
+| `texlive-fontsrecommended` | Latin Modern and the standard font set the template selects |
+| `texlive-xetex` | the **XeLaTeX** engine, which is pandoc's default PDF engine — needed for any non-ASCII character, so effectively every document in Spanish |
+| `texlive-plaingeneric` | plain-TeX generic packages the template pulls in (`ulem`, for strikethrough) |
+
+**Do not split this entry across lines carelessly.** It is the one multi-line
+package list in this file, and it is what caught the parser bug fixed in
+`lib/packages.awk`: only the first line was read, so a rebuilt machine got 3 of
+the 7 and could not knit a single PDF — with no error until someone tried. The
+parser now follows the wrap, but only while a line ends in a comma. Keep it
+that way.
+
+Verify a working install end to end rather than by package name:
+
+```bash
+echo 'test' | pandoc -o /tmp/t.pdf   # exits 0 and writes a PDF, or names the missing .sty
+```
+
 - `git`, `github-cli`
 - `docker`, `docker-runit`, `docker-compose`, `docker-buildx` — container
   runtime + BuildKit CLI plugin. `install.sh --system` activates the `docker`
