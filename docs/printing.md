@@ -63,6 +63,40 @@ are symlinked into `~/.config/OrcaSlicer/user/default/`, so editing either side
 edits the repo. Machine presets (`core-one`, `personal-ender`) keep their plain
 names because `compatible_printers` in every filament and process refers to them.
 
+### PrusaLink password
+
+The CORE One machine presets carry `printhost_password` inline, and the symlink
+means the file Orca writes is the tracked file — so the credential would land in
+a public repo. It is kept out by a git clean/smudge filter
+([`configs/OrcaSlicer/secret-filter.sh`](../configs/OrcaSlicer/secret-filter.sh),
+wired up by `.gitattributes` + `install.sh`):
+
+| Direction | What happens |
+|---|---|
+| working tree → index (`clean`) | `printhost_password` is blanked, always |
+| index → working tree (`smudge`) | value re-injected from `secrets.env` |
+
+The real value lives in `~/.config/dotfiles/secrets.env` (mode 600, outside the
+repo) as `ORCA_PRINTHOST_PASSWORD`. Template:
+[`configs/secrets.env.example`](../configs/secrets.env.example).
+
+Edits to any other setting in those presets still diff and commit normally — the
+filter only ever touches that one field. If `secrets.env` is missing the smudge
+passes through untouched, so a fresh clone checks out the blank placeholder and
+uploads fail with an auth error until you fill it in and re-run `install.sh`.
+
+The filter is registered in **repo-local** git config, which is never committed.
+`install.sh` sets it on every clone; if you ever bypass it, run:
+
+```bash
+git config filter.orcasecret.clean  "configs/OrcaSlicer/secret-filter.sh clean"
+git config filter.orcasecret.smudge "configs/OrcaSlicer/secret-filter.sh smudge"
+git config filter.orcasecret.required true
+```
+
+Verify with `git diff` after touching a preset: the staged version must show
+`"printhost_password": ""`.
+
 ### Naming convention
 
 ```

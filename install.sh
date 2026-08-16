@@ -191,6 +191,40 @@ fi
 echo "Updating git submodules..."
 git -C "$DOTFILES_DIR" submodule update --init --recursive
 
+# --- local secrets + git credential filters -------------------------------
+# Some tracked configs are symlinked live into an app's config dir, so the file
+# the app reads and writes IS the repo file — a credential in it would be
+# committed. `.gitattributes` routes those files through a clean/smudge filter
+# that blanks the value in the index and re-injects it from secrets.env here.
+# The filter is registered in repo-local git config (never committed), so it
+# has to be set up on every clone.
+
+SECRETS_FILE="$HOME/.config/dotfiles/secrets.env"
+if [ ! -f "$SECRETS_FILE" ]; then
+    echo "Creating $SECRETS_FILE from the example (fill in the values)..."
+    install -d -m 700 "$(dirname "$SECRETS_FILE")"
+    install -m 600 "$DOTFILES_DIR/configs/secrets.env.example" "$SECRETS_FILE"
+fi
+
+echo "Registering git credential filters..."
+git -C "$DOTFILES_DIR" config filter.orcasecret.clean \
+    "configs/OrcaSlicer/secret-filter.sh clean"
+git -C "$DOTFILES_DIR" config filter.orcasecret.smudge \
+    "configs/OrcaSlicer/secret-filter.sh smudge"
+git -C "$DOTFILES_DIR" config filter.orcasecret.required true
+
+# Re-materialise filtered files so smudge injects the real values. Only safe
+# when they have no uncommitted changes — otherwise a checkout would discard
+# real edits (e.g. a profile the slicer just saved).
+filtered_dirty=$(git -C "$DOTFILES_DIR" status --porcelain -- \
+    'configs/OrcaSlicer/user/default/machine/*.json')
+if [ -z "$filtered_dirty" ]; then
+    git -C "$DOTFILES_DIR" checkout -- \
+        'configs/OrcaSlicer/user/default/machine/*.json' 2>/dev/null || true
+else
+    echo " Skipping re-checkout: machine profiles have uncommitted changes."
+fi
+
 echo "Symlinking user dotfiles..."
 for src in "${!DOTFILES[@]}"; do
     link_file "$DOTFILES_DIR/$src" "${DOTFILES[$src]}"

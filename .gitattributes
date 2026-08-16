@@ -1,0 +1,6 @@
+# OrcaSlicer printer presets carry the PrusaLink password inline and are
+# symlinked live into ~/.config/OrcaSlicer, so the slicer reads/writes the
+# tracked file directly. The filter blanks the credential on the way into the
+# index and re-injects it from ~/.config/dotfiles/secrets.env on checkout.
+# See configs/OrcaSlicer/secret-filter.sh; registered by install.sh.
+configs/OrcaSlicer/user/default/machine/*.json filter=orcasecret

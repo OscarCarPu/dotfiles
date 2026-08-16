@@ -9,7 +9,7 @@
 	"printer_extruder_variant": ["Direct Drive Standard"],
 	"printer_settings_id": "core-one-obxidian",
 	"printhost_authorization_type": "user",
-	"printhost_password": "***REMOVED***",
+	"printhost_password": "",
 	"printhost_user": "maker",
 	"version": "2.4.0.0",
 	"wipe": "1",

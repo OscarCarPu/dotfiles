@@ -16,7 +16,7 @@
 	],
 	"printer_settings_id": "core-one",
 	"printhost_authorization_type": "user",
-	"printhost_password": "***REMOVED***",
+	"printhost_password": "",
 	"printhost_user": "maker",
 	"version": "2.4.0.0",
 	"z_hop": "0.5",
