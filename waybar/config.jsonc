@@ -77,12 +77,12 @@
         "format": "󰇚 {bandwidthDownBits} | 󰕒 {bandwidthUpBits}",
         "format-wifi": "󰇚 {bandwidthDownBits} | 󰕒 {bandwidthUpBits}",
         "format-ethernet": "󰇚 {bandwidthDownBits} | 󰕒 {bandwidthUpBits}",
-        "tooltip-format": "{ifname} via {gwaddr}",
+        "tooltip-format": "{ifname}: {ipaddr} via {gwaddr}",
         "format-linked": "{ifname} (No IP)",
         "format-disconnected": "Disconnected ⚠",
         "max-length": 80,
         "on-click-right": "nm-connection-editor",
-        "format-alt": "{ifname}: {ipaddr}"
+        "format-alt": "󰖩 {essid}"
     },
     "custom/usb": {
         "format": "{}",
