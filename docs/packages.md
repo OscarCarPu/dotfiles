@@ -283,6 +283,7 @@ echo 'test' | pandoc -o /tmp/t.pdf   # exits 0 and writes a PDF, or names the mi
 - `fd`, `fzf`, `ripgrep` — search
 - `htop`, `ncdu`, `tree` — inspection
 - `unzip` — `.zip` archive extraction
+- `pgcli` — PostgreSQL client with autocompletion and syntax highlighting
 - `pacman-contrib` — provides `pacdiff`, used by `shutdown.sh` both to list
   files pending a merge (`pacdiff -o`) and to merge them. The script falls
   back to listing `.pacnew` paths under `/etc` if it is missing.
