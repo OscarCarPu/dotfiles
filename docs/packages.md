@@ -357,12 +357,18 @@ echo 'test' | pandoc -o /tmp/t.pdf   # exits 0 and writes a PDF, or names the mi
 
 ## Games
 
-Launchers, plus the runtimes their games need. `home/Makefile` has the
-`celeste` and `olympus` targets that drive the Celeste stack. Steam is
-deliberately absent — removed 2026-08-16, nothing here depends on it.
+Launchers, plus the runtimes their games need.
 
-- `legendary` — CLI Epic Games launcher; the `celeste` Makefile target runs
-  `legendary launch Salt --no-wine --offline`
+- `steam` — lives in Artix's `[lib32]` repo, already enabled by the tracked
+  `pacman.conf` (see [`system.md`](system.md#lib32-repository-artix-multilib))
+- `lib32-mesa` — 32-bit OpenGL; provides the `lib32-libgl` that `steam`
+  depends on
+- `lib32-vulkan-intel` — 32-bit Vulkan ICD (ANV) for this machine's Raptor
+  Lake Iris Xe iGPU, the right provider for `steam`'s `lib32-vulkan-driver`
+  dependency; `vulkan-intel` under "Hardware" is the 64-bit half. Both lib32
+  entries are listed explicitly so `yay -S` resolves those two virtual deps
+  without stopping to ask which provider to use
+- `legendary` — CLI Epic Games launcher
 - `love` — LÖVE 2D engine, the runtime several Celeste mods ship against
 - `dotnet-sdk-8.0` — .NET runtime/SDK; Olympus (the Celeste mod manager in
   `~/Games/Olympus`) is a .NET application
