@@ -1,4 +1,4 @@
-.phony: axeigo-forms-2026 ssh-lab celeste olympus
+.phony: axeigo-forms-2026 ssh-lab
 
 axeigo-forms-2026:
 	cd /home/ocp/dev/axeigo/formularios/obradoiros && uv run main.py
