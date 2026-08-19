@@ -366,6 +366,18 @@ The `set-wallpaper` runit user service (see
 180 s. It waits for the Wayland socket before touching anything, so launch
 order doesn't matter.
 
+Rotation walks `~/media/images/main` in filename order rather than picking at
+random, so every image gets shown once per cycle instead of the same handful
+recurring while others never come up. The cursor lives in
+`~/.cache/wallpaper_index` (override with `WALLPAPER_INDEX_FILE`) and is shared
+by the service and `SUPER + W`, so a manual rotate advances the same sequence.
+With no index file — a cold start, or after deleting it — the starting point is
+random, so a fresh boot doesn't always open on the same image. On a multi-head
+setup each monitor is offset one step from the previous one.
+
+To jump the sequence somewhere specific, write a 0-based index (`echo 42 >
+~/.cache/wallpaper_index`) or delete the file to reroll a random start.
+
 ## Launcher (Wofi)
 
 Themed to match waybar (Catppuccin Mocha + peach accent). Config and CSS
@@ -446,8 +458,8 @@ The compositor writes a few runtime files into `~/.config/hypr/` (the
 symlinked repo). They are intentionally **not** tracked:
 
 - `wallpaper_index.json` — listed in `.gitignore`. Old leftover from a
-  previous wallpaper rotator; the current `set_wallpaper.sh` does not read
-  or write it. Safe to ignore if it reappears.
+  previous wallpaper rotator; unrelated to the current rotator's cursor, which
+  lives in `~/.cache/wallpaper_index`. Safe to ignore if it reappears.
 - `monitors.conf`, `workspaces.conf` — used to live here as nwg-displays
   output and an empty placeholder. Removed: nothing in `hyprland.lua`
   sources them. If you reintroduce one, add a `source = …` directive.
