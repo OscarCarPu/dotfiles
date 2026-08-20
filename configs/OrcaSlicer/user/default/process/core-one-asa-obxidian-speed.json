@@ -29,7 +29,6 @@
 	"print_settings_id": "core-one-asa-obxidian-speed",
 	"seam_slope_conditional": "1",
 	"seam_slope_type": "external",
-	"small_perimeter_speed": "60",
 	"sparse_infill_pattern": "gyroid",
 	"sparse_infill_speed": "167",
 	"support_base_pattern_spacing": "3",
@@ -41,5 +40,5 @@
 	"support_type": "tree(auto)",
 	"top_surface_pattern": "monotonic",
 	"version": "2.4.0.0",
-	"wall_loops": "6"
+	"wall_loops": "3"
 }
