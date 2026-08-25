@@ -12,6 +12,7 @@ declare -A DOTFILES=(
     ["waybar"]="$HOME/.config/waybar"
     ["wofi"]="$HOME/.config/wofi"
     ["swaync"]="$HOME/.config/swaync"
+    ["pipewire"]="$HOME/.config/pipewire"
     ["wireplumber"]="$HOME/.config/wireplumber"
     ["git/.gitconfig"]="$HOME/.gitconfig"
     ["configs/user-places.xbel"]="$HOME/.local/share/user-places.xbel"
