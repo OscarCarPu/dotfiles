@@ -226,9 +226,9 @@ unmounts all, right-click opens Thunar.
 - `go` — Go toolchain
 - `gopls`, `gofumpt`, `go-tools` — Go LSP + formatters for nvim (`go-tools`
   provides `goimports`)
-- `sqlfluff` — SQL linter/formatter for nvim's format-on-save. Dialect and
-  layout come from `configs/sqlfluff`, symlinked to `~/.sqlfluff`; a project
-  `.sqlfluff` overrides it
+- `pgformatter` — provides `pg_format`, SQL formatter for nvim's
+  format-on-save. Indent width comes from `configs/pg_format`, symlinked to
+  `~/.pg_format`; a project `.pg_format` overrides it
 - `uv` — Python package and project manager
 - `tk` — Tcl/Tk toolkit, provides `tkinter` for Python GUIs
 - `r` — R statistical computing language
