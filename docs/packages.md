@@ -326,7 +326,12 @@ echo 'test' | pandoc -o /tmp/t.pdf   # exits 0 and writes a PDF, or names the mi
   silently on every run and no platform was ever installed. Reinstall those
   three and run `sdkmanager` by hand if you ever build Android apps
 - `android-udev` — udev rules so non-root users (in `adbusers`) can reach connected devices
-- `obsidian-bin` — markdown notes / knowledge base
+- `obsidian` — markdown notes / knowledge base (Arch `[extra]`). Moved off
+  the AUR `obsidian-bin` **2026-08-31**: from 1.13.x the upstream `.deb`
+  renamed its desktop entry to `md.obsidian.Obsidian.desktop`, so the
+  PKGBUILD's `sed` on `obsidian.desktop` fails and `package_obsidian-bin()`
+  aborts. The repo package tracks the same version and uses system
+  `electron43` instead of a bundled one
 - `openscad-git` — programmers' 3D CAD modeller. The BOSL2 library is vendored
   as a git submodule under `configs/OpenSCAD/libraries/BOSL2` and the whole
   `configs/OpenSCAD/libraries` dir is symlinked to
