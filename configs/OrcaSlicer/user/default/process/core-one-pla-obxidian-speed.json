@@ -1,4 +1,7 @@
 {
+	"brim_object_gap": "0",
+	"brim_type": "outer_only",
+	"brim_width": "5",
 	"compatible_printers": [
 		"core-one-obxidian"
 	],
@@ -9,7 +12,6 @@
 	"infill_wall_overlap": "25%",
 	"inherits": "0.20mm SPEED @CORE One 0.4",
 	"internal_solid_infill_speed": "167",
-	"ironing_type": "no ironing",
 	"name": "core-one-pla-obxidian-speed",
 	"precise_outer_wall": "0",
 	"print_extruder_id": [
@@ -19,17 +21,23 @@
 		"Direct Drive Standard"
 	],
 	"print_settings_id": "core-one-pla-obxidian-speed",
+	"reduce_crossing_wall": "1",
 	"seam_slope_conditional": "1",
 	"seam_slope_type": "external",
 	"sparse_infill_pattern": "gyroid",
 	"sparse_infill_speed": "167",
 	"support_base_pattern_spacing": "3",
+	"support_expansion": "1.5",
 	"support_interface_spacing": "0.5",
-	"support_on_build_plate_only": "0",
+	"support_interface_speed": "50",
+	"support_object_xy_distance": "0.6",
+	"support_speed": "90",
 	"support_style": "default",
-	"support_threshold_angle": "15",
-	"support_type": "tree(auto)",
+	"support_threshold_angle": "25",
+	"support_type": "normal(auto)",
 	"top_surface_pattern": "monotonic",
+	"travel_acceleration": "4000",
+	"travel_speed": "250",
 	"version": "2.4.0.0",
 	"wall_loops": "3"
 }

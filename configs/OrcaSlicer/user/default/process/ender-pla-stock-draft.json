@@ -20,6 +20,7 @@
 		"Direct Drive Standard"
 	],
 	"print_settings_id": "ender-pla-stock-draft",
+	"reduce_crossing_wall": "1",
 	"skirt_distance": "6",
 	"skirt_height": "1",
 	"skirt_loops": "1",
