@@ -381,7 +381,7 @@ Nothing in the repo can do these; they are the real cost of a rebuild.
 | **Seafile password** | password manager | `~/.config/seafile-cli/credentials` |
 | **LibreWolf profile** | Sync account | Sign in; `user.js` and the AutoFirma CA are handled by `install.sh` |
 | **FNMT certificate** | `~/docs/personal/fnmt-cert/` | Comes back with Seafile; import into LibreWolf by hand |
-| **App logins** | — | Obsidian, Steam, Discord, Spotify, Teams |
+| **App logins** | — | Obsidian, Discord, Spotify, Teams |
 | **Monitor layout** | `hypr/hyprland.lua` | Matched by EDID serial. Different monitors ⇒ edit the `hl.monitor` blocks; the catch-all keeps unknown outputs off-screen instead of overlapping |
 | **Bootloader default** | Arch's GRUB | `grub-set-default 'Artix Linux (on /dev/nvme0n1pX)'` from Arch |
 
