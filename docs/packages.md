@@ -364,13 +364,6 @@ echo 'test' | pandoc -o /tmp/t.pdf   # exits 0 and writes a PDF, or names the mi
   (Librewolf passes only `WAYLAND_DISPLAY`, so AutoFirma dies with
   `HeadlessException`).
 
-## Games
-
-Launchers, plus the runtimes their games need.
-
-- `prismlauncher` — Minecraft launcher with instance management
-- `curseforge` (AUR) — CurseForge client, for Minecraft modpacks
-
 ## AUR helper
 
 - `yay-bin`
