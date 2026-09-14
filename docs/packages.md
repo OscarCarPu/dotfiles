@@ -314,6 +314,7 @@ echo 'test' | pandoc -o /tmp/t.pdf   # exits 0 and writes a PDF, or names the mi
 - `discord` — voice/text chat
 - `stremio-enhanced-bin` (AUR) — Stremio client with plugin/theme support
 - `spotify` — runs on workspace 3
+- `prismlauncher` — Minecraft instance launcher/manager (Artix `[galaxy]`, not AUR)
 - `seafile` (AUR) — Seafile command-line sync client (`seaf-cli`)
 - `musescore-bin` — sheet music editor
 - `jre-openjdk` — Java runtime

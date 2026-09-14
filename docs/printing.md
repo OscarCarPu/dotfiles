@@ -115,41 +115,37 @@ process name implies a coupling that does not exist and makes you feel obliged t
 change the process when you change filament. The producer belongs on the
 filament, which is the only place Orca actually uses it.
 
-### One machine preset per nozzle
+### One machine preset, standard nozzle only
 
-`core-one` inherits *Prusa CORE One HF 0.4 nozzle*, `core-one-obxidian` inherits
-*Prusa CORE One 0.4 nozzle*. This is not cosmetic. The vendor start gcode emits
+`core-one-obxidian` inherits *Prusa CORE One 0.4 nozzle* (the standard
+ObXidian). The HF machine preset (`core-one`, inheriting *Prusa CORE One HF
+0.4 nozzle*) is gone as of 2026-09-14 — HF's last holdout was ASA punteiros,
+and that moved to the Obxidian too, so nothing prints on the HF nozzle
+anymore.
+
+That preset split mattered because of the vendor start gcode:
 
 ```gcode
 M862.1 P[nozzle_diameter] A{(printer_notes=~/.*ABRASIVE_NOZZLE.*/ ? 1 : 0)} F{(printer_notes=~/.*HF_NOZZLE.*/ ? 1 : 0)}
 ```
 
-so the `F` flag — "this print requires a high-flow nozzle" — comes from the
-keyword `HF_NOZZLE` in `printer_notes`, which only the HF machine preset carries.
-Slicing with the HF preset while the standard Obxidian is installed emits `F1`
-and the printer refuses the job. `A` works the same way for abrasive nozzles;
-`A0` with a hardened nozzle installed is fine, since having more than required is
-never an error.
-
-Two presets also make the dropdowns behave: every filament and process declares
-`compatible_printers` for exactly one machine, so choosing the machine filters
-both lists down to that nozzle and the wrong combination cannot be picked.
-Machine presets keep plain names — the convention does not cover them, and
-`compatible_printers` everywhere refers to them.
+the `F` flag ("this print requires a high-flow nozzle") comes from the
+keyword `HF_NOZZLE` in `printer_notes`, present only on the HF preset —
+slicing with it while the standard nozzle is installed emits `F1` and the
+printer refuses the job. Worth remembering if an HF preset is ever
+reintroduced (e.g. testing the HF nozzle again).
 
 | Nozzle | material | speed | quality |
 |---|---|---|---|
-| CORE One HF | ASA only | — | 0.15 SPEED (punteiros) |
-| CORE One Obxidian | PLA | 0.20 SPEED | 0.10 FAST DETAIL |
+| CORE One Obxidian | PLA, ASA | 0.20 SPEED | 0.10 FAST DETAIL |
 | Ender stock | PLA | 0.16 Optimal | 0.12 Fine (+ 0.24 draft) |
 
-**The high-flow nozzle is not used for PLA any more** and its PLA profiles were
-deleted. Enclosed chamber plus high flow is the combination that produced the
-heat-creep jam, and none of the five real workloads gets near 15 mm³/s anyway.
-HF now exists only for ASA punteiros. PLA runs on the Obxidian with the chamber
-**open**, which is also why the ~4 mm³/s sustained-flow floor below is a
-conservative guard rather than a hard limit — with ambient air over the heatsink
-the margin is much wider than when it was measured.
+**The high-flow nozzle is not used at all any more.** Enclosed chamber plus
+high flow is the combination that produced the PLA heat-creep jam, and none
+of the real workloads gets near 15 mm³/s anyway. PLA runs on the Obxidian
+with the chamber **open**, which is also why the ~4 mm³/s sustained-flow
+floor below is a conservative guard rather than a hard limit — with ambient
+air over the heatsink the margin is much wider than when it was measured.
 
 Every profile is a thin delta over a Prusa/Creality vendor base via `inherits`.
 Resolve the full chain before judging a value — most of the config is inherited
@@ -172,6 +168,34 @@ the Figutech profile is HF-only. The Obxidian nozzle uses
 `core-one-pla-generic-obxidian`, which inherits Prusa's non-HF base, until the
 same test is repeated with that nozzle mounted. Max flowrate and pressure
 advance are per-nozzle; temperature and flow ratio transfer.
+
+### Polymaker ASA, calibration in progress (started 2026-09-14, Obxidian 0.4 nozzle)
+
+Symptom: rough surface on ASA + a mid-print clog (cold-pull needed). Profiles:
+filament `core-one-asa`, process `core-one-asa-obxidian-quality`, machine
+`core-one-obxidian`.
+
+Ruled out: temperature (below). Favored causes: moisture (fix applied:
+printing from a dry box now) **and** stale Pressure Advance carried over from
+PLA (fix applied: see bug below).
+
+| Setting | Value | How it was obtained |
+|---|---|---|
+| `nozzle_temperature` | 240 | Temp tower 260→230; adhesion fails at 235; matches Polymaker's TDS floor (240-260 for best adhesion). Roughness identical 240-260 → temp is not the cause. |
+| Pressure Advance (`M900 K`) | 0 | Tower test K0.000-0.080 step 0.005; base of the tower (K0) wins with margin |
+| `filament_flow_ratio` | TBD | pass 1/2, pending |
+| Retraction | TBD | pending |
+
+**Bug found and fixed:** `core-one-asa.json` inherited `...HF 0.4` (the
+HF-nozzle vendor base) while the printer runs the standard Obxidian nozzle.
+That HF base's `filament_start_gcode` never emits `M900 K` (only `M572 S`);
+the correct non-HF base does. Since PLA's start gcode sets `M900 K0.05` on
+every PLA print and ASA was never resetting it, **printing ASA right after
+PLA silently kept PLA's pressure advance** — a very plausible root cause for
+the rugosidad, and it matches the swap-frequency hypothesis exactly (it's
+PA carryover, not material contamination). Fixed: `inherits` switched to
+`Prusa Generic ASA @CORE One`, and `filament_start_gcode` now hardcodes
+`M900 K0` explicitly instead of relying on the vendor conditional.
 
 ### Calibration gotchas found the hard way
 
