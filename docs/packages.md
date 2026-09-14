@@ -365,6 +365,18 @@ echo 'test' | pandoc -o /tmp/t.pdf   # exits 0 and writes a PDF, or names the mi
   (Librewolf passes only `WAYLAND_DISPLAY`, so AutoFirma dies with
   `HeadlessException`).
 
+## Games
+
+- `steam` — lives in Artix's `[lib32]` repo, already enabled by the tracked
+  `pacman.conf` (see [`system.md`](system.md#lib32-repository-artix-multilib))
+- `lib32-mesa` — 32-bit OpenGL; provides the `lib32-libgl` that `steam`
+  depends on
+- `lib32-vulkan-intel` — 32-bit Vulkan ICD (ANV) for this machine's Raptor
+  Lake Iris Xe iGPU, the right provider for `steam`'s `lib32-vulkan-driver`
+  dependency; `vulkan-intel` under "Hardware" is the 64-bit half. Both lib32
+  entries are listed explicitly so `yay -S` resolves those two virtual deps
+  without stopping to ask which provider to use
+
 ## AUR helper
 
 - `yay-bin`
