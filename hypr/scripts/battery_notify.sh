@@ -39,12 +39,19 @@ else
 fi
 
 # Function to close existing battery notification
-# Note: org.freedesktop.Notifications.CloseNotification is a no-op on this
-# swaync version (returns success but leaves the notification on screen), so
-# use swaync-client's own dismiss command instead.
+# Note: swaync-client --close-latest only closes the most recently posted
+# notification, which may not be ours if another notification arrived after
+# it - leaving the battery notification stuck. Close by the saved ID via
+# swaync's own D-Bus interface instead, which targets it exactly.
 close_notification() {
     if [ -f "$NOTIFY_ID_FILE" ]; then
-        swaync-client --close-latest >/dev/null 2>&1 || true
+        local notify_id
+        notify_id=$(<"$NOTIFY_ID_FILE")
+        gdbus call --session \
+            --dest org.erikreider.swaync \
+            --object-path /org/erikreider/swaync/cc \
+            --method org.erikreider.swaync.cc.CloseNotification \
+            "$notify_id" >/dev/null 2>&1 || true
         rm -f "$NOTIFY_ID_FILE"
     fi
 }
