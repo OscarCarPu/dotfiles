@@ -1,15 +1,12 @@
 {
-	"avoid_crossing_perimeters": "0",
 	"brim_object_gap": "0",
 	"brim_type": "outer_only",
-	"brim_width": "5",
 	"compatible_printers": [
 		"core-one-obxidian"
 	],
 	"compatible_printers_condition": "",
 	"detect_thin_wall": "1",
 	"elefant_foot_compensation": "0.15",
-	"enable_arc_fitting": "1",
 	"enable_support": "1",
 	"from": "User",
 	"infill_wall_overlap": "25%",
@@ -19,7 +16,6 @@
 	"initial_layer_print_height": "0.24",
 	"initial_layer_speed": "30",
 	"internal_solid_infill_speed": "167",
-	"ironing_type": "no ironing",
 	"name": "core-one-asa-obxidian-speed",
 	"precise_outer_wall": "0",
 	"print_extruder_id": [
@@ -39,8 +35,6 @@
 	"support_on_build_plate_only": "1",
 	"support_style": "default",
 	"support_threshold_angle": "30",
-	"support_top_z_distance": "0.2",
-	"support_type": "tree(auto)",
 	"top_surface_pattern": "monotonic",
 	"version": "2.4.0.0",
 	"wall_loops": "3"
