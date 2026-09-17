@@ -51,25 +51,11 @@
       "updatedAt": "2026-09-14T21:00:33.279708Z"
     },
     {
-      "skillId": "skill_01Bv9rGoBknK9UjubUDXGVqj",
-      "name": "carta-nazaries",
-      "description": "Genera cartas, declaraciones responsables, escritos y certificados de Nazaríes en Word (.docx) sobre el papel corporativo: logo, columna de texto a 6 cm, tipografía Gellix y pie con datos de contacto. Úsala SIEMPRE que alguien pida redactar, preparar o generar una carta, una declaración, una declaración responsable, un escrito de subsanación, un escrito de alegaciones, un recurso, un certificado, una autorización, un compromiso o un anexo de pliego cumplimentado, aunque no mencione el formato ni el .docx. Úsala también cuando digan 'con nuestro papel', 'con la plantilla de carta', 'en formato carta' o 'como el documento de siempre'. No es para informes largos ni memorias técnicas con portada e índice: para eso está documento-nazaries-2026.",
-      "source": "custom",
-      "updatedAt": "2026-09-03T16:59:07.019958Z"
-    },
-    {
       "skillId": "pptx",
       "name": "pptx",
       "description": "Use this skill any time a .pptx or .potx file is involved in any way — as input, output, or both. This includes: creating slide decks, pitch decks, or presentations as PowerPoint (.pptx) files; reading, parsing, or extracting text from any .pptx or .potx file (even if the extracted content will be used elsewhere, like in an email, summary, or creating a different type of slide deck); editing, modifying, or updating existing presentations; combining or splitting slide files; working with templates (.potx), layouts, speaker notes, or comments. Trigger whenever the user asks for a PowerPoint or .pptx file, or references a .pptx or .potx filename, regardless of what they plan to do with the content afterward. However, when the user asks for a deck, slides, a slide deck, or a presentation without naming a file format, default to using a dedicated slide-deck artifact type or a separate slides skill if this session offers one; otherwise, use this skill.",
       "source": "anthropic",
       "updatedAt": "2026-09-14T21:00:33.306681Z"
-    },
-    {
-      "skillId": "skill_018qP2vTkhb3RV3mr9Cn4AKs",
-      "name": "documento-nazaries-2026",
-      "description": "Genera documentos oficiales de Nazaríes en Word (.docx) con la plantilla corporativa 2026 y la identidad verbal de la marca, para informes, auditorías, memorias técnicas, presupuestos, planes de proyecto, propuestas, licitaciones y cualquier entregable con identidad corporativa. Úsala SIEMPRE que alguien del equipo pida crear, redactar, preparar o generar un informe, documento o entregable \"con la plantilla\", \"con formato Nazaríes\" u \"oficial\", aunque no mencione el .docx. Úsala también cuando pregunten por la voz, el tono, los principios editoriales, las brand words o la definición oficial de la empresa; cuando haya que revisar un texto para que suene a Nazaríes y no a IA; o cuando se necesiten datos corporativos (razón social y CIF, certificaciones ISO y ENS, plantilla, oficinas, clientes de referencia, premios, servicios) para una propuesta o un dosier de solvencia. El flujo es proponer la estructura, redactar con la voz de marca, auditar el texto y generar el .docx con build_doc.py.",
-      "source": "custom",
-      "updatedAt": "2026-08-06T16:21:25.200733Z"
     }
   ]
 }
