@@ -181,10 +181,21 @@ PLA (fix applied: see bug below).
 
 | Setting | Value | How it was obtained |
 |---|---|---|
-| `nozzle_temperature` | 240 | Temp tower 260→230; adhesion fails at 235; matches Polymaker's TDS floor (240-260 for best adhesion). Roughness identical 240-260 → temp is not the cause. |
+| `nozzle_temperature` | 250 | Temp tower 260→230; adhesion fails at 235; Polymaker's TDS says 240-260. Roughness identical 240-260 → temp is not the cause. Raised 240→250 on 2026-09-21 for melt margin after the jam below. |
+| `filament_max_volumetric_speed` | 11.5 | Was 15 (Prusa's value, measured at 260 °C). ×0.77 derate, the same ratio the Figutech test found on the HF nozzle (17 of 22). Not measured on ASA. |
 | Pressure Advance (`M900 K`) | 0 | Tower test K0.000-0.080 step 0.005; base of the tower (K0) wins with margin |
 | `filament_flow_ratio` | TBD | pass 1/2, pending |
 | Retraction | TBD | pending |
+
+**Jam, 2026-09-21:** an ASA print on `core-one-asa-obxidian-resistente` clogged and
+molten plastic escaped above the heatbreak. That profile demands 15.6-17 mm³/s on
+nearly every feature (inner wall 0.5 × 0.2 × 170) against a 15 cap at 240 °C, i.e.
+it ran at the melt limit for the whole print; Prusa's own ASA base is 260 °C. The
+Buddy firmware does not detect this kind of clog — the same failure (plastic behind
+the planetary gearbox, extruder plate damaged) is reported on the forum. Fix:
+250 °C and a 11.5 cap, which costs +1.5 % time on `-speed` and +3.4 % on
+`-resistente` (2h30m → 2h32m, 3h53m → 4h01m). The cap lives in the filament, so
+every ASA process obeys it; the `-speed` infill clamps moved 167 → 128 to match.
 
 **Bug found and fixed:** `core-one-asa.json` inherited `...HF 0.4` (the
 HF-nozzle vendor base) while the printer runs the standard Obxidian nozzle.

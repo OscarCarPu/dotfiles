@@ -7,8 +7,8 @@
     "compatible_printers": ["core-one-obxidian"],
     "compatible_printers_condition": "",
     "bed_type": ["Textured PEI Plate"],
-    "nozzle_temperature": ["240"],
-    "nozzle_temperature_initial_layer": ["240"],
+    "nozzle_temperature": ["250"],
+    "nozzle_temperature_initial_layer": ["250"],
     "filament_start_gcode": ["M900 K0 ; PA calibrated 2026-09-14 (Polymaker ASA, Obxidian 0.4)\nM142 S40 ; set heatbreak target temp"],
     "hot_plate_temp": ["100"],
     "hot_plate_temp_initial_layer": ["100"],
@@ -23,5 +23,5 @@
     "close_fan_the_first_x_layers": ["3"],
     "slow_down_min_speed": ["30"],
     "dont_slow_down_outer_wall": ["1"],
-    "filament_max_volumetric_speed": ["15"]
+    "filament_max_volumetric_speed": ["11.5"]
 }
