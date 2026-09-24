@@ -1,0 +1,45 @@
+{
+	"avoid_crossing_perimeters": "0",
+	"compatible_printers": [
+		"core-one-obxidian"
+	],
+	"compatible_printers_condition": "",
+	"detect_thin_wall": "1",
+	"enable_arc_fitting": "1",
+	"enable_support": "1",
+	"extra_perimeters_on_overhangs": "1",
+	"from": "User",
+	"infill_wall_overlap": "35%",
+	"inherits": "0.20mm SPEED @CORE One 0.4",
+	"inner_wall_line_width": "0.5",
+	"line_width": "0.48",
+	"name": "core-one-pla-obxidian-resistente",
+	"outer_wall_line_width": "0.46",
+	"precise_outer_wall": "0",
+	"print_extruder_id": [
+		"1"
+	],
+	"print_extruder_variant": [
+		"Direct Drive Standard"
+	],
+	"print_settings_id": "core-one-pla-obxidian-resistente",
+	"reduce_crossing_wall": "1",
+	"seam_slope_conditional": "1",
+	"seam_slope_type": "external",
+	"small_perimeter_speed": "90",
+	"sparse_infill_density": "30%",
+	"sparse_infill_pattern": "gyroid",
+	"support_base_pattern_spacing": "3",
+	"support_interface_spacing": "0.5",
+	"support_on_build_plate_only": "1",
+	"support_style": "default",
+	"support_threshold_angle": "40",
+	"support_top_z_distance": "0.2",
+	"support_type": "tree(auto)",
+	"top_shell_layers": "6",
+	"bottom_shell_layers": "5",
+	"top_surface_pattern": "monotonic",
+	"version": "2.4.0.0",
+	"wall_loops": "5",
+	"wall_transition_filter_deviation": "50%"
+}

@@ -14,6 +14,8 @@ declare -A DOTFILES=(
     ["swaync"]="$HOME/.config/swaync"
     ["pipewire"]="$HOME/.config/pipewire"
     ["wireplumber"]="$HOME/.config/wireplumber"
+    # WirePlumber 0.5 only looks up Lua scripts under XDG data dirs
+    ["wireplumber/scripts"]="$HOME/.local/share/wireplumber/scripts"
     ["git/.gitconfig"]="$HOME/.gitconfig"
     ["configs/user-places.xbel"]="$HOME/.local/share/user-places.xbel"
     ["configs/user-dirs.dirs"]="$HOME/.config/user-dirs.dirs"

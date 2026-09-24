@@ -45,14 +45,6 @@ audio_ready() {
     fi
 }
 
-set_dock_default() {
-    # wpctl prefixes sink lines with a multibyte tree glyph that \s does not
-    # match, so don't anchor at line start - take the number before the dot.
-    local sink_id
-    sink_id=$(wpctl status 2>/dev/null | grep -A5 "Sinks:" | grep "USB3.1" | grep -oP '\b\d+(?=\.\s)' | head -1 || true)
-    [[ -n "$sink_id" ]] && wpctl set-default "$sink_id" 2>/dev/null || true
-}
-
 # Bounce the PipeWire stack, then decide by USB presence whether to wait for
 # the dock sink or fall back to built-in. During the cooldown the restart is
 # DEFERRED, not skipped - a skipped call used to silently leave the wrong
@@ -77,7 +69,6 @@ bounce_audio() {
         # Conditions may have changed while deferred - skip the bounce if the
         # dock audio is up and PipeWire already sees it.
         if dock_audio_alive && wpctl status 2>/dev/null | grep -q "USB3.1"; then
-            set_dock_default
             echo "$(date): Audio healthy after cooldown, restart not needed"
             return
         fi
@@ -105,7 +96,6 @@ bounce_audio() {
     local i
     for i in $(seq 1 10); do
         if dock_audio_alive; then
-            set_dock_default
             notify-send -t 3000 "Audio" "Audio recovered - dock active" 2>/dev/null || true
             echo "$(date): Audio recovered after ${i}s"
             return
