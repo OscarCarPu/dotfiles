@@ -45,6 +45,10 @@ audio_ready() {
     fi
 }
 
+dock_unplugged() {
+    notify-send -t 3000 "Audio" "Dock disconnected - using $(pactl get-default-sink 2>/dev/null || echo built-in audio)" 2>/dev/null || true
+}
+
 # Bounce the PipeWire stack, then decide by USB presence whether to wait for
 # the dock sink or fall back to built-in. During the cooldown the restart is
 # DEFERRED, not skipped - a skipped call used to silently leave the wrong
@@ -124,10 +128,12 @@ udevadm monitor --subsystem-match=sound --property 2>/dev/null | while read -r l
         if ! dock_audio_alive; then
             if ! dock_usb_present; then
                 if (( DOCK_PRESENT )); then
-                    # Physical unplug - no re-enumeration is coming. Fall back
-                    # to built-in audio right away instead of waiting 15s + 10s.
-                    echo "$(date): Dock USB gone (unplugged), falling back to built-in audio"
-                    restart_audio || true
+                    # Physical unplug - PipeWire drops the dock sink by itself
+                    # and follow-default-target moves streams to the next
+                    # sink. Bouncing the stack here disconnected every client
+                    # (Spotify, browsers stayed silent until restarted).
+                    echo "$(date): Dock USB gone (unplugged), leaving fallback to WirePlumber"
+                    dock_unplugged
                 fi
                 # else: some other audio device came/went while undocked -
                 # nothing to do
@@ -145,8 +151,8 @@ udevadm monitor --subsystem-match=sound --property 2>/dev/null | while read -r l
                     if ! dock_usb_present; then
                         # Unplugged mid-wait - stop waiting, fall back now.
                         handled=1
-                        echo "$(date): Dock USB vanished mid-wait, falling back to built-in audio"
-                        restart_audio || true
+                        echo "$(date): Dock USB vanished mid-wait, leaving fallback to WirePlumber"
+                        dock_unplugged
                         break
                     fi
                     sleep 1
