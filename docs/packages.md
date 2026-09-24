@@ -355,6 +355,9 @@ echo 'test' | pandoc -o /tmp/t.pdf   # exits 0 and writes a PDF, or names the mi
 - `teams-for-linux` (AUR) — Microsoft Teams unofficial client
 - `vlc` — multimedia player and framework
 - `okular` — PDF viewer
+- `geogebra-6-electron` (AUR) — GeoGebra 6 (dynamic geometry / algebra / graphing)
+  on system `electron`. Preferred over `[extra]` `geogebra` (still Classic 5)
+  and the stale `geogebra-6-bin`; conflicts with both
 - `zeal` — offline documentation browser (Dash-compatible docsets; Go, Rust, Python, etc.)
 - `autofirma-bin` — Spanish gov e-signature client (FNMT/DNIe,
   XAdES/PAdES/CAdES); use the `-bin` AUR (official .deb repackaged) rather
