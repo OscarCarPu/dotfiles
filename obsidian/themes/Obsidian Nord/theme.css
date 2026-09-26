@@ -118,7 +118,9 @@ body
 
     --titlebar-text-color-focused:   var(--red);
 
-    --inline-title-color:            var(--yellow);
+    --inline-title-color:            var(--h1-color);
+    --inline-title-size:             var(--h1-size);
+    --inline-title-weight:           var(--h1-weight);
 
     --bold-color:                    var(--yellow);
     --italic-color:                  var(--yellow);
@@ -223,7 +225,9 @@ body
 
     --titlebar-text-color-focused:   var(--red);
 
-    --inline-title-color:            var(--yellow);
+    --inline-title-color:            var(--h1-color);
+    --inline-title-size:             var(--h1-size);
+    --inline-title-weight:           var(--h1-weight);
 
     --bold-color:                    var(--green);
     --italic-color:                  var(--green);

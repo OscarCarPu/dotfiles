@@ -1,0 +1,23 @@
+{
+    "name": "core-one-petg-polymaker",
+    "from": "User",
+    "is_custom_defined": "1",
+    "version": "2.4.0.0",
+    "inherits": "Prusa Generic PETG @CORE One",
+    "compatible_printers": ["core-one-obxidian"],
+    "compatible_printers_condition": "",
+    "filament_vendor": ["Polymaker"],
+    "nozzle_temperature": ["245"],
+    "nozzle_temperature_initial_layer": ["245"],
+    "bed_type": ["Textured PEI Plate"],
+    "textured_plate_temp": ["70"],
+    "textured_plate_temp_initial_layer": ["70"],
+    "hot_plate_temp": ["70"],
+    "hot_plate_temp_initial_layer": ["70"],
+    "fan_min_speed": ["20"],
+    "fan_max_speed": ["40"],
+    "overhang_fan_speed": ["60"],
+    "filament_retraction_length": ["1"],
+    "filament_retraction_speed": ["20"],
+    "filament_max_volumetric_speed": ["12"]
+}
