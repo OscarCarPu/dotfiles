@@ -122,8 +122,8 @@ body
     --inline-title-size:             var(--h1-size);
     --inline-title-weight:           var(--h1-weight);
 
-    --bold-color:                    var(--yellow);
-    --italic-color:                  var(--yellow);
+    --bold-color:                    var(--orange);
+    --italic-color:                  var(--frost1);
 
     --checkbox-color:                var(--frost0);
     --checkbox-color-hover:          var(--frost0);
@@ -229,8 +229,8 @@ body
     --inline-title-size:             var(--h1-size);
     --inline-title-weight:           var(--h1-weight);
 
-    --bold-color:                    var(--green);
-    --italic-color:                  var(--green);
+    --bold-color:                    var(--orange);
+    --italic-color:                  var(--frost3);
 
     --checkbox-color:                var(--frost2);
     --checkbox-color-hover:          var(--frost2);
