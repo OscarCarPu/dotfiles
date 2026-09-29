@@ -1,5 +1,6 @@
 [
   "obsidian-latex-suite",
   "obsidian-style-settings",
-  "anymd-as-md-obsidian"
+  "anymd-as-md-obsidian",
+  "obsidian-pandoc"
 ]

@@ -83,6 +83,7 @@ var AnyMdAsMdPlugin = /** @class */ (function (_super) {
                 // register the view and extensions
                 this.registerExtensions(["qmd"], "markdown");
                 this.registerExtensions(["rmd"], "markdown");
+                this.registerExtensions(["r"], "markdown");
                 return [2 /*return*/];
             });
         });

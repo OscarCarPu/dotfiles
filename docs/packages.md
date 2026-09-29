@@ -234,12 +234,15 @@ unmounts all, right-click opens Thunar.
 - `tk` — Tcl/Tk toolkit, provides `tkinter` for Python GUIs
 - `r` — R statistical computing language
 - `rstudio-desktop-bin` (AUR) — R IDE
+- `pandoc-cli` — Markdown → PDF converter; the `pandoc` binary the Obsidian
+  Pandoc plugin and `jupyter-nbconvert --to pdf` shell out to
 - `texlive-basic`, `texlive-latex`, `texlive-latexrecommended`,
   `texlive-latexextra`, `texlive-fontsrecommended`, `texlive-xetex`,
-  `texlive-plaingeneric` — the LaTeX toolchain behind **PDF export**, used by
-  `rmarkdown`/`knitr` in RStudio and by `jupyter-nbconvert --to pdf`. See
-  [Why all seven](#why-all-seven-texlive-collections) below.
-### Why all seven texlive collections
+  `texlive-plaingeneric`, `texlive-langspanish` — the LaTeX toolchain behind
+  **PDF export**, used by `rmarkdown`/`knitr` in RStudio, by
+  `jupyter-nbconvert --to pdf` and by the Obsidian Pandoc plugin. See
+  [Why all eight](#why-all-eight-texlive-collections) below.
+### Why all eight texlive collections
 
 Arch splits TeX Live into collections, and "render a document to PDF" is not
 one of them — both `rmarkdown` and `nbconvert` shell out to `pandoc`, which
@@ -257,6 +260,7 @@ installed.
 | `texlive-fontsrecommended` | Latin Modern and the standard font set the template selects |
 | `texlive-xetex` | the **XeLaTeX** engine, which is pandoc's default PDF engine — needed for any non-ASCII character, so effectively every document in Spanish |
 | `texlive-plaingeneric` | plain-TeX generic packages the template pulls in (`ulem`, for strikethrough) |
+| `texlive-langspanish` | `spanish.ldf` and hyphenation for babel — `-V lang=es` fails with a babel "spanish" error without it |
 
 **Do not split this entry across lines carelessly.** It is the one multi-line
 package list in this file, and it is what caught the parser bug fixed in

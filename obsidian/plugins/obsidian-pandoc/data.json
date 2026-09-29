@@ -1,0 +1,15 @@
+{
+  "showCLICommands": false,
+  "addExtensionsToInternalLinks": "html",
+  "injectAppCSS": "none",
+  "injectThemeCSS": false,
+  "customCSSFile": null,
+  "displayYAMLFrontmatter": false,
+  "linkStrippingBehaviour": "text",
+  "highDPIDiagrams": true,
+  "pandoc": null,
+  "pdflatex": null,
+  "outputFolder": null,
+  "extraArguments": "--from=markdown-blank_before_header+wikilinks_title_after_pipe\n--pdf-engine=xelatex\n-Vlang=es\n-Vgeometry:margin=2.5cm",
+  "exportFrom": "md"
+}
