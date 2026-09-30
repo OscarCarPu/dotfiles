@@ -14,3 +14,6 @@ battery_notify_state
 
 # Seafile CLI credentials (never commit; only the .example is tracked)
 configs/seafile-cli/credentials
+
+# Claude account-synced skills (managed by Claude Code, not user config)
+claude/skills/synced/
