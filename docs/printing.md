@@ -164,10 +164,9 @@ clearly failing. The failure was gradual with **no extruder clicking**, which
 means it is a melt-rate limit, not a torque limit.
 
 Consequence worth remembering: 17 mm³/s is **above** the non-HF limit of 15, so
-the Figutech profile is HF-only. The Obxidian nozzle uses
-`core-one-pla-generic-obxidian`, which inherits Prusa's non-HF base, until the
-same test is repeated with that nozzle mounted. Max flowrate and pressure
-advance are per-nozzle; temperature and flow ratio transfer.
+the Figutech profile is HF-only. The Obxidian nozzle's PLA has not been
+retested. Max flowrate and pressure advance are per-nozzle; temperature and flow
+ratio transfer.
 
 ### Polymaker ASA, calibration in progress (started 2026-09-14, Obxidian 0.4 nozzle)
 

@@ -46,7 +46,7 @@
 	"support_speed": "50",
 	"support_interface_speed": "50",
 	"enable_overhang_speed": "1",
-	"overhang_1_4_speed": "50",
+	"overhang_1_4_speed": "30",
 	"overhang_2_4_speed": "25",
 	"overhang_3_4_speed": "20",
 	"overhang_4_4_speed": "15",
