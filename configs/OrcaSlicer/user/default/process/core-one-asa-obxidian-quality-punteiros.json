@@ -44,7 +44,6 @@
 	"gap_infill_speed": "50",
 	"bridge_speed": "50",
 	"ironing_speed": "50",
-	"ironing_type": "top",
 	"support_speed": "50",
 	"support_interface_speed": "50",
 	"enable_overhang_speed": "1",
