@@ -34,7 +34,9 @@
 	"bridge_flow": "0.9",
 	"counterbore_hole_bridging": "partiallybridge",
 	"enable_arc_fitting": "1",
-	"slowdown_for_curled_perimeters": "0",
+	"slowdown_for_curled_perimeters": "1",
+	"set_other_flow_ratios": "1",
+	"overhang_flow_ratio": "0.9",
 	"small_perimeter_threshold": "0",
 
 	"outer_wall_speed": "50",
