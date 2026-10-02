@@ -11,6 +11,8 @@
 	"from": "User",
 	"infill_wall_overlap": "35%",
 	"inherits": "0.20mm SPEED @CORE One 0.4",
+	"initial_layer_infill_speed": "50",
+	"initial_layer_speed": "30",
 	"inner_wall_line_width": "0.5",
 	"line_width": "0.48",
 	"name": "core-one-petg-obxidian-resistente",
