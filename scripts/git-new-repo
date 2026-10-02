@@ -9,17 +9,17 @@ REPO_NAME="$1"
 GITEA_URL="ssh://git@git-ssh.lab-ocp.com:2223/ocp/${REPO_NAME}.git"
 GITHUB_URL="git@github.com:OscarCarPu/${REPO_NAME}.git"
 
-echo "Cloning from Gitea: ${GITEA_URL}"
-git clone "$GITEA_URL" || exit 1
-
-cd "$REPO_NAME" || exit 1
+mkdir -p "$REPO_NAME" && cd "$REPO_NAME" || exit 1
+git init -b main || exit 1
 
 echo "Creating GitHub repo: ${REPO_NAME}"
-gh repo create "OscarCarPu/${REPO_NAME}" --private || exit 1
+gh repo create "OscarCarPu/${REPO_NAME}" --public || exit 1
 
-echo "Adding GitHub as push-only remote"
+echo "Fetching from Gitea, pushing to Gitea + GitHub"
+git remote add origin "$GITEA_URL"
 git remote set-url --add --push origin "$GITEA_URL"
 git remote set-url --add --push origin "$GITHUB_URL"
 
 echo "Done! Remotes:"
 git remote -v
+echo "The first 'git push -u origin main' creates the repo on Gitea (push-to-create)"
