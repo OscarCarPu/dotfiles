@@ -79,7 +79,7 @@
 
 	"elefant_foot_compensation": "0.15",
 	"seam_position": "back",
-	"seam_slope_conditional": "1",
+	"seam_slope_conditional": "0",
 	"seam_slope_type": "external",
 
 	"brim_type": "outer_and_inner",
