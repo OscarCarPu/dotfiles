@@ -16,7 +16,6 @@
 	"version": "2.4.0.0",
 
 	"initial_layer_print_height": "0.24",
-	"layer_height": "0.15",
 	"initial_layer_line_width": "0.6",
 	"inner_wall_line_width": "0.55",
 	"wall_loops": "6",
@@ -92,7 +91,7 @@
 	"support_style": "snug",
 	"support_on_build_plate_only": "1",
 	"support_threshold_angle": "15",
-	"enforce_support_layers": "41",
+	"enforce_support_layers": "61",
 	"support_remove_small_overhang": "0",
 	"support_top_z_distance": "0.15",
 	"support_base_pattern_spacing": "3",
