@@ -278,7 +278,11 @@ includes `runit`/`elogind`):
    is offered for those.
 10. The power action confirms with a 30s timer: Enter goes now, **Ctrl+C or
     Ctrl+D cancels**, and walking away lets it proceed — which is the point
-    of picking `Update + Shutdown` in the first place.
+    of picking `Update + Shutdown` in the first place. The exception is when
+    something is still pending: dotfiles drift from `install.sh --check`
+    (unpushed or uncommitted changes in `~/.dotfiles` and `~/dev` repos included, and checked even when
+    there was nothing to update) or `.pacnew` files left unmerged. Then there
+    is no timer, and it waits for Enter so you can fix things first.
 
 ### Automatic `.pacnew` merging
 

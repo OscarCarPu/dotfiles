@@ -69,6 +69,12 @@ CRITICAL_PKGS="^(linux|linux-lts|linux-zen|linux-hardened|linux-firmware|nvidia|
 
 POWER_TIMEOUT=30
 
+# Anything that should be dealt with before the machine goes off — unpushed
+# repos and the rest of the drift report, .pacnew files left unmerged. Any
+# entry here turns the power countdown off: walking away must not power off
+# over work that only exists on this disk.
+PENDING=()
+
 # --- Exit handling ---------------------------------------------------------
 # Enter or the timeout proceeds; Ctrl+C and Ctrl+D both cancel. Previously
 # neither did: with no `set -e`, a failed `read` fell straight through to
@@ -78,9 +84,15 @@ confirm_power() {
     # The handler echoes before returning: a bare `return 1` would skip the
     # message below, leaving a bare ^C as the only feedback.
     trap 'echo -e "\n\033[1;90mCancelled — staying on.\033[0m"; return 1' INT
-    printf '\n\033[1;33mReady to %s. Enter = now, Ctrl+C = cancel (auto in %ss): \033[0m' \
-        "$verb" "$POWER_TIMEOUT"
-    read -r -t "$POWER_TIMEOUT"; rc=$?
+    if [ "${#PENDING[@]}" -gt 0 ]; then
+        printf '\n\033[1;31mNot clean: %s — no countdown.\033[0m' "${PENDING[*]}"
+        printf '\n\033[1;33mFix it in another terminal, then Enter to %s, Ctrl+C = cancel: \033[0m' "$verb"
+        read -r; rc=$?
+    else
+        printf '\n\033[1;33mReady to %s. Enter = now, Ctrl+C = cancel (auto in %ss): \033[0m' \
+            "$verb" "$POWER_TIMEOUT"
+        read -r -t "$POWER_TIMEOUT"; rc=$?
+    fi
     trap - INT
     [ "$rc" -gt 128 ] && { echo; return 0; }   # timed out -> walked away -> proceed
     [ "$rc" -eq 0 ]   && return 0              # bare Enter -> proceed
@@ -103,8 +115,35 @@ print_blockers() {
     return 0
 }
 
+# Dotfiles drift report (install.sh --check), which includes the unpushed /
+# uncommitted scan of ~/dev. Started at t=0 so the early exits — nothing to
+# update, update declined — still get it, and re-run after an upgrade, since
+# the upgrade itself is a drift source.
+DOTFILES_DIR="$(cd "$SCRIPTS_DIR/../.." && pwd)"
+PID_DRIFT=""
+check_drift() {
+    (cd "$DOTFILES_DIR" && bash install.sh --check) > "$RUN_DIR/drift" 2>&1
+    echo $? > "$RUN_DIR/drift.rc"
+}
+print_drift() {
+    [ -n "$PID_DRIFT" ] || return 0
+    if kill -0 "$PID_DRIFT" 2>/dev/null; then
+        echo -e "\n\033[0;90mWaiting for the dotfiles drift report...\033[0m"
+    fi
+    wait "$PID_DRIFT" 2>/dev/null
+    PID_DRIFT=""
+    echo -e "\n\033[1;34m[ Dotfiles drift ]\033[0m"
+    cat "$RUN_DIR/drift"
+    if [ "$(cat "$RUN_DIR/drift.rc" 2>/dev/null)" != 0 ]; then
+        echo -e "\033[0;90mFix with: cd ~/.dotfiles && bash install.sh [--system|--prune]\033[0m"
+        PENDING+=("dotfiles drift")
+    fi
+    return 0
+}
+
 power_action() {
     print_blockers                            # catches the early-exit paths
+    print_drift
 
     if [ -n "${UPDATE_FAILED:-}" ]; then
         echo -e "\n\033[1;31m✗ Update failed — staying on. Resolve the errors above and re-run.\033[0m"
@@ -207,6 +246,7 @@ else:
 }
 
 sync_repo_db & PID_REPO=$!
+[ -f "$DOTFILES_DIR/install.sh" ] && { check_drift & PID_DRIFT=$!; }
 fetch_news   > "$RUN_DIR/news" & PID_NEWS=$!
 PID_AUR=""
 if command -v yay &>/dev/null; then
@@ -453,27 +493,25 @@ if [ -n "$PACNEW_FILES" ]; then
         read -rp "Run pacdiff now? [y/N]: " DIFF_CONFIRM
         if [[ "${DIFF_CONFIRM:-}" =~ ^[Yy]$ ]]; then
             sudo pacdiff
+            PACNEW_FILES=$(pacdiff -o 2>/dev/null)
         fi
     else
         echo "(pacdiff not installed — merge manually or install pacman-contrib)"
     fi
+    [ -n "$PACNEW_FILES" ] && PENDING+=(".pacnew files unmerged")
 fi
 
 # --- Step 8: dotfiles drift -------------------------------------------------
 # An update is exactly when the machine drifts from the repo: a package lands
 # that packages.md never heard of, a .pacnew merge unlinks an /etc file, an app
-# replaces a symlink with a real file. This is the one flow that already has
-# your attention, so the report goes here rather than in a cron job nobody
-# reads. Read-only — it never changes anything.
-DOTFILES_DIR="$(cd "$SCRIPTS_DIR/../.." && pwd)"
-if [ -x "$DOTFILES_DIR/install.sh" ] || [ -f "$DOTFILES_DIR/install.sh" ]; then
-    echo -e "\n\033[1;34m[ Dotfiles drift ]\033[0m"
-    (cd "$DOTFILES_DIR" && bash install.sh --check) ||
-        echo -e "\033[0;90mFix with: cd ~/.dotfiles && bash install.sh [--system|--prune]\033[0m"
+# replaces a symlink with a real file. The t=0 report predates all that, so it
+# is discarded and taken again. Read-only — it never changes anything. Any
+# drift (unpushed repos included) disables the power countdown.
+if [ -n "$PID_DRIFT" ]; then
+    wait "$PID_DRIFT" 2>/dev/null
+    check_drift & PID_DRIFT=$!
+    print_drift
 fi
-# No prompt here on purpose: the EXIT trap's confirm_power already holds the
-# terminal for 30 s, which is the window to read this. A blocking read would
-# strand the machine on if you walked away.
 
 exit 0
 INNEREOF

@@ -354,9 +354,10 @@ if [ "${1:-}" = "--check" ]; then
         ok "$(printf '%s\n' "$sync_status" | grep -c synchronized) libraries synchronized"
     fi
 
-    section "Git repos in ~/dev"
-    # Not synced by Seafile on purpose — the remote IS the backup. So a repo
-    # without one, or with work that never left the machine, has no backup.
+    section "Git repos"
+    # ~/dev is not synced by Seafile on purpose — the remote IS the backup. So a
+    # repo without one, or with work that never left the machine, has no backup.
+    # This repo is checked too: uncommitted config changes are drift as well.
     found=0
     while read -r gitdir; do
         repo="${gitdir%/.git}"
@@ -370,7 +371,7 @@ if [ "${1:-}" = "--check" ]; then
         dirty=$(git -C "$repo" status --porcelain 2>/dev/null | wc -l)
         [ "$unpushed" -gt 0 ] && { warn "$rel has $unpushed unpushed commit(s)"; found=1; }
         [ "$dirty" -gt 0 ] && { warn "$rel has $dirty uncommitted change(s)"; found=1; }
-    done < <(find "$HOME/dev" -maxdepth 4 -name .git -type d 2>/dev/null)
+    done < <(echo "$DOTFILES_DIR/.git"; find "$HOME/dev" -maxdepth 4 -name .git -type d 2>/dev/null)
     [ "$found" -eq 0 ] && ok "every repo has a remote and is fully pushed"
 
     section "Stale links"
