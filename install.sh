@@ -276,15 +276,23 @@ if [ "${1:-}" = "--check" ]; then
         [ -L "$target" ] && [ "$(readlink "$target")" = "$want" ] ||
             bad "$target not linked to $want (run: bash install.sh --system)"
     done
-    # /etc/sudoers.d is 0750 root:root, so a plain test always fails as a
-    # normal user. Only report when passwordless sudo can actually look.
+    # /etc/sudoers.d is 0750 root:root, so the files can't be read as a normal
+    # user. `sudo -n -l` lists the live rules without a password as long as
+    # one of them is NOPASSWD; check each repo rule's spec (after `host=`)
+    # appears there, whitespace collapsed since sudo reflows the listing.
+    live_rules="$(sudo -n -l 2>/dev/null | tr -s ' \t\n' ' ')"
     for src in "${!SYSTEM_SUDOERS[@]}"; do
         target="${SYSTEM_SUDOERS[$src]}"
-        if sudo -n true 2>/dev/null; then
-            sudo -n test -e "$target" || bad "$target missing"
-        else
+        if [ -z "$live_rules" ]; then
             printf '  \033[2m·\033[0m %s (needs sudo to verify)\n' "$target"
+            continue
         fi
+        while IFS= read -r rule; do
+            spec="$(printf '%s' "${rule#*=}" | tr -s ' \t' ' ')"
+            [[ "$live_rules" == *"${spec# }"* ]] && continue
+            bad "$target missing or out of date (run: bash install.sh --system)"
+            break
+        done < <(grep -Ev '^[[:space:]]*(#|$)' "$DOTFILES_DIR/$src")
     done
     for svc in "${SYSTEM_RUNIT_ACTIVATE[@]}"; do
         [ -e "/etc/runit/runsvdir/default/$svc" ] ||
