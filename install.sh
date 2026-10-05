@@ -39,6 +39,7 @@ declare -A DOTFILES=(
     ["claude/settings.json"]="$HOME/.claude/settings.json"
     ["claude/statusline.sh"]="$HOME/.claude/statusline.sh"
     ["configs/librewolf.overrides.cfg"]="$HOME/.librewolf/librewolf.overrides.cfg"
+    ["configs/docker/config.json"]="$HOME/.docker/config.json"
 )
 
 # Files COPIED rather than symlinked, because the app rewrites them with

@@ -289,6 +289,10 @@ echo 'test' | pandoc -o /tmp/t.pdf   # exits 0 and writes a PDF, or names the mi
 - `aws-sam-cli-bin` (AUR) — AWS SAM CLI (`sam`). The `-bin` build tracks
   upstream releases; the source `aws-sam-cli` lags months behind. `sam local`
   runs Lambdas in containers, so it relies on `docker` above
+- `amazon-ecr-credential-helper` (AUR) — `docker-credential-ecr-login`, so
+  `docker pull/push` to ECR authenticates from the AWS CLI credentials instead
+  of an expiring `docker login`. Registries are mapped in
+  `configs/docker/config.json` (`credHelpers`)
 
 ## CLI tooling
 
