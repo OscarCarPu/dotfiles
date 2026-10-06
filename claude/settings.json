@@ -2,7 +2,7 @@
   "permissions": {
     "defaultMode": "auto"
   },
-  "model": "opus",
+  "model": "sonnet",
   "skillOverrides": {
     "learning-ai-guide": "user-invocable-only"
   },
@@ -26,6 +26,6 @@
     }
   },
   "theme": "dark",
-  "skipAutoPermissionPrompt": true,
-  "switchModelsOnFlag": true
+  "switchModelsOnFlag": true,
+  "skipAutoPermissionPrompt": true
 }
