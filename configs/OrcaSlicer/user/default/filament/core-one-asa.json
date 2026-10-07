@@ -7,8 +7,8 @@
     "compatible_printers": ["core-one-obxidian"],
     "compatible_printers_condition": "",
     "bed_type": ["Textured PEI Plate"],
-    "nozzle_temperature": ["245"],
-    "nozzle_temperature_initial_layer": ["250"],
+    "nozzle_temperature": ["250"],
+    "nozzle_temperature_initial_layer": ["255"],
     "filament_start_gcode": ["M572 S0.04 ; pressure advance, PA pattern 2026-10-05 (ASA, ObXidian 0.4)\nM142 S40 ; set heatbreak target temp\nM141 S{chamber_temperature[current_extruder]} ; set chamber target temp"],
     "hot_plate_temp": ["105"],
     "hot_plate_temp_initial_layer": ["105"],
@@ -27,5 +27,5 @@
     "filament_retract_before_wipe": ["0%"],
     "chamber_minimal_temperature": ["45"],
     "chamber_temperature": ["45"],
-    "filament_max_volumetric_speed": ["11.5"]
+    "filament_max_volumetric_speed": ["11"]
 }
