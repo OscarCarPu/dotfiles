@@ -35,6 +35,7 @@ declare -A DOTFILES=(
     ["configs/applications/autofirma.desktop"]="$HOME/.local/share/applications/autofirma.desktop"
     ["configs/applications/nvim-kitty.desktop"]="$HOME/.local/share/applications/nvim-kitty.desktop"
     ["configs/applications/ardour9.desktop"]="$HOME/.local/share/applications/ardour9.desktop"
+    ["configs/applications/orca-slicer.desktop"]="$HOME/.local/share/applications/orca-slicer.desktop"
     ["claude/skills"]="$HOME/.claude/skills"
     ["claude/settings.json"]="$HOME/.claude/settings.json"
     ["claude/statusline.sh"]="$HOME/.claude/statusline.sh"

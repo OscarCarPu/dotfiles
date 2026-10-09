@@ -1,0 +1,11 @@
+[Desktop Entry]
+# Overrides /usr/share/applications/orca-slicer.desktop so launching from wofi
+# goes through scripts/orca-slicer (XWayland) instead of the packaged zink
+# override, which fails with a Wayland protocol error on this machine.
+# Absolute path: see ardour9.desktop.
+Name=OrcaSlicer
+Exec=/home/ocp/.local/bin/orca-slicer %U
+Icon=OrcaSlicer
+Type=Application
+Categories=Utility;
+MimeType=model/stl;application/vnd.ms-3mfdocument;application/prs.wavefront-obj;application/x-amf;x-scheme-handler/orcaslicer;x-scheme-handler/bambustudio;

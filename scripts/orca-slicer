@@ -1,0 +1,8 @@
+#!/bin/bash
+# OrcaSlicer launcher. Native Wayland segfaults in the GL thumbnail render
+# right after slicing (Intel Iris Xe), and the packaged zink override dies with
+# a Wayland protocol error. Running through XWayland avoids both.
+#
+# Absolute path on purpose: this wrapper shadows /usr/bin/orca-slicer in PATH.
+
+GDK_BACKEND=x11 exec /usr/bin/orca-slicer "$@"

@@ -358,6 +358,9 @@ echo 'test' | pandoc -o /tmp/t.pdf   # exits 0 and writes a PDF, or names the mi
   `configs/OrcaSlicer/user/default/{machine,process,filament}/`, symlinked into
   `~/.config/OrcaSlicer/user/default/`. Each is named "personal-ender" and
   inherits the Creality Ender-3 0.4 system presets.
+  Launched via `scripts/orca-slicer` (+ `configs/applications/orca-slicer.desktop`)
+  with `GDK_BACKEND=x11`: native Wayland segfaults after slicing and the
+  packaged zink override errors out with a Wayland protocol error.
   Note: Orca loads `libwebkit2gtk-4.1`, so it inherits the `libjxl` 0.11 pin.
   `webkit2gtk-4.1` is held at 2.52.4 in `IgnorePkg` (see `configs/pacman.conf`)
   because 2.52.5 links `libjxl.so.0.12` and fails to load under the pin.
