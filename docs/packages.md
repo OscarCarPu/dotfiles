@@ -459,3 +459,20 @@ jupyter notebook notebook.ipynb   # cwd = project, so data/foo.csv resolves
 
 To re-enter later: `source .venv/bin/activate && jupyter notebook …` —
 deps persist in `.venv/`.
+
+### Colab-like kernel
+
+For notebooks written for Google Colab, `install-packages.sh` builds a shared
+venv at `~/.local/share/colab-env` (Python 3.12, like Colab) with the stack
+listed in `configs/colab/requirements.txt`, and registers it as the
+**Python 3 (Colab)** kernel. Any Jupyter (`jupyter lab`, `nbconvert`) can then
+select it without activating anything:
+
+```bash
+jupyter lab notebook.ipynb                                    # pick "Python 3 (Colab)"
+jupyter nbconvert --to notebook --execute --ExecutePreprocessor.kernel_name=colab notebook.ipynb
+```
+
+Torch/TensorFlow are left out (multi-GB); add them with
+`uv pip install --python ~/.local/share/colab-env/bin/python torch`. Colab-only
+APIs (`google.colab`, `drive.mount`) do not exist locally.

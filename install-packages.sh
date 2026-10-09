@@ -55,6 +55,18 @@ else
     echo "Open a new shell so PATH picks up uv, then re-run this script." >&2
 fi
 
+# --- Colab-like notebook kernel -------------------------------------------
+# Python 3.12 (what Colab runs) + its usual scientific stack, registered as the
+# "Python 3 (Colab)" kernel so any Jupyter picks it without activating a venv.
+
+if command -v uv >/dev/null 2>&1; then
+    COLAB_ENV="$HOME/.local/share/colab-env"
+    echo "Building the Colab-like kernel in $COLAB_ENV..."
+    uv venv --python 3.12 --allow-existing "$COLAB_ENV"
+    uv pip install --python "$COLAB_ENV/bin/python" -r "$DOTFILES_DIR/configs/colab/requirements.txt"
+    "$COLAB_ENV/bin/python" -m ipykernel install --user --name colab --display-name "Python 3 (Colab)"
+fi
+
 # --- cargo-installed ESP32 tooling ----------------------------------------
 
 echo "Installing espup + espflash via cargo (ESP32 toolchain)..."

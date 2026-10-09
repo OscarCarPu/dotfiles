@@ -9,7 +9,7 @@
       "/home/ocp/Zettlr Tutorial"
     ]
   },
-  "openDirectory": "/home/ocp/edu/data-science-degree/metodos-numericos/R1/apuntes",
+  "openDirectory": "/home/ocp/edu/data-science-degree/tipologia-fuentes-datos/R1/PEC1",
   "dialogPaths": {
     "askFileDialog": "",
     "askDirDialog": "/home/ocp/edu/data-science-degree/metodos-numericos",
@@ -18,7 +18,7 @@
   "window": {
     "nativeAppearance": false,
     "vibrancy": false,
-    "fileManagerVisible": false,
+    "fileManagerVisible": true,
     "sidebarVisible": false,
     "currentSidebarTab": "toc",
     "recentGlobalSearches": []
