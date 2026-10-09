@@ -349,8 +349,9 @@ echo 'test' | pandoc -o /tmp/t.pdf   # exits 0 and writes a PDF, or names the mi
   `install.sh` expands `aspell-es` (~885k forms) into a hunspell dictionary at
   `~/.config/Zettlr/dict/es-ES/` (generated, ~11 MB, not tracked; Zettlr
   searches that dir before its bundled `dict`).
-  `config.json` (spellcheck `es-ES` + `en-US`), `user.dic` (personal words, migrated from Obsidian), `custom.css` (distinct heading
-  sizes/hues) are symlinked from `configs/zettlr/`. The Obsidian setup
+  `config.json` (spellcheck `es-ES` + `en-US`), `user.dic` (personal words, migrated from Obsidian), `display.theme` = built-in `karl-marx-stadt` (sans-serif) and `custom.css`
+  (per-level heading colours + padding only; margins/font-size overrides break
+  CodeMirror click mapping) are symlinked from `configs/zettlr/`. The Obsidian setup
   (Nord theme, plugins, `obsidian-theme` runit service) was deleted; it is in
   git history before this date. The per-vault `.obsidian/` dirs under `~/edu`
   and `~/docs` were deleted too (Syncthing `.stversions` copies left alone)

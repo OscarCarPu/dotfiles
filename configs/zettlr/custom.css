@@ -1,29 +1,29 @@
-/* Headings: size + weight + hue per level so the outline reads at a glance */
+/* Colour per heading level. Colour and weight only: no margins or font-size,
+   which break CodeMirror's click-to-position mapping. */
 .cm-header-1, .cm-header-2, .cm-header-3,
 .cm-header-4, .cm-header-5, .cm-header-6 { font-weight: 700; }
 
-.cm-header-1 { font-size: 2em;    color: #5e81ac; }
-.cm-header-2 { font-size: 1.6em;  color: #81a1c1; }
-.cm-header-3 { font-size: 1.35em; color: #8fbcbb; }
-.cm-header-4 { font-size: 1.15em; color: #a3be8c; }
-.cm-header-5 { font-size: 1.05em; color: #d08770; font-style: italic; }
-.cm-header-6 { font-size: 1em;    color: #b48ead; font-style: italic; }
-
-.cm-line:has(.cm-header-1) { border-bottom: 2px solid #5e81ac; margin-top: 1.2em; }
-.cm-line:has(.cm-header-2) { border-bottom: 1px solid #81a1c1; margin-top: 1em; }
+.cm-header-1 { color: #5e81ac; }
+.cm-header-2 { color: #b48ead; }
+.cm-header-3 { color: #4c8f6b; }
+.cm-header-4 { color: #c27a2c; }
+.cm-header-5 { color: #bf616a; }
+.cm-header-6 { color: #6b7280; }
 
 body.dark .cm-header-1 { color: #88c0d0; }
-body.dark .cm-header-2 { color: #81a1c1; }
-body.dark .cm-header-3 { color: #8fbcbb; }
-body.dark .cm-header-4 { color: #a3be8c; }
-body.dark .cm-header-5 { color: #ebcb8b; }
-body.dark .cm-header-6 { color: #b48ead; }
-body.dark .cm-line:has(.cm-header-1) { border-bottom-color: #88c0d0; }
-body.dark .cm-line:has(.cm-header-2) { border-bottom-color: #81a1c1; }
+body.dark .cm-header-2 { color: #b48ead; }
+body.dark .cm-header-3 { color: #a3be8c; }
+body.dark .cm-header-4 { color: #ebcb8b; }
+body.dark .cm-header-5 { color: #d08770; }
+body.dark .cm-header-6 { color: #9aa5b1; }
 
-/* Fonts: sans-serif for prose, monospace for code */
-.cm-content, .cm-line { font-family: "Adwaita Sans", sans-serif; font-size: 1.05em; }
-.cm-formatting-code, .cm-code, .cm-codeblock, code, pre {
-    font-family: "CaskaydiaCove Nerd Font Mono", monospace;
-    font-size: 0.85em;
-}
+/* Spacing above headings via padding (safe for CodeMirror, unlike margin) */
+.cm-line:has(.cm-header-1) { padding-top: 0.8em; }
+.cm-line:has(.cm-header-2) { padding-top: 0.6em; }
+.cm-line:has(.cm-header-3) { padding-top: 0.4em; }
+
+/* Rule under H1/H2 (border sits inside the line box, so CodeMirror measures it) */
+.cm-line:has(.cm-header-1) { border-bottom: 2px solid #5e81ac; }
+.cm-line:has(.cm-header-2) { border-bottom: 1px solid #b48ead; }
+body.dark .cm-line:has(.cm-header-1) { border-bottom-color: #88c0d0; }
+body.dark .cm-line:has(.cm-header-2) { border-bottom-color: #b48ead; }
