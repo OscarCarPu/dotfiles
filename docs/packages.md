@@ -190,7 +190,7 @@ Driverless IPP queue for the network Epson ET-3850 — see
 - `cliphist` — clipboard history (paired with `wofi` via `SUPER + SHIFT + V`)
 - `papirus-icon-theme` — vector icons used by GTK apps and wofi (set in `configs/gtk-3.0/settings.ini`)
 - `socat`, `jq` — used by `monitor_watcher.sh` to consume Hyprland's event socket
-- `inotify-tools` — filesystem watcher; used by the `obsidian-theme` runit service to auto-apply Nord theme and plugins to new vaults
+- `inotify-tools` — filesystem watcher (`inotifywait`)
 - `elogind-runit` — `loginctl poweroff/reboot`, polkit, seat mgmt (pulls `elogind` as a dep)
 
 ## Storage
@@ -234,13 +234,13 @@ unmounts all, right-click opens Thunar.
 - `tk` — Tcl/Tk toolkit, provides `tkinter` for Python GUIs
 - `r` — R statistical computing language
 - `rstudio-desktop-bin` (AUR) — R IDE
-- `pandoc-cli` — Markdown → PDF converter; the `pandoc` binary the Obsidian
-  Pandoc plugin and `jupyter-nbconvert --to pdf` shell out to
+- `pandoc-cli` — Markdown → PDF converter; the `pandoc` binary Zettlr's export
+  and `jupyter-nbconvert --to pdf` shell out to
 - `texlive-basic`, `texlive-latex`, `texlive-latexrecommended`,
   `texlive-latexextra`, `texlive-fontsrecommended`, `texlive-xetex`,
   `texlive-plaingeneric`, `texlive-langspanish` — the LaTeX toolchain behind
   **PDF export**, used by `rmarkdown`/`knitr` in RStudio, by
-  `jupyter-nbconvert --to pdf` and by the Obsidian Pandoc plugin. See
+  `jupyter-nbconvert --to pdf` and by Zettlr's PDF export. See
   [Why all eight](#why-all-eight-texlive-collections) below.
 ### Why all eight texlive collections
 
@@ -340,12 +340,20 @@ echo 'test' | pandoc -o /tmp/t.pdf   # exits 0 and writes a PDF, or names the mi
   silently on every run and no platform was ever installed. Reinstall those
   three and run `sdkmanager` by hand if you ever build Android apps
 - `android-udev` — udev rules so non-root users (in `adbusers`) can reach connected devices
-- `obsidian` — markdown notes / knowledge base (Arch `[extra]`). Moved off
-  the AUR `obsidian-bin` **2026-08-31**: from 1.13.x the upstream `.deb`
-  renamed its desktop entry to `md.obsidian.Obsidian.desktop`, so the
-  PKGBUILD's `sed` on `obsidian.desktop` fails and `package_obsidian-bin()`
-  aborts. The repo package tracks the same version and uses system
-  `electron43` instead of a bundled one
+- `aspell-es` — Spanish word list; `install.sh` expands it into Zettlr's `es-ES` hunspell dictionary (see `zettlr`)
+- `zettlr` — markdown notes / knowledge base (Arch `[extra]`). Replaced
+  `obsidian` **2026-10-09**: Obsidian's Chromium spellchecker (`es-ES-3-0.bdic`)
+  flagged valid words ("medible", "categorización", "extractivo"). Zettlr's
+  bundled `es-ES` hunspell dictionary lacks e.g. "computacional" and "medible",
+  and Arch's `hunspell-es_any` lacks derived forms like "categorización". So
+  `install.sh` expands `aspell-es` (~885k forms) into a hunspell dictionary at
+  `~/.config/Zettlr/dict/es-ES/` (generated, ~11 MB, not tracked; Zettlr
+  searches that dir before its bundled `dict`).
+  `config.json` (spellcheck `es-ES` + `en-US`), `user.dic` (personal words, migrated from Obsidian), `custom.css` (distinct heading
+  sizes/hues) are symlinked from `configs/zettlr/`. The Obsidian setup
+  (Nord theme, plugins, `obsidian-theme` runit service) was deleted; it is in
+  git history before this date. The per-vault `.obsidian/` dirs under `~/edu`
+  and `~/docs` were deleted too (Syncthing `.stversions` copies left alone)
 - `openscad-git` — programmers' 3D CAD modeller. The BOSL2 library is vendored
   as a git submodule under `configs/OpenSCAD/libraries/BOSL2` and the whole
   `configs/OpenSCAD/libraries` dir is symlinked to

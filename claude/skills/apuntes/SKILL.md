@@ -1,6 +1,6 @@
 ---
 name: apuntes
-description: Hacer o continuar apuntes en Markdown (Obsidian) a partir de los PDF de teoría de una asignatura, con el estilo conciso del usuario. Usar cuando pida "haz los apuntes", "esquema", "resume la sección X", "continúa", "siguiente sección" o "iguala el estilo" sobre notas de R*/apuntes/ o de cualquier asignatura en ~/edu.
+description: Hacer o continuar apuntes en Markdown a partir de los PDF de teoría de una asignatura, con el estilo conciso del usuario. Usar cuando pida "haz los apuntes", "esquema", "resume la sección X", "continúa", "siguiente sección" o "iguala el estilo" sobre notas de R*/apuntes/ o de cualquier asignatura en ~/edu.
 ---
 
 # Apuntes al estilo del usuario
@@ -50,7 +50,7 @@ Se omiten: introducción del módulo, autoría, leyendas de figuras y bibliograf
 - `>` (cita simple) para la frase clave o la idea importante del PDF, como mucho una por sección. Sin callouts `> [!note]`.
 - *Cursiva* para términos en inglés: *dataset*, *join*, *logs*.
 - Español con tildes.
-- Matemáticas en LaTeX (Obsidian + latex-suite): `$…$` en línea y `$$…$$` en bloque; `\operatorname{rg}`, `\iff`, `\Rightarrow`.
+- Matemáticas en LaTeX (latex-suite): `$…$` en línea y `$$…$$` en bloque; `\operatorname{rg}`, `\iff`, `\Rightarrow`.
 - Código en bloques con lenguaje (```` ```r ````, ```` ```python ````), con comentarios breves en línea; para las funciones, una tabla `operación | código`.
 - Diagramas, solo si ayudan, en ```` ```mermaid ````.
 

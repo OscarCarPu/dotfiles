@@ -54,7 +54,7 @@ Once you have enough information, write a reusable prompt file. This file will b
 
 4. **Exercises — always mandatory**: the prompt must explicitly tell the agent to always include exercises, no exceptions. The agent decides the distribution based on content, but the total must be 10–15 and there must be at least one of each type: mechanical, interpretive/applied, and conceptual/design.
 
-5. **Output instructions**: where to save the file (in a `learning/` subfolder inside the subject's folder), naming convention, and the splitting rule below. All documents are read in **Obsidian**: do not open with a `# H1` title (Obsidian uses the filename); use wikilinks (`[[filename]]`) to cross-reference other documents in the same folder when relevant; LaTeX renders via MathJax.
+5. **Output instructions**: where to save the file (in a `learning/` subfolder inside the subject's folder), naming convention, and the splitting rule below. All documents are read in a Markdown editor: do not open with a `# H1` title (the filename is the title); use wikilinks (`[[filename]]`) to cross-reference other documents in the same folder when relevant; LaTeX renders via MathJax.
 
 ### What the prompt must NOT do
 

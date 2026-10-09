@@ -20,9 +20,8 @@ An Artix Hyprland configuration for my daily computer.
 - `wofi/`: Wofi launcher styling
 - `swaync/`: SwayNC configuration
 - `wireplumber/`: WirePlumber priority rules
-- `runit/user/`: User runit services (pipewire stack, set-wallpaper, battery-notify, obsidian-theme, seafile, seafile-watch)
+- `runit/user/`: User runit services (pipewire stack, set-wallpaper, battery-notify, seafile, seafile-watch)
 - `runit/system/`: System runit services (displaylink)
-- `obsidian/`: Shared Obsidian config (appearance, plugins, theme) — symlinked into every vault by the `obsidian-theme` runit service
 - `kitty/`: Kitty terminal configuration
 - `ssh/`: SSH client config (host aliases + Cloudflare `ProxyCommand`; no keys)
 - `scripts/`: Custom system tools (`~/.local/bin`)

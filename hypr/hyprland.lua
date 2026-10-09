@@ -188,7 +188,7 @@ hl.bind(mainMod .. " + R", hl.dsp.exec_cmd("wofi --show drun"))
 hl.bind(mainMod .. " + F", hl.dsp.exec_cmd("librewolf"))
 hl.bind(mainMod .. " + P", hl.dsp.exec_cmd("spotify"))
 hl.bind(mainMod .. " + S", hl.dsp.exec_cmd("librewolf https://soundcloud.com"))
-hl.bind(mainMod .. " + O", hl.dsp.exec_cmd("obsidian"))
+hl.bind(mainMod .. " + O", hl.dsp.exec_cmd("zettlr"))
 
 -- Clipboard history (cliphist + wofi)
 hl.bind(mainMod .. " + SHIFT + V",
