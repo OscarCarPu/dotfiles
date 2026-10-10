@@ -44,6 +44,8 @@ declare -A DOTFILES=(
     ["configs/zettlr/config.json"]="$HOME/.config/Zettlr/config.json"
     ["configs/zettlr/custom.css"]="$HOME/.config/Zettlr/custom.css"
     ["configs/zettlr/user.dic"]="$HOME/.config/Zettlr/user.dic"
+    ["configs/fontconfig/fonts.conf"]="$HOME/.config/fontconfig/fonts.conf"
+    ["configs/zettlr/Paper PDF.yaml"]="$HOME/.config/Zettlr/defaults/Paper PDF.yaml"
 )
 
 # Files COPIED rather than symlinked, because the app rewrites them with

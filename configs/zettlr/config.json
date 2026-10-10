@@ -5,8 +5,7 @@
     "openFiles": [],
     "openWorkspaces": [
       "/home/ocp/edu/data-science-degree/metodos-numericos",
-      "/home/ocp/edu/data-science-degree/tipologia-fuentes-datos",
-      "/home/ocp/Zettlr Tutorial"
+      "/home/ocp/edu/data-science-degree/tipologia-fuentes-datos"
     ]
   },
   "openDirectory": "/home/ocp/edu/data-science-degree/tipologia-fuentes-datos/R1/PEC1",
@@ -56,7 +55,7 @@
   "newFileNamePattern": "%id.md",
   "newFileDontPrompt": false,
   "export": {
-    "dir": "temp",
+    "dir": "cwd",
     "stripTags": false,
     "autoOpenExportedFiles": true,
     "stripLinks": "full",
@@ -65,8 +64,21 @@
     "useBundledPandoc": true,
     "exportQmdWithQuarto": false,
     "customCommands": [],
-    "selectedProfiles": [],
-    "lastUsedProfile": "HTML.yaml",
+    "selectedProfiles": [
+      {
+        "filePath": "/home/ocp/edu/data-science-degree/tipologia-fuentes-datos/R1/PEC1/TyFdD_20261_PEC1-1.pdf",
+        "profile": "Paper PDF.yaml"
+      },
+      {
+        "filePath": "/home/ocp/edu/data-science-degree/tipologia-fuentes-datos/R1/PEC1/22.514_Carballo_Puebla_Oscar_PEC1.pdf",
+        "profile": "Paper PDF.yaml"
+      },
+      {
+        "filePath": "/home/ocp/edu/data-science-degree/tipologia-fuentes-datos/R1/PEC1/22.514_Carballo_Puebla_Oscar_PEC1.md",
+        "profile": "Paper PDF.yaml"
+      }
+    ],
+    "lastUsedProfile": "Paper PDF.yaml",
     "forceEnableExtensions": {
       "mark": true,
       "alerts": true
@@ -96,8 +108,8 @@
     "enableTableHelper": true,
     "indentUnit": 4,
     "indentWithTabs": false,
-    "alwaysIndentLineOnTab": false,
-    "fontSize": 18,
+    "alwaysIndentLineOnTab": true,
+    "fontSize": 16,
     "countChars": false,
     "inputMode": "default",
     "boldFormatting": "**",

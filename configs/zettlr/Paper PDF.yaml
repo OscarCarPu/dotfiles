@@ -1,0 +1,54 @@
+# ZETTLR DEFAULTS FILE
+# ====================
+# Conversion: Markdown --> PDF, academic paper look (XeLaTeX, Latin Modern)
+reader: markdown+lists_without_preceding_blankline
+writer: pdf
+self-contained: true
+variables:
+  papersize: a4
+  documentclass: article
+  fontsize: 11pt
+  geometry: margin=2.5cm
+  indent: false
+  linestretch: 1.2
+  colorlinks: true
+  linkcolor: black
+  urlcolor: black
+  lang: es
+  header-includes:
+    - \usepackage{titlesec}
+    - \titleformat{\section}{\normalfont\huge\bfseries}{}{0pt}{}[\vspace{2pt}\titlerule\vspace{2pt}\titlerule]
+    - \titleformat{\subsection}{\normalfont\LARGE\bfseries}{}{0pt}{}[\titlerule]
+    - \titleformat{\subsubsection}{\normalfont\large\bfseries}{}{0pt}{}
+    - \titleformat{\paragraph}[hang]{\normalfont\normalsize\bfseries}{}{0pt}{}
+    - \titlespacing*{\section}{0pt}{3ex plus 1ex}{1.5ex}
+    - \titlespacing*{\subsection}{0pt}{2.5ex plus 1ex}{1.2ex}
+    - \titlespacing*{\subsubsection}{0pt}{2ex plus 1ex}{1ex}
+    - \usepackage{enumitem}
+    - \renewcommand{\labelitemi}{\textbullet}
+    - \renewcommand{\labelitemii}{\textopenbullet}
+    - \setlist{leftmargin=2em}
+    - \titlespacing*{\paragraph}{0pt}{1.5ex}{0.5ex}
+metadata-files: []
+include-before-body: []
+include-after-body: []
+include-in-header: []
+bibliography: []
+filters:
+- type: citeproc
+pdf-engine: xelatex
+dpi: 300
+toc: false
+number-sections: false
+section-divs: true
+identifier-prefix: ''
+title-prefix: ''
+eol: lf
+strip-comments: false
+indented-code-classes: []
+ascii: false
+default-image-extension: .jpg
+highlight-style: kate
+tab-stop: 4
+preserve-tabs: false
+fail-if-warnings: false

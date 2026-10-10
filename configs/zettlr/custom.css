@@ -18,12 +18,25 @@ body.dark .cm-header-5 { color: #d08770; }
 body.dark .cm-header-6 { color: #9aa5b1; }
 
 /* Spacing above headings via padding (safe for CodeMirror, unlike margin) */
-.cm-line:has(.cm-header-1) { padding-top: 0.8em; }
-.cm-line:has(.cm-header-2) { padding-top: 0.6em; }
-.cm-line:has(.cm-header-3) { padding-top: 0.4em; }
+.cm-line:has(.cm-header-1) { padding-top: 0.3em; }
+.cm-line:has(.cm-header-2) { padding-top: 0.25em; }
+.cm-line:has(.cm-header-3) { padding-top: 0.2em; }
 
 /* Rule under H1/H2 (border sits inside the line box, so CodeMirror measures it) */
 .cm-line:has(.cm-header-1) { border-bottom: 2px solid #5e81ac; }
 .cm-line:has(.cm-header-2) { border-bottom: 1px solid #b48ead; }
 body.dark .cm-line:has(.cm-header-1) { border-bottom-color: #88c0d0; }
 body.dark .cm-line:has(.cm-header-2) { border-bottom-color: #b48ead; }
+
+/* Match the Paper PDF profile: Latin Modern Roman, and the same heading size
+   ratios (LaTeX \huge / \LARGE / \large over 10.95pt body). */
+body .cm-editor {
+  --zettlr-editor-font: "Latin Modern Roman", serif;
+  --zettlr-editor-line-height: 1.15;
+  --zettlr-editor-header-1-size: 2.27em;
+  --zettlr-editor-header-2-size: 1.89em;
+  --zettlr-editor-header-3-size: 1.31em;
+  --zettlr-editor-header-4-size: 1em;
+  --zettlr-editor-header-5-size: 1em;
+  --zettlr-editor-header-6-size: 1em;
+}
