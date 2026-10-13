@@ -9,7 +9,7 @@ set -euo pipefail
 # finishes connecting. Prefer curl for a real reachability check; fall back
 # to DNS-only if curl isn't installed.
 wait_for_internet() {
-    local max_seconds="${1:-30}" deadline have_curl
+    local max_seconds="${1:-10}" deadline have_curl
     deadline=$(( $(date +%s) + max_seconds ))
     command -v curl >/dev/null 2>&1 && have_curl=1 || have_curl=0
     while (( $(date +%s) < deadline )); do

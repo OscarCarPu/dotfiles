@@ -325,6 +325,7 @@ echo 'test' | pandoc -o /tmp/t.pdf   # exits 0 and writes a PDF, or names the mi
   behind when killed instead of closed — otherwise it refuses to start,
   mid-exam
 - `discord` — voice/text chat
+- `telegram-desktop` — Telegram chat client (Arch `[extra]`)
 - `stremio-enhanced-bin` (AUR) — Stremio client with plugin/theme support
 - `spotify` — runs on workspace 3
 - `prismlauncher` — Minecraft instance launcher/manager (Artix `[galaxy]`, not AUR)
