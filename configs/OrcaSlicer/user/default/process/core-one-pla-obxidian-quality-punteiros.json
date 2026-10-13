@@ -17,8 +17,9 @@
 
 	"initial_layer_print_height": "0.24",
 	"initial_layer_line_width": "0.6",
-	"inner_wall_line_width": "0.55",
+	"inner_wall_line_width": "0.45",
 	"wall_loops": "6",
+	"wall_generator": "classic",
 	"detect_thin_wall": "1",
 	"precise_outer_wall": "0",
 	"sparse_infill_density": "25%",
@@ -81,6 +82,7 @@
 	"seam_position": "back",
 	"seam_slope_conditional": "0",
 	"seam_slope_min_length": "7",
+	"seam_slope_start_height": "50%",
 	"seam_slope_type": "external",
 
 	"brim_type": "outer_and_inner",
