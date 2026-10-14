@@ -154,4 +154,17 @@ return {
       dependencies_bin = { tinymist = "tinymist" },
     },
   },
+
+  -- Inline images (kitty graphics protocol) in buffers: PDF viewer and Typst preview
+  {
+    "folke/snacks.nvim",
+    lazy = false,
+    opts = {
+      image = {
+        enabled = true,
+        -- snacks' own viewer only draws a PDF's first page: pdfview (lua/pdfview.lua) handles *.pdf
+        formats = { "png", "jpg", "jpeg", "gif", "bmp", "webp", "tiff", "heic", "avif", "mp4", "mov", "avi", "mkv", "webm", "icns" },
+      },
+    },
+  },
 }

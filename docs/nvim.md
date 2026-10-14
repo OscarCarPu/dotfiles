@@ -102,13 +102,15 @@ hidden `.name.preview.typ`, previewed with `tinymist`. `$...$` is **Typst math**
 | Key (markdown buffer) | Action |
 |---|---|
 | `<leader>mp` | live preview in a new browser window, updates as you type; compile errors show as a warning |
-| `<leader>mt` | live preview in a kitty split beside the editor (`typst-term-preview`: one pinned page, `k` next page, `j` previous, `g`/`G` first/last; needs kitty restarted once for remote control) |
+| `<leader>mt` | live preview as a buffer in a vertical split (listed in the tabufline like any file); redraws as you type and jumps to the page of the text you are editing; press again to close it, or to re-show it if hidden. Page keys as in PDFs below |
 | `<leader>me` | export `name.pdf` next to the note |
 
 Raw Typst goes in a ```` ```{=typst} ```` block. Math and those blocks are tinted in the buffer.
 
 ## PDFs
 
-Opening a `*.pdf` (`nvim file.pdf`, `:e`, the file tree) shows it in a kitty split via
-`pdf-term-view` (`poppler`'s `pdftoppm`/`pdfinfo` + the kitty graphics protocol): one pinned
-page, `k`/space next, `j` previous, `g`/`G` first/last, `q` quit; it reloads when the file changes.
+Opening a `*.pdf` (`nvim file.pdf`, `:e`, the file tree) shows it in a normal buffer
+(`lua/pdfview.lua`): `pdftoppm` rasterises one page, drawn by `snacks.nvim`'s image module (kitty
+graphics protocol, needs `imagemagick`/`poppler`). It lives in the tabufline and opens in the window
+the file tree targets. Keys: `n`/`<Space>`/`<PageDown>` next page, `p`/`<PageUp>` previous,
+`gg`/`G` first/last, `q` close. It reloads when the file changes.

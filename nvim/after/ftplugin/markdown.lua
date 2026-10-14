@@ -8,7 +8,7 @@ local buf = vim.api.nvim_get_current_buf()
 local dir = vim.fn.expand "%:p:h"
 local base = vim.fn.expand "%:t:r"
 local typ = string.format("%s/.%s.preview.typ", dir, base)
-local server, timer, kitty_win, last_error
+local server, timer, last_error, view_buf
 
 local function free_port()
   local sock = vim.uv.new_tcp()
@@ -22,6 +22,8 @@ end
 -- so the preview keeps the last good render and the error is shown in the buffer instead.
 local ns = vim.api.nvim_create_namespace "mdpreview"
 local tmp = string.format("%s/.%s.preview.new.typ", dir, base)
+local pdf = string.format("%s/mdpreview-%d.pdf", vim.fn.stdpath "cache", buf)
+local pdf_tmp = pdf .. ".new"
 local busy, dirty = false, false
 
 -- buffer line holding the offending Typst, found by the code shown in typst's error snippet
@@ -57,6 +59,34 @@ local function show_error(stderr)
   end
 end
 
+-- page of the rendered PDF showing the text around the cursor: match the nearest prose line
+-- (letters/digits only, so wrapping and markup don't matter), else scale by position in the file
+local function alnum(str)
+  return str:lower():gsub("[^%w\128-\255]", "")
+end
+
+local function cursor_page()
+  local r = vim.system({ "pdftotext", pdf, "-" }):wait()
+  local pages = vim.split(r.stdout or "", "\f", { plain = true })
+  if pages[#pages] == "" then table.remove(pages) end
+  if #pages == 0 then return 1 end
+  local hay = vim.tbl_map(alnum, pages)
+  local lines = vim.api.nvim_buf_get_lines(buf, 0, -1, false)
+  local row = vim.api.nvim_win_get_cursor(vim.fn.bufwinid(buf) > 0 and vim.fn.bufwinid(buf) or 0)[1]
+  for d = 0, 12 do
+    for _, i in ipairs(d == 0 and { row } or { row - d, row + d }) do
+      local text = lines[i] and alnum((lines[i]:gsub("%$[^$]*%$", ""))) or ""
+      if #text >= 12 then
+        local needle = text:sub(1, 24)
+        for page, h in ipairs(hay) do
+          if h:find(needle, 1, true) then return page end
+        end
+      end
+    end
+  end
+  return math.max(1, math.min(#pages, math.ceil(row / #lines * #pages)))
+end
+
 local function render(done)
   if busy then dirty = true; return end
   busy = true
@@ -71,11 +101,15 @@ local function render(done)
     on_exit = function(_, code)
       if not server then os.remove(tmp); busy = false; return end
       if code ~= 0 then return vim.schedule(function() show_error "error: pandoc failed"; finish() end) end
-      vim.system({ "typst", "compile", "--root", dir, "--format", "pdf", tmp, "-" }, {}, function(r)
+      vim.system({ "typst", "compile", "--root", dir, "--format", "pdf", tmp, pdf_tmp }, {}, function(r)
         vim.schedule(function()
           if not server then os.remove(tmp); busy = false; return end
           if r.code == 0 then
             os.rename(tmp, typ)
+            os.rename(pdf_tmp, pdf)
+            if view_buf and vim.api.nvim_buf_is_valid(view_buf) then
+              require("pdfview").refresh(view_buf, cursor_page())
+            end
             vim.diagnostic.reset(ns, buf)
             last_error = nil
           else
@@ -97,12 +131,15 @@ end
 local function stop()
   if timer then timer:stop(); timer:close(); timer = nil end
   if server then vim.fn.jobstop(server); server = nil end
-  if kitty_win then
-    vim.system { "kitten", "@", "--to", vim.env.KITTY_LISTEN_ON, "close-window", "--match", "id:" .. kitty_win }
-    kitty_win = nil
+  if view_buf then
+    local vb = view_buf
+    view_buf = nil
+    if vim.api.nvim_buf_is_valid(vb) then vim.api.nvim_buf_delete(vb, { force = true }) end
   end
   os.remove(typ)
   os.remove(tmp)
+  os.remove(pdf)
+  os.remove(pdf_tmp)
   vim.diagnostic.reset(ns, buf)
   busy, dirty, last_error = false, false, nil
   vim.api.nvim_clear_autocmds { group = "MdPreview" .. buf }
@@ -147,26 +184,27 @@ local function launch_browser()
   end))
 end
 
+-- the preview is a normal (listed) buffer, so it sits in the tabufline like any other file
+local function show_preview()
+  local win = vim.api.nvim_get_current_win()
+  vim.cmd "rightbelow vsplit"
+  vim.api.nvim_win_set_buf(0, view_buf)
+  vim.api.nvim_set_current_win(win)
+end
+
 local function launch_terminal()
-  local to = vim.env.KITTY_LISTEN_ON
-  if to and to ~= "" then
-    -- split of this very kitty window; the script exits (closing the split) when the .typ disappears
-    vim.system({ "kitten", "@", "--to", to, "close-window", "--match", "cmdline:pdf-term-view" }):wait()
-    vim.system({ "kitten", "@", "--to", to, "goto-layout", "splits" }):wait()
-    local r = vim.system({
-      "kitten", "@", "--to", to, "launch", "--location=vsplit", "--keep-focus", "typst-term-preview", typ,
-    }):wait()
-    kitty_win = vim.trim(r.stdout or "")
-    server = 1 -- marker: preview running
-    if r.code ~= 0 then
-      server, kitty_win = nil, nil
-      vim.notify("kitty split failed: " .. (r.stderr or ""), vim.log.levels.ERROR)
-    end
-  else
-    -- kitty started before remote control was enabled: fall back to its own window
-    vim.notify("No kitty remote control in this window: restart kitty to get a split. Opening a separate window.", vim.log.levels.WARN)
-    server = vim.fn.jobstart { "kitty", "--class", "typst-preview", "typst-term-preview", typ }
-  end
+  view_buf = vim.api.nvim_create_buf(true, true)
+  vim.api.nvim_buf_set_name(view_buf, base .. " (preview)")
+  require("pdfview").attach(view_buf, pdf)
+  vim.api.nvim_create_autocmd("BufWipeout", {
+    buffer = view_buf,
+    once = true,
+    callback = function()
+      if view_buf then view_buf = nil; vim.schedule(stop) end
+    end,
+  })
+  show_preview()
+  require("pdfview").refresh(view_buf, cursor_page())
 end
 
 local function start(mode)
@@ -194,8 +232,10 @@ vim.keymap.set("n", "<leader>mp", function()
 end, { desc = "Markdown: live Typst preview (browser window)", buffer = true })
 
 vim.keymap.set("n", "<leader>mt", function()
-  if server then stop() else start "terminal" end
-end, { desc = "Markdown: live Typst preview (kitty split)", buffer = true })
+  if server and view_buf and vim.fn.bufwinid(view_buf) < 0 then show_preview()
+  elseif server then stop()
+  else start "terminal" end
+end, { desc = "Markdown: live Typst preview (buffer in a split)", buffer = true })
 
 vim.keymap.set("n", "<leader>me", function()
   local pdf = string.format("%s/%s.pdf", dir, base)
