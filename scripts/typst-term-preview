@@ -40,7 +40,7 @@ draw() {
         return
     fi
     mapfile -t files < <(ls "$out"/*.png)
-    kitten icat --clear --place "${cols}x$((rows - 1))@0x0" --scale-up --align center "${files[$((page - 1))]}" 2>/dev/null
+    kitten icat --image-id 4242 --place "${cols}x$((rows - 1))@0x0" --scale-up --align center "${files[$((page - 1))]}" 2>/dev/null
     printf '\e[%d;1H\e[2K %d/%d  j/k prev/next  g/G first/last  q quit' "$rows" "$page" "$n"
 }
 
