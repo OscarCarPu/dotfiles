@@ -4,14 +4,15 @@
   "app": {
     "openFiles": [],
     "openWorkspaces": [
+      "/home/ocp/edu/data-science-degree/disenho-uso-bbdd-analiticas",
       "/home/ocp/edu/data-science-degree/metodos-numericos",
       "/home/ocp/edu/data-science-degree/tipologia-fuentes-datos"
     ]
   },
-  "openDirectory": "/home/ocp/edu/data-science-degree/metodos-numericos/R1/PEC1",
+  "openDirectory": "/home/ocp/edu/data-science-degree/disenho-uso-bbdd-analiticas/R1/apuntes",
   "dialogPaths": {
     "askFileDialog": "",
-    "askDirDialog": "/home/ocp/edu/data-science-degree/metodos-numericos",
+    "askDirDialog": "/home/ocp/edu/data-science-degree/disenho-uso-bbdd-analiticas",
     "askLangFileDialog": ""
   },
   "window": {
