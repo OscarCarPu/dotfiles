@@ -35,6 +35,7 @@ vim.api.nvim_create_autocmd("BufReadCmd", {
     local pdf = vim.fn.fnamemodify(args.file, ":p")
     local to = vim.env.KITTY_LISTEN_ON
     if to and to ~= "" then
+      vim.system({ "kitten", "@", "--to", to, "close-window", "--match", "cmdline:pdf-term-view" }):wait()
       vim.system { "kitten", "@", "--to", to, "launch", "--location=vsplit", "--keep-focus", "pdf-term-view", pdf }
     else
       vim.fn.jobstart { "kitty", "--class", "pdf-view", "pdf-term-view", pdf }

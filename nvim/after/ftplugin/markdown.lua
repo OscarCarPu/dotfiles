@@ -151,6 +151,7 @@ local function launch_terminal()
   local to = vim.env.KITTY_LISTEN_ON
   if to and to ~= "" then
     -- split of this very kitty window; the script exits (closing the split) when the .typ disappears
+    vim.system({ "kitten", "@", "--to", to, "close-window", "--match", "cmdline:pdf-term-view" }):wait()
     vim.system({ "kitten", "@", "--to", to, "goto-layout", "splits" }):wait()
     local r = vim.system({
       "kitten", "@", "--to", to, "launch", "--location=vsplit", "--keep-focus", "typst-term-preview", typ,
