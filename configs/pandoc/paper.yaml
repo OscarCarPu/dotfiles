@@ -33,4 +33,5 @@ variables:
       #show heading.where(level: 4): it => block(above: 1.5em, below: 0.9em, text(size: 11pt, weight: "bold", it.body))
 filters:
   - typst-math.lua
+  - typst-boxes.lua
 citeproc: true
