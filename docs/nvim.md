@@ -112,5 +112,5 @@ Raw Typst goes in a ```` ```{=typst} ```` block. Math and those blocks are tinte
 Opening a `*.pdf` (`nvim file.pdf`, `:e`, the file tree) shows it in a normal buffer
 (`lua/pdfview.lua`): `pdftoppm` rasterises one page, drawn by `snacks.nvim`'s image module (kitty
 graphics protocol, needs `imagemagick`/`poppler`). It lives in the tabufline and opens in the window
-the file tree targets. Keys: `n`/`<Space>`/`<PageDown>` next page, `p`/`<PageUp>` previous,
+the file tree targets. Keys: `j`/`n`/`<Space>`/`<PageDown>`/scroll wheel next page, `k`/`p`/`<PageUp>` previous (page number in the window bar),
 `gg`/`G` first/last, `q` close. It reloads when the file changes.

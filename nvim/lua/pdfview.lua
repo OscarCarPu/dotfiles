@@ -65,8 +65,16 @@ function M.step(buf, delta)
   if v then M.goto_page(buf, v.page + delta) end
 end
 
+local function teardown(buf)
+  local v = views[buf]
+  views[buf] = nil
+  if v and v.place then v.place:close() end
+  if v and v.timer and not v.timer:is_closing() then v.timer:stop(); v.timer:close() end
+end
+
 --- Turn `buf` into a viewer of `pdf`.
 function M.attach(buf, pdf)
+  teardown(buf) -- :bdelete only unloads, so the next :e re-attaches the same buffer
   pdf = vim.fn.fnamemodify(pdf, ":p")
   views[buf] = { pdf = pdf, page = 1, n = 1, seq = 0 }
   vim.bo[buf].buftype = "nofile"
@@ -77,31 +85,47 @@ function M.attach(buf, pdf)
   local function map(keys, fn, desc)
     vim.keymap.set("n", keys, fn, { buffer = buf, desc = "PDF: " .. desc })
   end
-  for _, k in ipairs { "n", "<PageDown>", "<Right>", "<Space>" } do map(k, function() M.step(buf, 1) end, "next page") end
-  for _, k in ipairs { "p", "<PageUp>", "<Left>" } do map(k, function() M.step(buf, -1) end, "previous page") end
+  for _, k in ipairs { "j", "n", "<Down>", "<PageDown>", "<Right>", "<Space>", "<C-d>", "<C-f>", "<ScrollWheelDown>" } do
+    map(k, function() M.step(buf, 1) end, "next page")
+  end
+  for _, k in ipairs { "k", "p", "<Up>", "<PageUp>", "<Left>", "<C-u>", "<C-b>", "<ScrollWheelUp>" } do
+    map(k, function() M.step(buf, -1) end, "previous page")
+  end
   map("gg", function() M.goto_page(buf, 1) end, "first page")
   map("G", function() M.goto_page(buf, views[buf].n) end, "last page")
   map("q", function() vim.cmd.bdelete { bang = true } end, "close")
 
   local timer = vim.uv.new_timer()
+  views[buf].timer = timer
   timer:start(300, 300, vim.schedule_wrap(function()
     local v = views[buf]
-    if not v or not vim.api.nvim_buf_is_valid(buf) then
-      timer:stop(); timer:close()
-      return
-    end
+    if not v or v.timer ~= timer or not vim.api.nvim_buf_is_valid(buf) then return end
     local now = stamp(v.pdf)
     if now and now ~= v.mtime then M.refresh(buf) end
   end))
-  vim.api.nvim_create_autocmd("BufWipeout", {
+
+  -- page number in the window bar, only while this buffer is shown in the window
+  local group = vim.api.nvim_create_augroup("pdfview" .. buf, { clear = true })
+  vim.api.nvim_create_autocmd("BufWinEnter", {
+    group = group,
     buffer = buf,
-    once = true,
     callback = function()
-      local v = views[buf]
-      views[buf] = nil
-      if v and v.place then v.place:close() end
+      vim.wo.winbar = "%=%{get(b:, 'pdfview_status', '')} "
+      -- snacks hides a placement whose buffer left every window and never un-hides it: redraw fresh
+      vim.schedule(function() M.refresh(buf) end)
     end,
   })
+  vim.api.nvim_create_autocmd("BufWinLeave", {
+    group = group,
+    buffer = buf,
+    callback = function() vim.wo.winbar = "" end,
+  })
+  vim.api.nvim_create_autocmd({ "BufUnload", "BufWipeout" }, {
+    group = group,
+    buffer = buf,
+    callback = function() teardown(buf) end,
+  })
+  vim.wo.winbar = "%=%{get(b:, 'pdfview_status', '')} "
 
   Snacks.image.terminal.detect(function() vim.schedule(function() M.refresh(buf) end) end)
 end

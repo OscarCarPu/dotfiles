@@ -17,20 +17,20 @@ variables:
   header-includes:
     - |
       #set page(fill: white)
-      #set par(spacing: 1em)
+      #set par(leading: 0.7em, spacing: 1.4em)
       #set list(marker: ([•], [◦]), indent: 1em)
       #set enum(indent: 1em)
       #show heading: set align(left)
-      #show heading.where(level: 1): it => block(width: 100%, above: 1.5em, below: 0.75em, {
+      #show heading.where(level: 1): it => block(width: 100%, above: 2.2em, below: 1.2em, {
         text(size: 20.74pt, weight: "bold", it.body)
         v(2pt); line(length: 100%, stroke: 0.4pt); v(2pt); line(length: 100%, stroke: 0.4pt)
       })
-      #show heading.where(level: 2): it => block(width: 100%, above: 1.25em, below: 0.6em, {
+      #show heading.where(level: 2): it => block(width: 100%, above: 2em, below: 1.1em, {
         text(size: 17.28pt, weight: "bold", it.body)
         v(2pt); line(length: 100%, stroke: 0.4pt)
       })
-      #show heading.where(level: 3): it => block(above: 1em, below: 0.5em, text(size: 12pt, weight: "bold", it.body))
-      #show heading.where(level: 4): it => block(above: 0.75em, below: 0.5em, text(size: 11pt, weight: "bold", it.body))
+      #show heading.where(level: 3): it => block(above: 1.8em, below: 1em, text(size: 12pt, weight: "bold", it.body))
+      #show heading.where(level: 4): it => block(above: 1.5em, below: 0.9em, text(size: 11pt, weight: "bold", it.body))
 filters:
   - typst-math.lua
 citeproc: true
