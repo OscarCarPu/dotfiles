@@ -17,6 +17,9 @@ local M = {}
 ---@field cache table<string, string> render key -> png
 ---@field seq number
 ---@field gen number
+---@field last number page shown by the previous draw (direction of travel)
+---@field ahead number[] pages queued for the prefetch worker
+---@field busy? boolean
 ---@field timer? uv_timer_t
 local views = {} ---@type table<number, pdfview.View>
 -- per instance: snacks keeps an `identify` result next to each png path in its own persistent
@@ -149,12 +152,34 @@ local function show(buf, png)
   v.place = place
 end
 
-local function prefetch(buf, v, page, wpx, hpx)
-  if v.zoom > 1 or page < 1 or page > v.n then return end
+-- One background worker renders the pages ahead (in the direction of travel first), so fast
+-- paging never queues several pdftoppm processes against the foreground render.
+local function pump(buf, v)
+  if v.busy then return end
+  local page = table.remove(v.ahead, 1)
+  if not page then return end
+  local win, wpx, hpx = viewport(buf)
+  if not win or v.zoom > 1 then v.ahead = {}; return end
   local key, args = plan(v, page, wpx, hpx)
+  if v.cache[key] then return pump(buf, v) end
+  v.busy = true
   rasterise(v, buf, key, args, function(png)
-    if views[buf] == v then Snacks.image.image.new(png) end -- convert + upload ahead of time
+    v.busy = false
+    if views[buf] == v then
+      Snacks.image.image.new(png) -- convert + upload ahead of time
+      pump(buf, v)
+    end
   end)
+end
+
+local function prefetch(buf, v, page)
+  local d = page >= v.last and 1 or -1
+  v.last = page
+  v.ahead = {}
+  for _, p in ipairs { page + d, page + 2 * d, page + 3 * d, page - d } do
+    if p >= 1 and p <= v.n then table.insert(v.ahead, p) end
+  end
+  pump(buf, v)
 end
 
 local function draw(buf)
@@ -169,8 +194,7 @@ local function draw(buf)
     if views[buf] ~= v or v.gen ~= gen or not vim.api.nvim_buf_is_valid(buf) then return end
     show(buf, png)
     set_status(buf)
-    prefetch(buf, v, page + 1, wpx, hpx)
-    prefetch(buf, v, page - 1, wpx, hpx)
+    prefetch(buf, v, page)
   end)
 end
 
@@ -239,7 +263,7 @@ end
 function M.attach(buf, pdf)
   teardown(buf) -- :bdelete only unloads, so the next :e re-attaches the same buffer
   pdf = vim.fn.fnamemodify(pdf, ":p")
-  local v = { pdf = pdf, page = 1, n = 1, sizes = {}, zoom = 1, cx = 0.5, cy = 0.5, stale = {}, cache = {}, seq = 0, gen = 0 }
+  local v = { pdf = pdf, page = 1, n = 1, sizes = {}, zoom = 1, cx = 0.5, cy = 0.5, stale = {}, cache = {}, seq = 0, gen = 0, last = 1, ahead = {} }
   views[buf] = v
   vim.bo[buf].buftype = "nofile"
   vim.bo[buf].swapfile = false
@@ -251,7 +275,7 @@ function M.attach(buf, pdf)
       vim.keymap.set("n", k, fn, { buffer = buf, desc = "PDF: " .. desc })
     end
   end
-  map({ "k", "n", "<PageDown>", "<Space>", "<C-d>", "<C-f>", "<ScrollWheelDown>" }, function() M.step(buf, 1) end, "next page")
+  map({ "k", "n", "<PageDown>", "<C-d>", "<C-f>", "<ScrollWheelDown>" }, function() M.step(buf, 1) end, "next page")
   map({ "j", "p", "<PageUp>", "<C-u>", "<C-b>", "<ScrollWheelUp>" }, function() M.step(buf, -1) end, "previous page")
   map({ "gg" }, function() M.goto_page(buf, 1) end, "first page")
   map({ "G" }, function() M.goto_page(buf, v.n) end, "last page")
