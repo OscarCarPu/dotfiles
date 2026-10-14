@@ -99,7 +99,14 @@ Para los 1–3 temas que más cuestan o más puntúan, o donde la entrega es má
 ## Formato
 
 - Español con tildes; segunda persona del singular ("tu entrega", "explícalo").
-- Matemáticas en **LaTeX** en todo el documento, empezando por las preguntas: `$…$` en línea y `$$…$$` en bloque (Obsidian con latex-suite, igual que los apuntes y las respuestas del usuario). Por ejemplo: `$X^TX$`, `$a_{ij}$`, `$\kappa_\infty(A)$`, `$\lVert A\rVert_\infty$`, `$A^{-1}$`, `$\lambda_i(M)=\lambda_i(A)+\lambda$`, `$\dfrac{\lVert\Delta w\rVert}{\lVert w\rVert}$`. Nada de Unicode matemático (ᵀ, ᵢ, ‖, κ, λ sueltos). Las referencias de `referencias/` están en Unicode porque son anteriores a esta regla: de ellas se copia la estructura, no la notación.
-- Matrices y sistemas en bloque con `pmatrix` o `cases`; en línea, una matriz pequeña como `$\begin{pmatrix}1&2\\3&4\end{pmatrix}$`.
+- Matemáticas en **sintaxis Typst** dentro del Markdown, en todo el documento empezando por las preguntas: `$…$` en línea y `$$…$$` en bloque. Nada de LaTeX (`\frac`, `_{…}`, `\lambda`) ni de Unicode matemático suelto (ᵀ, ᵢ, ‖, κ, λ). Las referencias de `referencias/` están en Unicode porque son anteriores a esta regla: de ellas se copia la estructura, no la notación. El documento de la PEC1 (`metodos-numericos/R1/PEC1/preparacion-entrevista-PEC1.md`) ya está en Typst y sirve de ejemplo de notación.
+  - Separar con espacios las letras que se multiplican: `$X^T X$`, `$A w = b$`, `$v^T A v$`, `$A A^(-1)$`. `$Xw$` sería una variable llamada "Xw".
+  - Grupos con paréntesis, no llaves: `$a_(i j)$`, `$A^(-1)$`, `$sum_(k=1)^m$`. Un solo carácter va sin paréntesis: `$x_i$`, `$X^T$`, `$kappa_2$`, `$lambda_min$`.
+  - Tras un subíndice o superíndice de un carácter, dejar un espacio antes de `(`: `$lambda_i (M)$`. Sin él, Typst mete el `(M)` en el subíndice.
+  - Símbolos por nombre, sin barra: `lambda`, `kappa`, `Delta`, `epsilon`, `theta`, `alpha`, `oo` (∞), `dot` (·), `times`, `approx`, `<=`, `>=`, `!=`, `->`, `=>`, `<=>`, `>>`.
+  - Fracciones `$(a)/(b)$`; normas `$norm(A)_oo$`; raíces `$sqrt(x)$`; `$tilde(x)$`; `$bold(1)$`; operadores con nombre `$op("rg") (X)$`; texto `$w_"ridge"$`.
+  - Matrices `$mat(1, 2; 3, 4)$` (`,` separa columnas y `;` filas); sistemas `$$cases(x + y = 1, x - y = 0)$$`.
+  - Coma decimal `$0","167$`: con `$0,167$` Typst añade un espacio tras la coma. Llaves literales con barra: `$\{7, 1, 1\}$`.
+  - Si se puede, compilar las fórmulas para comprobarlas: `pip install typst` en un venv del scratchpad y `typst.compile(...)` sobre un `.typ` con cada fórmula.
 - Negrita para la idea clave de cada pregunta o paso, no para frases enteras. Sin emojis ni callouts.
 - Tamaño orientativo para una PEC de cuatro tareas: unas 400 líneas en modo normal y 250–300 en modo escueto. Que crezca por profundidad en lo difícil, no por relleno.

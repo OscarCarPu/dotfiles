@@ -1,0 +1,36 @@
+# Pandoc defaults: Markdown --> Typst/PDF, academic paper look
+# Usage: pandoc -d paper file.md -o file.pdf --pdf-engine=typst
+reader: markdown+lists_without_preceding_blankline
+to: typst
+standalone: true
+variables:
+  papersize: a4
+  margin:
+    x: 2.5cm
+    y: 2.5cm
+  fontsize: 11pt
+  mainfont: New Computer Modern
+  linestretch: 1.2
+  lang: es
+  region: ES
+  linkcolor: "000000"
+  header-includes:
+    - |
+      #set page(fill: white)
+      #set par(spacing: 1em)
+      #set list(marker: ([•], [◦]), indent: 1em)
+      #set enum(indent: 1em)
+      #show heading: set align(left)
+      #show heading.where(level: 1): it => block(width: 100%, above: 1.5em, below: 0.75em, {
+        text(size: 20.74pt, weight: "bold", it.body)
+        v(2pt); line(length: 100%, stroke: 0.4pt); v(2pt); line(length: 100%, stroke: 0.4pt)
+      })
+      #show heading.where(level: 2): it => block(width: 100%, above: 1.25em, below: 0.6em, {
+        text(size: 17.28pt, weight: "bold", it.body)
+        v(2pt); line(length: 100%, stroke: 0.4pt)
+      })
+      #show heading.where(level: 3): it => block(above: 1em, below: 0.5em, text(size: 12pt, weight: "bold", it.body))
+      #show heading.where(level: 4): it => block(above: 0.75em, below: 0.5em, text(size: 11pt, weight: "bold", it.body))
+filters:
+  - typst-math.lua
+citeproc: true

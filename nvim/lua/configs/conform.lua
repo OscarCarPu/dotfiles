@@ -5,6 +5,7 @@ local options = {
     kotlin = { "ktlint" },
     rust = { "rustfmt" },
     python = { "ruff_format" },
+    typst = { "typstyle" },
     sql = { "pg_format" },
     css = { "prettier" },
     html = { "prettier" },

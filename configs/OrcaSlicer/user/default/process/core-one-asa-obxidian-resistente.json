@@ -2,7 +2,7 @@
 	"avoid_crossing_perimeters": "0",
 	"brim_object_gap": "0",
 	"brim_type": "outer_only",
-	"brim_width": "8",
+	"brim_width": "12",
 	"compatible_printers": [
 		"core-one-obxidian"
 	],

@@ -1,0 +1,64 @@
+#!/bin/bash
+# Live Typst preview inside a kitty window: recompiles <file.typ> to PNGs whenever
+# it changes and draws ONE page, pinned to the pane (no scrolling), via the kitty
+# graphics protocol. Keys: k/space next page, j prev, g first, G last, q quit.
+
+typ="$1"
+[ -f "$typ" ] || { echo "Usage: typst-term-preview <file.typ>"; exit 1; }
+
+out="$(mktemp -d)"
+saved_tty="$(stty -g)"
+cleanup() { rm -rf "$out"; stty "$saved_tty"; printf '\e[?25h\e[?1049l'; }
+trap cleanup EXIT
+stty -icanon -echo
+printf '\e[?1049h\e[?25l'
+
+page=1
+last=""
+n=0
+err=""
+
+compile() {
+    rm -f "$out"/*.png
+    if typst compile --root "$(dirname "$typ")" --ppi 110 "$typ" "$out/{0p}.png" 2> "$out/err"; then
+        err=""
+    else
+        err="$(cat "$out/err")"
+    fi
+    n=$(ls "$out"/*.png 2>/dev/null | wc -l)
+}
+
+draw() {
+    local rows cols files
+    rows=$(tput lines); cols=$(tput cols)
+    [ "$page" -gt "$n" ] && page=$n
+    [ "$page" -lt 1 ] && page=1
+    printf '\e[H'
+    if [ -n "$err" ]; then
+        kitten icat --clear 2>/dev/null
+        printf '\e[2J\e[H%s' "$err"
+        return
+    fi
+    mapfile -t files < <(ls "$out"/*.png)
+    kitten icat --clear --place "${cols}x$((rows - 1))@0x0" --scale-up --align center "${files[$((page - 1))]}" 2>/dev/null
+    printf '\e[%d;1H\e[2K %d/%d  j/k prev/next  g/G first/last  q quit' "$rows" "$page" "$n"
+}
+
+while :; do
+    now="$(stat -c %Y.%y "$typ" 2>/dev/null)" || exit 0
+    if [ "$now" != "$last" ]; then
+        last="$now"
+        compile
+        draw
+    fi
+    if read -rsn1 -t 0.2 key; then
+        case "$key" in
+            k|' ') page=$((page + 1)) ;;
+            j) page=$((page - 1)) ;;
+            g) page=1 ;;
+            G) page=$n ;;
+            q) exit 0 ;;
+        esac
+        draw
+    fi
+done

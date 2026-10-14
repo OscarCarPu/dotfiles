@@ -42,6 +42,7 @@ Based on [NvChad v2.5](https://github.com/NvChad/NvChad) with the **oxocarbon** 
 | **conform.nvim** | Code formatting (stylua, gofumpt, ktlint, rustfmt, ruff) |
 | **nvim-lspconfig** | LSP support (HTML, CSS, Go, Rust, Kotlin, XML, Svelte, Python) |
 | **nvim-treesitter** | Syntax highlighting (vim, lua, vimdoc, html, css, go, rust, kotlin, java, xml, markdown, svelte, js, ts, python) |
+| **typst-preview.nvim** | Live browser preview for Typst (`<leader>mp`, needs `tinymist`; LSP `tinymist`, formatter `typstyle`) |
 | **nvim-surround** | Surround text with brackets, quotes, tags, etc. |
 
 ## Editor Settings
@@ -90,3 +91,18 @@ Based on [NvChad v2.5](https://github.com/NvChad/NvChad) with the **oxocarbon** 
 ## File Explorer
 
 nvim-tree opens automatically on startup and can be toggled with `Space + e`.
+
+## Markdown → Typst
+
+Markdown is rendered through Typst, never LaTeX: `pandoc -d paper` (defaults in
+`configs/pandoc/paper.yaml`, math filter `typst-math.lua`) turns the buffer into a
+hidden `.name.preview.typ`, previewed with `tinymist`. `$...$` is **Typst math**
+(`a_(i j)`, `times`, `sum_(k = 1)^m`).
+
+| Key (markdown buffer) | Action |
+|---|---|
+| `<leader>mp` | live preview in a new browser window, updates as you type; compile errors show as a warning |
+| `<leader>mt` | live preview in a kitty split beside the editor (`typst-term-preview`: one pinned page, `k` next page, `j` previous, `g`/`G` first/last; needs kitty restarted once for remote control) |
+| `<leader>me` | export `name.pdf` next to the note |
+
+Raw Typst goes in a ```` ```{=typst} ```` block. Math and those blocks are tinted in the buffer.

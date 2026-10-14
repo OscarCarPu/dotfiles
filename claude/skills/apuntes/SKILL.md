@@ -50,7 +50,15 @@ Se omiten: introducción del módulo, autoría, leyendas de figuras y bibliograf
 - `>` (cita simple) para la frase clave o la idea importante del PDF, como mucho una por sección. Sin callouts `> [!note]`.
 - *Cursiva* para términos en inglés: *dataset*, *join*, *logs*.
 - Español con tildes.
-- Matemáticas en LaTeX (latex-suite): `$…$` en línea y `$$…$$` en bloque; `\operatorname{rg}`, `\iff`, `\Rightarrow`.
+- Matemáticas en **sintaxis Typst**: `$…$` en línea y `$$…$$` en bloque; `$op("rg") (A)$`, `<=>`, `=>`. Los apuntes antiguos están en LaTeX: no convertirlos salvo que el usuario lo pida, y al continuar uno de ellos escribir lo nuevo en Typst.
+  - Separar con espacios las letras que se multiplican: `$X^T X$`, `$A w = b$`, `$v^T A v$`, `$A A^(-1)$`. `$Xw$` sería una variable llamada "Xw".
+  - Grupos con paréntesis, no llaves: `$a_(i j)$`, `$A^(-1)$`, `$sum_(k=1)^m$`. Un solo carácter va sin paréntesis: `$x_i$`, `$X^T$`, `$kappa_2$`, `$lambda_min$`.
+  - Tras un subíndice o superíndice de un carácter, dejar un espacio antes de `(`: `$lambda_i (M)$`. Sin él, Typst mete el `(M)` en el subíndice.
+  - Símbolos por nombre, sin barra: `lambda`, `kappa`, `Delta`, `epsilon`, `theta`, `alpha`, `oo` (∞), `dot` (·), `times`, `approx`, `<=`, `>=`, `!=`, `->`, `=>`, `<=>`, `>>`.
+  - Fracciones `$(a)/(b)$`; normas `$norm(A)_oo$`; raíces `$sqrt(x)$`; `$tilde(x)$`; `$bold(1)$`; operadores con nombre `$op("rg") (X)$`; texto `$w_"ridge"$`.
+  - Matrices `$mat(1, 2; 3, 4)$` (`,` separa columnas y `;` filas); sistemas `$$cases(x + y = 1, x - y = 0)$$`.
+  - Coma decimal `$0","167$`: con `$0,167$` Typst añade un espacio tras la coma. Llaves literales con barra: `$\{7, 1, 1\}$`.
+  - Si se puede, compilar las fórmulas para comprobarlas: `pip install typst` en un venv del scratchpad y `typst.compile(...)` sobre un `.typ` con cada fórmula.
 - Código en bloques con lenguaje (```` ```r ````, ```` ```python ````), con comentarios breves en línea; para las funciones, una tabla `operación | código`.
 - Diagramas, solo si ayudan, en ```` ```mermaid ````.
 
@@ -80,4 +88,4 @@ Un **modelo de datos** determina la manera en la que se organizan y estructuran 
 - **Proyección**: recupera solo ciertos campos → **todas** las filas de las columnas elegidas
 ```
 
-Referencias de estilo del usuario: `~/edu/data-science-degree/tipologia-fuentes-datos/R1/apuntes/` y `~/edu/data-science-degree/metodos-numericos/R1/apuntes/Metodos numéricos en álgebra lineal.md` (para apuntes con matemáticas).
+Referencias de estilo del usuario: `~/edu/data-science-degree/tipologia-fuentes-datos/R1/apuntes/` y `~/edu/data-science-degree/metodos-numericos/R1/apuntes/Metodos numéricos en álgebra lineal.md` (para apuntes con matemáticas; de ellos se copia el estilo, no la notación, que está en LaTeX).

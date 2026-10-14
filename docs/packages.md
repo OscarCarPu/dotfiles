@@ -236,6 +236,8 @@ unmounts all, right-click opens Thunar.
 - `rstudio-desktop-bin` (AUR) — R IDE
 - `pandoc-cli` — Markdown → PDF converter; the `pandoc` binary Zettlr's export
   and `jupyter-nbconvert --to pdf` shell out to
+- `typst`, `tinymist`, `typstyle` — Typst compiler, its LSP/live-preview backend, and
+  formatter. Typst embeds New Computer Modern, so no font package is needed
 - `texlive-basic`, `texlive-latex`, `texlive-latexrecommended`,
   `texlive-latexextra`, `texlive-fontsrecommended`, `texlive-xetex`,
   `texlive-plaingeneric`, `texlive-langspanish` — the LaTeX toolchain behind

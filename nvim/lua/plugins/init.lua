@@ -34,6 +34,7 @@ return {
         "java",
         "xml",
         "markdown",
+        "typst",
         "svelte",
         "javascript",
         "typescript",
@@ -145,4 +146,12 @@ return {
     },
   },
 
+  -- Typst live preview (browser, updates as you type)
+  {
+    "chomosuke/typst-preview.nvim",
+    ft = "typst",
+    opts = {
+      dependencies_bin = { tinymist = "tinymist" },
+    },
+  },
 }

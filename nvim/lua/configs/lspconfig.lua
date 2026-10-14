@@ -7,7 +7,7 @@ require "configs.xml"
 require "configs.python"
 require "configs.svelte"
 
-local servers = { "html", "cssls", "ts_ls", "gopls", "rust_analyzer", "kotlin_ls", "lemminx", "svelte", "pyright" }
+local servers = { "html", "cssls", "ts_ls", "gopls", "rust_analyzer", "kotlin_ls", "lemminx", "svelte", "pyright", "tinymist" }
 vim.lsp.enable(servers)
 
 -- read :h vim.lsp.config for changing options of lsp servers
