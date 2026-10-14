@@ -7,6 +7,8 @@ description: Hacer o continuar apuntes en Markdown a partir de los PDF de teorí
 
 Los apuntes son **esquemas concisos** para estudiar, no una transcripción del PDF. Ante la duda, quitar.
 
+**Nunca escribir en los archivos de apuntes.** El usuario los edita él mismo (nvim, Typst): el contenido se le entrega **en el chat**, en un bloque de código, y él lo pega. Solo se lee la nota (y el PDF); no usar Edit/Write sobre `apuntes/` aunque pida "escribe" o "continúa", salvo que diga expresamente que lo escriba tú.
+
 ## Dónde está cada cosa
 
 ```
@@ -26,7 +28,7 @@ Los apuntes son **esquemas concisos** para estudiar, no una transcripción del P
 1. **Leer la nota existente** antes de nada. Si el usuario ya ha empezado una sección, continuar desde ahí respetando lo que ha escrito; no reescribir su texto salvo que pida igualar o resumir.
 2. Extraer el PDF: `pdftotext -layout teoria/X.pdf <scratchpad>/x.txt`. El índice del principio da la jerarquía de secciones.
 3. Si una figura aporta contenido (tablas, comparativas, ejemplos de operaciones), renderizar esa página y mirarla: `pdftoppm -r 80 -f N -l N -png X.pdf <scratchpad>/pg`.
-4. Escribir **una sección del PDF cada vez** cuando el usuario va por partes ("siguiente", "continúa" = la siguiente sección del índice).
+4. Entregar en el chat **una sección del PDF cada vez** cuando el usuario va por partes ("siguiente", "continúa" = la siguiente sección del índice).
 5. Antes de escribir, mirar otro apunte de la misma asignatura para igualar el estilo.
 
 ## Jerarquía
@@ -47,7 +49,12 @@ Se omiten: introducción del módulo, autoría, leyendas de figuras y bibliograf
 - `→` para consecuencias o resultados: `recupera solo ciertos campos → todas las filas`.
 - Listas `1)` para clasificaciones numeradas del PDF o pasos de un proceso.
 - **Tablas** solo cuando el tema es tabular de verdad: una tabla del propio PDF, una comparación de 3 o más elementos en varias dimensiones (DIKW, niveles de modelado) u operaciones con su comando/fórmula. Nunca una tabla que repita lo que ya dicen los bullets.
-- `>` (cita simple) para la frase clave o la idea importante del PDF, como mucho una por sección. Sin callouts `> [!note]`.
+- **Nota** con `::: nota` … `:::` (en lugar de `>`): raro. Solo para una frase que el PDF destaca como definición o regla central y que no cabe como bullet; por defecto, ninguna. Nunca para resumir o cerrar una sección. Sin callouts `> [!note]` ni citas `>`.
+  ```
+  ::: nota
+  Texto de la nota
+  :::
+  ```
 - *Cursiva* para términos en inglés: *dataset*, *join*, *logs*.
 - Español con tildes.
 - Matemáticas en **sintaxis Typst**: `$…$` en línea y `$$…$$` en bloque; `$op("rg") (A)$`, `<=>`, `=>`. Los apuntes antiguos están en LaTeX: no convertirlos salvo que el usuario lo pida, y al continuar uno de ellos escribir lo nuevo en Typst.
