@@ -27,3 +27,20 @@ vim.api.nvim_create_autocmd("User", {
     end
   end,
 })
+
+-- PDFs are not text: show them in a kitty split (pdf-term-view) instead of a binary buffer
+vim.api.nvim_create_autocmd("BufReadCmd", {
+  pattern = "*.pdf",
+  callback = function(args)
+    local pdf = vim.fn.fnamemodify(args.file, ":p")
+    local to = vim.env.KITTY_LISTEN_ON
+    if to and to ~= "" then
+      vim.system { "kitten", "@", "--to", to, "launch", "--location=vsplit", "--keep-focus", "pdf-term-view", pdf }
+    else
+      vim.fn.jobstart { "kitty", "--class", "pdf-view", "pdf-term-view", pdf }
+    end
+    vim.bo[args.buf].buftype = "nofile"
+    vim.bo[args.buf].modifiable = false
+    vim.api.nvim_buf_set_lines(args.buf, 0, -1, false, { "PDF opened in viewer: " .. pdf })
+  end,
+})

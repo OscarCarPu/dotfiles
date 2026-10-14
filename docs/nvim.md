@@ -106,3 +106,9 @@ hidden `.name.preview.typ`, previewed with `tinymist`. `$...$` is **Typst math**
 | `<leader>me` | export `name.pdf` next to the note |
 
 Raw Typst goes in a ```` ```{=typst} ```` block. Math and those blocks are tinted in the buffer.
+
+## PDFs
+
+Opening a `*.pdf` (`nvim file.pdf`, `:e`, the file tree) shows it in a kitty split via
+`pdf-term-view` (`poppler`'s `pdftoppm`/`pdfinfo` + the kitty graphics protocol): one pinned
+page, `k`/space next, `j` previous, `g`/`G` first/last, `q` quit; it reloads when the file changes.
