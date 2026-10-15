@@ -215,6 +215,7 @@ unmounts all, right-click opens Thunar.
 
 - `ttf-cascadia-code-nerd`
 - `ttf-firacode-nerd`
+- `otf-latin-modern` — Latin Modern Roman for the Zettlr editor (`configs/zettlr/custom.css`)
 
 ## Editor / dev
 
