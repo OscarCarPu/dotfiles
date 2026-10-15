@@ -9,6 +9,7 @@ local dir = vim.fn.expand "%:p:h"
 local base = vim.fn.expand "%:t:r"
 local typ = string.format("%s/.%s.preview.typ", dir, base)
 local server, timer, last_error, view_buf
+local tdf_key = "mdpreview-" .. buf
 
 local function free_port()
   local sock = vim.uv.new_tcp()
@@ -65,12 +66,20 @@ local function alnum(str)
   return str:lower():gsub("[^%w\128-\255]", "")
 end
 
+local hay_stamp, hay_cache -- the PDF's text, per version of the file (the cursor moves far more often than it changes)
+
 local function cursor_page()
-  local r = vim.system({ "pdftotext", pdf, "-" }):wait()
-  local pages = vim.split(r.stdout or "", "\f", { plain = true })
-  if pages[#pages] == "" then table.remove(pages) end
+  local st = vim.uv.fs_stat(pdf)
+  local stamp = st and (st.mtime.sec .. "." .. st.mtime.nsec)
+  if stamp ~= hay_stamp or not hay_cache then
+    local r = vim.system({ "pdftotext", pdf, "-" }):wait()
+    local pages = vim.split(r.stdout or "", "\f", { plain = true })
+    if pages[#pages] == "" then table.remove(pages) end
+    hay_stamp, hay_cache = stamp, vim.tbl_map(alnum, pages)
+  end
+  local hay = hay_cache
+  local pages = hay
   if #pages == 0 then return 1 end
-  local hay = vim.tbl_map(alnum, pages)
   local lines = vim.api.nvim_buf_get_lines(buf, 0, -1, false)
   local row = vim.api.nvim_win_get_cursor(vim.fn.bufwinid(buf) > 0 and vim.fn.bufwinid(buf) or 0)[1]
   for d = 0, 12 do
@@ -109,6 +118,11 @@ local function render(done)
             os.rename(pdf_tmp, pdf)
             if view_buf and vim.api.nvim_buf_is_valid(view_buf) then
               require("pdfview").refresh(view_buf, cursor_page())
+            else
+              -- tdf reloads by itself a moment after the file changes: let it, then point it at the cursor
+              vim.defer_fn(function()
+                if server then require("tdfview").goto_page(tdf_key, cursor_page()) end
+              end, 400)
             end
             vim.diagnostic.reset(ns, buf)
             last_error = nil
@@ -136,6 +150,7 @@ local function stop()
     view_buf = nil
     if vim.api.nvim_buf_is_valid(vb) then vim.api.nvim_buf_delete(vb, { force = true }) end
   end
+  require("tdfview").close(tdf_key)
   os.remove(typ)
   os.remove(tmp)
   os.remove(pdf)
@@ -193,6 +208,10 @@ local function show_preview()
 end
 
 local function launch_terminal()
+  local tdf = require "tdfview"
+  if tdf.available() then
+    return tdf.open(pdf, { key = tdf_key, keep_focus = true })
+  end
   view_buf = vim.api.nvim_create_buf(true, true)
   vim.api.nvim_buf_set_name(view_buf, base .. " (preview)")
   require("pdfview").attach(view_buf, pdf)
@@ -224,6 +243,18 @@ local function start(mode)
       timer:start(150, 0, vim.schedule_wrap(render))
     end,
   })
+  -- moving the cursor (without editing) makes tdf follow too
+  local follow = vim.uv.new_timer()
+  vim.api.nvim_create_autocmd({ "CursorMoved", "CursorMovedI" }, {
+    group = "MdPreview" .. buf,
+    buffer = buf,
+    callback = function()
+      follow:stop()
+      follow:start(250, 0, vim.schedule_wrap(function()
+        if server and not busy then require("tdfview").goto_page(tdf_key, cursor_page()) end
+      end))
+    end,
+  })
   vim.api.nvim_create_autocmd({ "BufUnload", "VimLeavePre" }, { group = "MdPreview" .. buf, callback = stop })
 end
 
@@ -232,10 +263,12 @@ vim.keymap.set("n", "<leader>mp", function()
 end, { desc = "Markdown: live Typst preview (browser window)", buffer = true })
 
 vim.keymap.set("n", "<leader>mt", function()
-  if server and view_buf and vim.fn.bufwinid(view_buf) < 0 then show_preview()
+  local tdf = require "tdfview"
+  if server and tdf.available() and not tdf.alive(tdf_key) then launch_terminal()
+  elseif server and view_buf and vim.fn.bufwinid(view_buf) < 0 then show_preview()
   elseif server then stop()
   else start "terminal" end
-end, { desc = "Markdown: live Typst preview (buffer in a split)", buffer = true })
+end, { desc = "Markdown: live Typst preview (tdf split, or a buffer outside kitty)", buffer = true })
 
 vim.keymap.set("n", "<leader>me", function()
   local pdf = string.format("%s/%s.pdf", dir, base)

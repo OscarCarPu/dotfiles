@@ -28,10 +28,16 @@ vim.api.nvim_create_autocmd("User", {
   end,
 })
 
--- PDFs are not text: draw them in a buffer (pdfview) instead of a binary one
+-- PDFs are not text: open them in tdf (a kitty split) when possible, else draw them in a buffer
+-- (pdfview) instead of a binary one
 vim.api.nvim_create_autocmd("BufReadCmd", {
   pattern = "*.pdf",
   callback = function(args)
-    require("pdfview").attach(args.buf, args.file)
+    local tdf = require "tdfview"
+    if not tdf.available() then return require("pdfview").attach(args.buf, args.file) end
+    tdf.open(args.file)
+    vim.schedule(function()
+      if vim.api.nvim_buf_is_valid(args.buf) then vim.api.nvim_buf_delete(args.buf, { force = true }) end
+    end)
   end,
 })

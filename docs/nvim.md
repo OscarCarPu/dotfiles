@@ -113,13 +113,36 @@ Raw Typst goes in a ```` ```{=typst} ```` block. Math and those blocks are tinte
 
 ## PDFs
 
+Inside kitty (with `tdf` installed) opening a `*.pdf` (`nvim file.pdf`, `:e`, the file tree) launches
+[`tdf`](https://github.com/itsjunetime/tdf) in a kitty split to the right of nvim
+(`lua/tdfview.lua`, via `kitten @ launch`; kitty remote control and the `splits` layout are set in
+`kitty/kitty.conf`). tdf does the rendering, search and page keys itself (`?` inside it lists them);
+it reloads whenever the file changes. The split is closed when nvim exits. Opening a PDF that is
+already shown just focuses its split.
+
+The `<leader>mt` Markdown preview works the same way: the note is compiled to a hidden PDF as you type
+and tdf shows it (the split opens without taking focus; press `<leader>mt` again to close it, or to
+reopen it if you closed it with `q`). tdf has no way to be told where to go, so nvim reads its page
+counter and types `g<page>` into it: after each render and a moment after the cursor moves, tdf is
+taken to the page holding the text around the cursor (page precision only, matched by text).
+
+Outside kitty, or without `tdf`, PDFs fall back to a built-in viewer in an ordinary buffer
+(`lua/pdfview.lua`).
+
+### Built-in viewer (fallback)
+
 Opening a `*.pdf` (`nvim file.pdf`, `:e`, the file tree) shows it in a normal buffer
-(`lua/pdfview.lua`): `pdftoppm` rasterises one page, drawn by `snacks.nvim`'s image module (kitty
+(`lua/pdfview.lua`): the whole document is one vertical strip, scrolled smoothly (pages follow one
+another with a small gap). Each frame is the visible slice: `pdftoppm` renders only the cropped part
+of every page in view, `magick` stacks them, and `snacks.nvim`'s image module draws the result (kitty
 graphics protocol, needs `imagemagick`/`poppler`). It lives in the tabufline, opens in the window
-the file tree targets and is centred; neighbouring pages are pre-rendered so paging is instant.
-Keys: `k`/`<PageDown>`/scroll wheel next page, `j`/`<PageUp>` previous,
-`gg`/`G` first/last, `+`/`-`/`<C-ScrollWheel>` zoom, `0` fit page, arrows or `h`/`l` pan while zoomed,
-`q` close. The page number (and zoom) is in the window bar. It reloads when the file changes.
+the file tree targets and reloads when the file changes.
+Keys: `k`/`<Down>`/scroll wheel scroll down, `j`/`<Up>` up (a tenth of the window),
+`<PageDown>`/`<C-f>` and `<PageUp>`/`<C-b>` a screen, `<C-d>`/`<C-u>` half a screen,
+`gg`/`G` top/bottom, `+`/`-`/`<C-ScrollWheel>` zoom around the middle of the window (scrolling keeps
+working at that size), `0` fit width, `h`/`l`/arrows left-right pan while zoomed, `q` close.
+The page in the middle of the window (and zoom) is in the window bar. In the `<leader>mt` preview
+the view only jumps when the text you edit is on another page.
 
 Search and links (also in the `<leader>mt` preview): `/` searches the text (case-insensitive,
 `pdftotext -bbox`), highlights every hit on the page, `n`/`N` next/previous hit, `<Esc>` clears;

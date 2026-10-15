@@ -239,6 +239,8 @@ unmounts all, right-click opens Thunar.
   and `jupyter-nbconvert --to pdf` shell out to
 - `typst`, `tinymist`, `typstyle` — Typst compiler, its LSP/live-preview backend, and
   formatter. Typst embeds New Computer Modern, so no font package is needed
+- `tdf` — terminal PDF viewer (kitty graphics, search, links); nvim opens PDFs and the
+  Markdown preview in it (`lua/tdfview.lua`), falling back to its own viewer without it
 - `qpdf` — reads a PDF's link annotations and destinations as JSON; nvim's PDF
   viewer (`lua/pdfview.lua`) uses it to make index/cross-reference links clickable
 - `texlive-basic`, `texlive-latex`, `texlive-latexrecommended`,
