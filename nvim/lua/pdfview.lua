@@ -1,34 +1,39 @@
--- PDF viewer in an ordinary buffer: the whole document as one vertical strip, scrolled smoothly.
--- Each frame is the visible slice of the strip (pdftoppm renders only the cropped part of every
--- page in view, magick stacks them) drawn by snacks.image (kitty graphics protocol). Being a
--- buffer, it shows up in the tabufline, opens in whatever window nvim-tree targets and reloads on change.
--- Document coordinates are in pt (1 pt = `scale` pixels): zoom 1 fits the widest page to the window.
+-- PDF viewer in an ordinary buffer. Every page is an image transmitted to kitty once and drawn
+-- through unicode placeholders (the technique snacks.image and image.nvim use): the buffer holds
+-- one line per terminal row of the page, so nvim itself scrolls, clips and pans it, instantly.
+-- Pages near the window are rasterised ahead by a few parallel pdftoppm jobs (a quick low-res
+-- pass first, then the sharp one), far pages are dropped again.
 local M = {}
+
+---@class pdfview.Page
+---@field level number 0 nothing drawn, 1 low-res, 2 sharp
+---@field busy? boolean
+---@field failed? string version of the PDF that could not be rendered
+---@field img? snacks.Image
+---@field png? string
+---@field mtime? string version of the PDF drawn
+---@field hlkey number search-highlight version drawn (0 = none)
 
 ---@class pdfview.View
 ---@field pdf string
----@field page number page under the middle of the window
+---@field page number page in the middle of the window
 ---@field n number
 ---@field mtime? string
 ---@field sizes table<number, number[]> page sizes in pt
----@field offs number[] top of each page in the strip (pt)
 ---@field maxw number widest page (pt)
----@field total number strip height (pt)
----@field zoom number 1 = widest page fits the window width
----@field sx number left edge of the window (pt), only meaningful when the strip is wider than the window
----@field sy number top edge of the window (pt)
----@field place? table current snacks placement
----@field stale table[] placements waiting to be closed once the current one is drawn
----@field frames string[] png files of the latest frames
----@field bands table<string, string> cached page bands: key -> png
----@field band_order string[] LRU order of `bands`
----@field inflight table<string, function[]>
----@field prefetching? boolean
----@field dir number direction of the last scroll (1 down, -1 up)
----@field prev_sy number
+---@field zoom number 1 = widest page as wide as the window
+---@field lay? table[] per page {row, rows, cols, pad} in terminal cells, row 0-based
+---@field cols_max number strip width in cells
+---@field scale number px per pt at the current layout
+---@field total_rows number
+---@field W number window width the layout was made for
+---@field left number blank cells left of the strip when it is narrower than the window
+---@field cw number
+---@field ch number
+---@field pages table<number, pdfview.Page>
+---@field gen number bumped on every layout change (drops stale async results)
+---@field jobs number
 ---@field seq number
----@field drawing? boolean
----@field redo? boolean
 ---@field epoch number bumped whenever the file changes on disk (drops stale async results)
 ---@field words? table<number, table[]> per page: {x0, y0, x1, y1, text} in pt, origin top-left
 ---@field links? table<number, table[]> per page: {x0, y0, x1, y1, page?, y?, uri?}
@@ -37,6 +42,7 @@ local M = {}
 ---@field hits table[] {page, rects}
 ---@field cur number index into hits
 ---@field by_page table<number, table[]> highlight rects per page {rects, cur}
+---@field hlver number
 ---@field back table[] positions to return to after following a link
 ---@field timer? uv_timer_t
 local views = {} ---@type table<number, pdfview.View>
@@ -44,9 +50,29 @@ local views = {} ---@type table<number, pdfview.View>
 -- cache, so a path reused by another session would be drawn with the wrong size
 local dir = string.format("%s/pdfview/%d", vim.fn.stdpath "cache", vim.fn.getpid())
 vim.api.nvim_create_autocmd("VimLeavePre", { callback = function() vim.fn.delete(dir, "rf") end })
-local ZOOM_STEP, ZOOM_MIN, ZOOM_MAX = 1.25, 0.25, 8
-local GAP = 10 -- pt between pages
-local BG = "#303030"
+
+local ZOOM_STEP, ZOOM_MIN = 1.25, 0.25
+local MAXCELLS = 297 -- the placeholder protocol numbers rows and columns with 297 diacritics
+local GAP = 1 -- blank rows between pages
+local NEAR, FAR = 2, 6 -- pages beyond the window drawn sharp / at low resolution
+local JOBS = 3 -- parallel pdftoppm processes
+local LOW = 0.3 -- resolution of the quick first pass
+local PLACEHOLDER = vim.fn.nr2char(0x10EEEE)
+local ns = vim.api.nvim_create_namespace "pdfview"
+local WINOPTS = {
+  number = false, relativenumber = false, cursorline = false, signcolumn = "no", wrap = false, list = false,
+  scrolloff = 0, sidescrolloff = 0, foldcolumn = "0", statuscolumn = "", colorcolumn = "", spell = false,
+  winbar = "%=%{get(b:, 'pdfview_status', '')} ",
+}
+local diacritics = vim.split("0305,030D,030E,0310,0312,033D,033E,033F,0346,034A,034B,034C,0350,0351,0352,0357,035B,0363,0364,0365,0366,0367,0368,0369,036A,036B,036C,036D,036E,036F,0483,0484,0485,0486,0487,0592,0593,0594,0595,0597,0598,0599,059C,059D,059E,059F,05A0,05A1,05A8,05A9,05AB,05AC,05AF,05C4,0610,0611,0612,0613,0614,0615,0616,0617,0657,0658,0659,065A,065B,065D,065E,06D6,06D7,06D8,06D9,06DA,06DB,06DC,06DF,06E0,06E1,06E2,06E4,06E7,06E8,06EB,06EC,0730,0732,0733,0735,0736,073A,073D,073F,0740,0741,0743,0745,0747,0749,074A,07EB,07EC,07ED,07EE,07EF,07F0,07F1,07F3,0816,0817,0818,0819,081B,081C,081D,081E,081F,0820,0821,0822,0823,0825,0826,0827,0829,082A,082B,082C,082D,0951,0953,0954,0F82,0F83,0F86,0F87,135D,135E,135F,17DD,193A,1A17,1A75,1A76,1A77,1A78,1A79,1A7A,1A7B,1A7C,1B6B,1B6D,1B6E,1B6F,1B70,1B71,1B72,1B73,1CD0,1CD1,1CD2,1CDA,1CDB,1CE0,1DC0,1DC1,1DC3,1DC4,1DC5,1DC6,1DC7,1DC8,1DC9,1DCB,1DCC,1DD1,1DD2,1DD3,1DD4,1DD5,1DD6,1DD7,1DD8,1DD9,1DDA,1DDB,1DDC,1DDD,1DDE,1DDF,1DE0,1DE1,1DE2,1DE3,1DE4,1DE5,1DE6,1DFE,20D0,20D1,20D4,20D5,20D6,20D7,20DB,20DC,20E1,20E7,20E9,20F0,2CEF,2CF0,2CF1,2DE0,2DE1,2DE2,2DE3,2DE4,2DE5,2DE6,2DE7,2DE8,2DE9,2DEA,2DEB,2DEC,2DED,2DEE,2DEF,2DF0,2DF1,2DF2,2DF3,2DF4,2DF5,2DF6,2DF7,2DF8,2DF9,2DFA,2DFB,2DFC,2DFD,2DFE,2DFF,A66F,A67C,A67D,A6F0,A6F1,A8E0,A8E1,A8E2,A8E3,A8E4,A8E5,A8E6,A8E7,A8E8,A8E9,A8EA,A8EB,A8EC,A8ED,A8EE,A8EF,A8F0,A8F1,AAB0,AAB2,AAB3,AAB7,AAB8,AABE,AABF,AAC1,FE20,FE21,FE22,FE23,FE24,FE25,FE26,10A0F,10A38,1D185,1D186,1D187,1D188,1D189,1D1AA,1D1AB,1D1AC,1D1AD,1D242,1D243,1D244", ",")
+local positions = setmetatable({}, {
+  __index = function(t, k)
+    t[k] = vim.fn.nr2char(tonumber(diacritics[k], 16))
+    return t[k]
+  end,
+})
+
+local pump, relayout
 
 local function stamp(pdf)
   local st = vim.uv.fs_stat(pdf)
@@ -65,26 +91,108 @@ local function read_info(v)
   for page, w, h in out:gmatch "Page%s+(%d+)%s+size:%s+([%d.]+) x ([%d.]+)" do
     v.sizes[tonumber(page)] = { tonumber(w), tonumber(h) }
   end
-  v.offs, v.maxw = {}, 1
-  local y = 0
-  for i = 1, v.n do
-    local s = size_of(v, i)
-    v.offs[i] = y
-    y = y + s[2] + GAP
-    v.maxw = math.max(v.maxw, s[1])
-  end
-  v.total = y - GAP
+  v.maxw = 1
+  for i = 1, v.n do v.maxw = math.max(v.maxw, size_of(v, i)[1]) end
 end
 
-local function page_at(v, y)
-  for i = v.n, 1, -1 do
-    if v.offs[i] <= y then return i end
+local function win_of(buf)
+  local win = vim.fn.bufwinid(buf)
+  return win >= 0 and win or nil
+end
+
+local function win_cols(win)
+  return vim.api.nvim_win_get_width(win) - vim.fn.getwininfo(win)[1].textoff
+end
+
+local function cell_size()
+  local t = Snacks.image.terminal.size()
+  return t.cell_width, t.cell_height
+end
+
+local function setlines(buf, first, last, lines)
+  vim.bo[buf].modifiable = true
+  vim.api.nvim_buf_set_lines(buf, first, last, false, lines)
+  vim.bo[buf].modifiable = false
+end
+
+--- Page positions in terminal cells for a window `W` cells wide.
+local function build_layout(v, W, cw, ch)
+  local cols_max = math.max(1, math.min(MAXCELLS, math.floor(W * v.zoom + 0.5)))
+  local scale = cols_max * cw / v.maxw
+  local left = math.max(0, math.floor((W - cols_max) / 2))
+  local lay, row = {}, 0
+  for i = 1, v.n do
+    local s = size_of(v, i)
+    local cols = math.max(1, math.min(cols_max, math.floor(s[1] * scale / cw + 0.5)))
+    local rows = math.max(1, math.min(MAXCELLS, math.floor(s[2] * scale / ch + 0.5)))
+    lay[i] = { row = row, rows = rows, cols = cols, pad = left + math.floor((cols_max - cols) / 2) }
+    row = row + rows + GAP
   end
-  return 1
+  return { lay = lay, cols_max = cols_max, scale = scale, total_rows = row - GAP, W = W, cw = cw, ch = ch, left = left }
+end
+
+local function same_layout(a, b)
+  if not a or #a.lay ~= #b.lay or a.W ~= b.W or a.cw ~= b.cw or a.ch ~= b.ch then return false end
+  for i, l in ipairs(a.lay) do
+    local m = b.lay[i]
+    if l.row ~= m.row or l.rows ~= m.rows or l.cols ~= m.cols or l.pad ~= m.pad then return false end
+  end
+  return true
+end
+
+local function page_at_row(v, row)
+  local lo, hi = 1, v.n
+  while lo < hi do
+    local mid = math.ceil((lo + hi) / 2)
+    if v.lay[mid].row <= row then lo = mid else hi = mid - 1 end
+  end
+  return lo
+end
+
+local function top_bot(win)
+  return vim.fn.line("w0", win), vim.fn.line("w$", win)
+end
+
+local function leftcol(win)
+  return vim.api.nvim_win_call(win, function() return vim.fn.winsaveview().leftcol end)
+end
+
+--- The document point in the middle of the window: page, fraction down the page, fraction across the strip.
+local function get_anchor(v, win)
+  local top, bot = top_bot(win)
+  local row = (top + bot) / 2 - 1
+  local p = page_at_row(v, row)
+  local L = v.lay[p]
+  return {
+    page = p,
+    fy = math.max(0, math.min(1, (row - L.row) / L.rows)),
+    fx = (leftcol(win) + win_cols(win) / 2) / v.cols_max,
+  }
+end
+
+--- Put `row` (0-based) at `frac` of the window height (and optionally `col`, a cell, in the middle).
+local function scroll_to(v, win, row, frac, col)
+  local h = vim.api.nvim_win_get_height(win)
+  local top = math.max(1, math.min(math.floor(row - h * frac + 1.5), math.max(1, v.total_rows - h + 1)))
+  local view = { topline = top, lnum = math.min(v.total_rows, top + math.floor(h / 2)) }
+  if col then
+    view.leftcol = math.max(0, math.floor(col - win_cols(win) / 2))
+    view.col = view.leftcol
+  end
+  vim.api.nvim_win_call(win, function() vim.fn.winrestview(view) end)
+end
+
+local function set_anchor(v, win, a)
+  local L = v.lay[math.min(a.page, v.n)]
+  scroll_to(v, win, L.row + a.fy * L.rows, 0.5, a.fx * v.cols_max)
 end
 
 local function set_status(buf)
   local v = views[buf]
+  local win = win_of(buf)
+  if not win or not v.lay then return end
+  local top, bot = top_bot(win)
+  v.page = page_at_row(v, math.floor((top + bot) / 2) - 1)
   local zoom = v.zoom ~= 1 and string.format("  %d%%", v.zoom * 100) or ""
   local find = ""
   if v.query then
@@ -94,380 +202,264 @@ local function set_status(buf)
   vim.cmd.redrawstatus()
 end
 
-local function clear_frames(v)
-  for _, f in ipairs(v.frames) do os.remove(f) end
-  v.frames = {}
+local function hl_for(v, page)
+  return v.by_page[page] and v.hlver or 0
 end
 
-local function close_all(list)
-  for _, p in ipairs(list) do p:close() end
-end
-
---- Window pixels of the window showing `buf`, or nil when it is hidden.
-local function viewport(buf)
-  local win = vim.fn.bufwinid(buf)
-  if win < 0 then return end
-  local t = Snacks.image.terminal.size()
-  return win, vim.api.nvim_win_get_width(win) * t.cell_width, vim.api.nvim_win_get_height(win) * t.cell_height
-end
-
---- Clamp the scroll position and return the scale (px per pt), the window size (pt) and its left edge.
-local function geometry(v, wpx, hpx)
-  local scale = wpx / v.maxw * v.zoom
-  local vw, vh = wpx / scale, hpx / scale
-  v.sy = math.max(0, math.min(v.sy, v.total - vh))
-  local sx
-  if vw >= v.maxw then
-    sx = -(vw - v.maxw) / 2
-  else
-    v.sx = math.max(0, math.min(v.sx, v.maxw - vw))
-    sx = v.sx
+--- Free a page's image and blank its rows.
+local function clear_page(v, buf, page)
+  local st = v.pages[page]
+  local L = v.lay[page]
+  if not st or st.level == 0 then return end
+  if st.img then Snacks.image.terminal.request { a = "d", d = "I", i = st.img.id } end
+  if st.png then os.remove(st.png) end
+  v.pages[page] = { level = 0, hlkey = 0 }
+  if vim.api.nvim_buf_is_valid(buf) then
+    pcall(vim.api.nvim_buf_del_extmark, buf, ns, page)
+    local blank = string.rep(" ", v.left + v.cols_max)
+    setlines(buf, L.row, L.row + L.rows, vim.fn["repeat"]({ blank }, L.rows))
   end
-  return scale, vw, vh, sx
 end
 
---- Window size in pt (nil when hidden).
-local function view_pt(buf)
-  local v = views[buf]
-  local win, wpx, hpx = viewport(buf)
-  if not win then return end
-  local _, vw, vh = geometry(v, wpx, hpx)
-  return vw, vh
-end
-
--- Pages are rasterised once into full-width bands one window tall (cached, evicted LRU) and a
--- frame only crops and stacks them: scrolling never waits for pdftoppm unless it outruns the prefetch.
-local BAND_CAP = 60
-
-local function touch(v, key)
-  for i, k in ipairs(v.band_order) do
-    if k == key then table.remove(v.band_order, i); break end
-  end
-  table.insert(v.band_order, key)
-end
-
-local function clear_bands(v)
-  for _, f in pairs(v.bands) do os.remove(f) end
-  v.bands, v.band_order = {}, {}
-end
-
----@return table band descriptor for rows k*B.. of `page` at `scale`
-local function band(v, buf, scale, B, page, k)
-  local s = size_of(v, page)
-  local ph = math.ceil(s[2] * scale)
-  local dpi = string.format("%.2f", scale * 72)
-  return {
-    page = page, k = k, dpi = dpi, y = k * B, w = math.ceil(s[1] * scale), h = math.min(B, ph - k * B),
-    key = string.format("%d:%d:%s:%d", page, k, dpi, B),
-    prefix = string.format("%s/%d-b%d-%d-%s-%d", dir, buf, page, k, dpi, B),
-  }
-end
-
---- Make sure the band is on disk; cb(ok).
-local function get_band(v, buf, b, cb)
-  if v.bands[b.key] then touch(v, b.key); return cb(true) end
-  if v.inflight[b.key] then return table.insert(v.inflight[b.key], cb) end
-  v.inflight[b.key] = { cb }
-  vim.fn.mkdir(dir, "p")
-  local epoch = v.epoch
-  local cmd = { "pdftoppm", "-png", "-singlefile", "-r", b.dpi }
-  vim.list_extend(cmd, vim.tbl_map(tostring, { "-x", 0, "-y", b.y, "-W", b.w, "-H", b.h, "-f", b.page, "-l", b.page }))
-  vim.list_extend(cmd, { v.pdf, b.prefix })
-  vim.system(cmd, {}, vim.schedule_wrap(function(r)
-    local waiting = v.inflight[b.key]
-    v.inflight[b.key] = nil
-    local ok = r.code == 0 and views[buf] == v and v.epoch == epoch
-    if ok then
-      v.bands[b.key] = b.prefix .. ".png"
-      touch(v, b.key)
-      while #v.band_order > BAND_CAP do
-        local old = table.remove(v.band_order, 1)
-        os.remove(v.bands[old])
-        v.bands[old] = nil
-      end
-    else
-      os.remove(b.prefix .. ".png")
+--- Show the transmitted image `img` in the rows of `page`; the previous image of the page is freed.
+local function install(v, buf, page, img, png, level, mtime, hlkey)
+  local L = v.lay[page]
+  local st = v.pages[page]
+  local old_img, old_png = st.img, st.png
+  Snacks.image.terminal.request { a = "p", U = 1, i = img.id, p = page, C = 1, c = L.cols, r = L.rows }
+  local group = string.format("PdfView%d_%d", buf, page)
+  Snacks.util.set_hl { [group] = { fg = img.id, sp = page, bg = "none", nocombine = true } }
+  if not old_img then
+    local pad = string.rep(" ", L.pad)
+    local tail = string.rep(" ", math.max(0, v.left + v.cols_max - L.pad - L.cols))
+    local lines, cells = {}, {}
+    for r = 1, L.rows do
+      for c = 1, L.cols do cells[c] = PLACEHOLDER .. positions[r] .. positions[c] end
+      lines[r] = pad .. table.concat(cells, "", 1, L.cols) .. tail
     end
-    for _, f in ipairs(waiting) do f(ok) end
+    setlines(buf, L.row, L.row + L.rows, lines)
+    vim.api.nvim_buf_set_extmark(buf, ns, L.row, 0, {
+      id = page, end_row = L.row + L.rows - 1, end_col = #lines[L.rows] - #tail, hl_group = group,
+      undo_restore = false, strict = false,
+    })
+  end
+  v.pages[page] = { level = level, img = img, png = png, mtime = mtime, hlkey = hlkey }
+  if old_img then Snacks.image.terminal.request { a = "d", d = "I", i = old_img.id } end
+  if old_png then os.remove(old_png) end
+end
+
+--- Paint the search hits of `page` onto the raster (current hit stronger).
+local function highlight_cmd(v, page, dpi, png)
+  local hits = v.by_page[page]
+  if not hits then return end
+  local k = dpi / 72
+  local cmd = { "magick", png }
+  for _, pass in ipairs { false, true } do
+    cmd[#cmd + 1] = "-fill"
+    cmd[#cmd + 1] = pass and "rgba(255,140,0,0.45)" or "rgba(255,225,0,0.4)"
+    for _, hit in ipairs(hits) do
+      if hit.cur == pass then
+        for _, r in ipairs(hit.rects) do
+          cmd[#cmd + 1] = "-draw"
+          cmd[#cmd + 1] = string.format("rectangle %d,%d %d,%d", r[1] * k - 1, r[2] * k - 1, r[3] * k + 1, r[4] * k + 1)
+        end
+      end
+    end
+  end
+  cmd[#cmd + 1] = png
+  return cmd
+end
+
+local function start_job(v, buf, page, level)
+  local st = v.pages[page]
+  st.busy = true
+  v.jobs = v.jobs + 1
+  v.seq = v.seq + 1
+  local seq, gen, mtime, hlkey = v.seq, v.gen, v.mtime, hl_for(v, page)
+  local prefix = string.format("%s/%d-%d-%d", dir, buf, page, seq)
+  local png = prefix .. ".png"
+  local dpi = v.scale * 72 * (level == 1 and LOW or 1)
+  vim.fn.mkdir(dir, "p")
+
+  local function alive()
+    return views[buf] == v and v.gen == gen and vim.api.nvim_buf_is_valid(buf)
+  end
+  -- a layout change already zeroed the counters: only a job of the current layout gives its slot back
+  local function release(failed)
+    if not alive() then return end
+    v.jobs = v.jobs - 1
+    st.busy = false
+    if failed then st.failed = mtime end
+  end
+  local function drawn()
+    local size = Snacks.image.util.dim(png)
+    local info = Snacks.image.convert.convert { src = png }
+    local step = info.steps[#info.steps]
+    -- hand snacks the `identify` result so it skips spawning magick for every page
+    vim.fn.writefile({ string.format("PNG %dx%d 72x72", size.width, size.height) }, step.file)
+    local img = Snacks.image.image.new(png)
+    local function place()
+      if not alive() then
+        Snacks.image.terminal.request { a = "d", d = "I", i = img.id }
+        os.remove(png)
+        return
+      end
+      release()
+      install(v, buf, page, img, png, level, mtime, hlkey)
+      set_status(buf)
+      pump(buf)
+    end
+    if img.sent then return place() end
+    img.placements[-seq] = { update = function() img.placements[-seq] = nil; place() end }
+  end
+
+  local cmd = { "pdftoppm", "-png", "-singlefile", "-r", string.format("%.2f", dpi), "-f", page, "-l", page, v.pdf, prefix }
+  vim.system(vim.tbl_map(tostring, cmd), {}, vim.schedule_wrap(function(r)
+    if r.code ~= 0 or not alive() then
+      os.remove(png)
+      return release(r.code ~= 0)
+    end
+    local paint = highlight_cmd(v, page, dpi, png)
+    if not paint then return drawn() end
+    vim.system(paint, {}, vim.schedule_wrap(function()
+      if not alive() then
+        os.remove(png)
+        return release()
+      end
+      drawn()
+    end))
   end))
 end
 
---- Bands (as descriptors) covering the strip between `y0` and `y1` (pt), top to bottom.
-local function bands_between(v, buf, scale, B, y0, y1)
-  local list = {}
-  for p = page_at(v, y0), v.n do
-    if v.offs[p] >= y1 then break end
-    local ph = math.ceil(size_of(v, p)[2] * scale)
-    local r0 = math.max(0, math.floor((y0 - v.offs[p]) * scale))
-    local r1 = math.min(ph, math.ceil((y1 - v.offs[p]) * scale))
-    for k = math.floor(r0 / B), math.floor((r1 - 1) / B) do
-      if k >= 0 and k * B < ph then table.insert(list, band(v, buf, scale, B, p, k)) end
+--- Pages that should be drawn for the current window position: page -> level, in priority order.
+local function wanted(v, win)
+  local top, bot = top_bot(win)
+  local p0, p1 = page_at_row(v, top - 1), page_at_row(v, bot - 1)
+  local want, order = {}, {}
+  local function add(p, level)
+    if p >= 1 and p <= v.n and not want[p] then
+      want[p] = level
+      order[#order + 1] = p
     end
   end
-  return list
+  for p = p0, p1 do add(p, 2) end
+  for d = 1, FAR do
+    add(p1 + d, d <= NEAR and 2 or 1)
+    add(p0 - d, d <= NEAR and 2 or 1)
+  end
+  return want, order, p0, p1
 end
 
--- Read ahead in the direction of travel (and a little behind), one band at a time.
-local function prefetch(buf)
+function pump(buf)
   local v = views[buf]
-  if not v or v.prefetching then return end
-  local win, wpx, hpx = viewport(buf)
-  if not win then return end
-  local scale, _, vh = geometry(v, wpx, hpx)
-  local d = v.dir
-  local list = bands_between(v, buf, scale, hpx, v.sy - (d < 0 and 2 or 0.7) * vh, v.sy + vh + (d < 0 and 0.7 or 2) * vh)
-  if d < 0 then list = vim.fn.reverse(list) end
-  for _, b in ipairs(list) do
-    if not v.bands[b.key] then
-      v.prefetching = true
-      return get_band(v, buf, b, function()
-        v.prefetching = false
-        if views[buf] == v then prefetch(buf) end
-      end)
+  local win = win_of(buf)
+  if not v or not win or not v.lay then return end
+  local want, order, p0, p1 = wanted(v, win)
+  for p, st in pairs(v.pages) do
+    if st.level > 0 and not st.busy and (p < p0 - FAR - 2 or p > p1 + FAR + 2) then clear_page(v, buf, p) end
+  end
+  for _, p in ipairs(order) do
+    if v.jobs >= JOBS then break end
+    v.pages[p] = v.pages[p] or { level = 0, hlkey = 0 }
+    local st = v.pages[p]
+    if not st.busy and st.failed ~= v.mtime then
+      local level
+      if st.level == 0 then
+        level = (p >= p0 and p <= p1 and want[p] == 2) and 1 or want[p]
+      elseif st.level < want[p] then
+        level = want[p]
+      elseif st.mtime ~= v.mtime or st.hlkey ~= hl_for(v, p) then
+        level = st.level == 1 and 1 or 2
+      end
+      if level then start_job(v, buf, p, level) end
     end
   end
 end
 
---- Build the frame for the current scroll position: crop the cached bands of the pages in view,
---- stack them on a background with magick and paint the search hits. cb(png, shown) or cb() on failure.
-local function render(buf, cb)
+--- Rebuild the whole layout (zoom, window size, different document), keeping the point in the middle.
+function relayout(buf, anchor)
   local v = views[buf]
-  local win, wpx, hpx = viewport(buf)
-  if not win then return cb() end
-  local scale, vw, vh, sx = geometry(v, wpx, hpx)
-  local sy = v.sy
-  v.dir = sy > v.prev_sy and 1 or sy < v.prev_sy and -1 or v.dir
-  v.prev_sy = sy
-  v.page = page_at(v, sy + vh / 2)
-  v.seq = v.seq + 1
-  local out = string.format("%s/%d-f%d.png", dir, buf, v.seq)
-
-  local pieces = {}
-  for p = page_at(v, sy), v.n do
-    if v.offs[p] >= sy + vh then break end
-    local s = size_of(v, p)
-    local x0 = (v.maxw - s[1]) / 2
-    local xa, xb = math.max(sx, x0) - x0, math.min(sx + vw, x0 + s[1]) - x0
-    local ya, yb = math.max(sy, v.offs[p]) - v.offs[p], math.min(sy + vh, v.offs[p] + s[2]) - v.offs[p]
-    if xb > xa and yb > ya then
-      local px = math.floor(xa * scale)
-      local cw = math.max(1, math.ceil(xb * scale) - px)
-      local r0, r1 = math.floor(ya * scale), math.ceil(yb * scale)
-      local left = math.floor((x0 - sx) * scale + 0.5)
-      local top = math.floor((v.offs[p] - sy) * scale + 0.5)
-      for k = math.floor(r0 / hpx), math.floor((r1 - 1) / hpx) do
-        local b = band(v, buf, scale, hpx, p, k)
-        local a, e = math.max(r0, b.y), math.min(r1, b.y + b.h)
-        if e > a then
-          table.insert(pieces, { band = b, page = p, x0 = x0, x = left + px, y = top + a, crop = string.format("%dx%d+%d+%d", cw, e - a, px, a - b.y) })
-        end
-      end
-    end
+  local win = win_of(buf)
+  if not v or not win then return end
+  local W = win_cols(win)
+  local cw, ch = cell_size()
+  anchor = anchor or (v.lay and get_anchor(v, win)) or { page = 1, fy = 0, fx = 0.5 }
+  for p in pairs(v.pages) do
+    local st = v.pages[p]
+    if st.img then Snacks.image.terminal.request { a = "d", d = "I", i = st.img.id } end
+    if st.png then os.remove(st.png) end
   end
-  if #pieces == 0 then return cb() end
-
-  local function compose()
-    local cmd = { "magick", "-size", string.format("%dx%d", wpx, hpx), "xc:" .. BG }
-    for _, pc in ipairs(pieces) do
-      vim.list_extend(cmd, {
-        "(", v.bands[pc.band.key], "-crop", pc.crop, "+repage", ")",
-        "-geometry", string.format("%+d%+d", pc.x, pc.y), "-composite",
-      })
-    end
-    for _, pass in ipairs { false, true } do -- the current hit goes on top, stronger
-      local rects = {}
-      local done = {}
-      for _, pc in ipairs(pieces) do
-        if not done[pc.page] then -- once per page, whichever band is on screen
-          done[pc.page] = true
-          for _, hit in ipairs(v.by_page[pc.page] or {}) do
-            if hit.cur == pass then
-              for _, r in ipairs(hit.rects) do
-                table.insert(rects, string.format(
-                  "rectangle %d,%d %d,%d",
-                  (pc.x0 + r[1] - sx) * scale - 1, (v.offs[pc.page] + r[2] - sy) * scale - 1,
-                  (pc.x0 + r[3] - sx) * scale + 1, (v.offs[pc.page] + r[4] - sy) * scale + 1
-                ))
-              end
-            end
-          end
-        end
-      end
-      if #rects > 0 then
-        vim.list_extend(cmd, { "-fill", pass and "rgba(255,140,0,0.45)" or "rgba(255,225,0,0.4)" })
-        for _, rect in ipairs(rects) do vim.list_extend(cmd, { "-draw", rect }) end
-      end
-    end
-    vim.list_extend(cmd, { "-define", "png:compression-level=1", out })
-    vim.system(cmd, {}, vim.schedule_wrap(function(r)
-      if r.code ~= 0 or views[buf] ~= v then
-        os.remove(out)
-        return cb()
-      end
-      -- hand snacks the `identify` result so it skips spawning magick for every frame
-      local info = Snacks.image.convert.convert({ src = out })
-      local step = info.steps[#info.steps]
-      vim.fn.writefile({ string.format("PNG %dx%d 72x72", wpx, hpx) }, step.file)
-      cb(out, { sy = sy, sx = sx, scale = scale, w = wpx, h = hpx })
-    end))
-  end
-
-  local left, failed = 0, false
-  local seen = {}
-  for _, pc in ipairs(pieces) do
-    if not seen[pc.band.key] then
-      seen[pc.band.key] = true
-      left = left + 1
-    end
-  end
-  for key in pairs(seen) do
-    local b
-    for _, pc in ipairs(pieces) do
-      if pc.band.key == key then b = pc.band; break end
-    end
-    get_band(v, buf, b, function(ok)
-      failed = failed or not ok
-      left = left - 1
-      if left > 0 then return end
-      if failed or views[buf] ~= v then return cb() end
-      compose()
-    end)
-  end
+  vim.api.nvim_buf_clear_namespace(buf, ns, 0, -1)
+  local b = build_layout(v, W, cw, ch)
+  v.lay, v.cols_max, v.scale, v.total_rows, v.W, v.cw, v.ch, v.left = b.lay, b.cols_max, b.scale, b.total_rows, W, cw, ch, b.left
+  v.pages, v.jobs, v.gen = {}, 0, v.gen + 1
+  local blank = string.rep(" ", b.left + b.cols_max)
+  setlines(buf, 0, -1, vim.fn["repeat"]({ blank }, v.total_rows))
+  set_anchor(v, win, anchor)
+  set_status(buf)
+  pump(buf)
 end
 
---- Centre the image in the window; the buffer needs enough lines for the top padding.
-local function center(self)
-  local win = self:wins()[1]
-  if not win then return end
-  local w, h = vim.api.nvim_win_get_width(win), vim.api.nvim_win_get_height(win)
-  local img = self.img
-  -- snacks never scales an image up (it trusts the dpi): claim a tiny dpi so it fits the window
-  img.info = img.info or { size = Snacks.image.util.dim(img.file) }
-  img.info.dpi = { width = 1, height = 1 }
-  local size = Snacks.image.util.fit(img.file, { width = w, height = h }, { info = img.info })
-  local top = math.max(0, math.floor((h - size.height) / 2))
-  local left = math.max(0, math.floor((w - size.width) / 2))
-  self.opts.pos = { top + 1, left }
-  self.geom = { left = left, top = top, w = size.width, h = size.height } -- cells, for mouse hit-testing
-  if vim.api.nvim_buf_line_count(self.buf) < top + 1 then
-    vim.bo[self.buf].modifiable = true
-    vim.api.nvim_buf_set_lines(self.buf, 0, -1, false, vim.fn.split(string.rep("\n", top), "\n", true))
-    vim.bo[self.buf].modifiable = false
-  end
-end
-
---- Swap in a new placement and only drop the old one once the new one is on screen (no flash).
-local function show(buf, png, shown)
-  local v = views[buf]
-  if not v then return end
-  if v.place then table.insert(v.stale, v.place) end
-  local place
-  place = Snacks.image.placement.new(buf, png, {
-    conceal = true,
-    auto_resize = true,
-    on_update_pre = center,
-    on_update = function()
-      if v.place == place and #v.stale > 0 then
-        local old = v.stale
-        v.stale = {}
-        close_all(old)
-      end
-      vim.cmd.redraw() -- the extmarks were set from an async callback: nothing else repaints them
-    end,
-  })
-  place.shown = shown
-  v.place = place
-end
-
--- One frame at a time: scrolling faster than frames render just re-aims the next one.
-local function draw(buf)
-  local v = views[buf]
-  if not v then return end
-  if v.drawing then v.redo = true; return end
-  v.drawing = true
-  render(buf, function(png, shown)
-    v.drawing = false
-    if views[buf] ~= v or not vim.api.nvim_buf_is_valid(buf) then
-      if png then os.remove(png) end
-      return
-    end
-    if png then
-      table.insert(v.frames, png)
-      while #v.frames > 4 do os.remove(table.remove(v.frames, 1)) end
-      show(buf, png, shown)
-      set_status(buf)
-      prefetch(buf)
-    end
-    if v.redo then
-      v.redo = false
-      draw(buf)
-    end
-  end)
-end
-
---- Redraw, optionally scrolling to the top of `page` if it is not the one on screen;
---- re-reads the PDF when it changed on disk.
+--- Redraw; re-reads the PDF when it changed on disk and scrolls to `page` if given and not on screen.
 function M.refresh(buf, page)
   local v = views[buf]
   if not v then return end
   local now = stamp(v.pdf)
-  if now ~= v.mtime then
+  local changed = now ~= v.mtime
+  if changed then
     v.mtime = now
     v.epoch = v.epoch + 1
     v.words, v.links, v.hits, v.by_page = nil, nil, {}, {}
-    clear_frames(v)
-    clear_bands(v)
     read_info(v)
-    if v.query then M.search(buf, v.query, true) end
   end
-  if page and page ~= v.page then v.sy = v.offs[math.max(1, math.min(page, v.n))] end
-  draw(buf)
+  local win = win_of(buf)
+  if not win then return end
+  local cw, ch = cell_size()
+  local b = build_layout(v, win_cols(win), cw, ch)
+  if not v.lay or not same_layout(v, b) then
+    relayout(buf)
+  else
+    set_status(buf)
+    pump(buf)
+  end
+  if changed and v.query then M.search(buf, v.query, true) end
+  if page and page ~= v.page then M.goto_page(buf, page) end
 end
 
 function M.goto_page(buf, page)
   local v = views[buf]
-  if not v then return end
-  v.sy = v.offs[math.max(1, math.min(page, v.n))]
-  draw(buf)
+  local win = win_of(buf)
+  if not v or not win or not v.lay then return end
+  scroll_to(v, win, v.lay[math.max(1, math.min(page, v.n))].row, 0, nil)
 end
 
---- Scroll by a fraction of the window height (positive = down).
-function M.scroll(buf, frac)
-  local v = views[buf]
-  local _, vh = view_pt(buf)
-  if not vh then return end
-  v.sy = v.sy + frac * vh
-  draw(buf)
-end
-
-function M.to_end(buf)
-  local v = views[buf]
-  if v then v.sy = v.total; draw(buf) end
+--- Scroll by `lines` (positive = down).
+function M.scroll(buf, lines)
+  local win = win_of(buf)
+  if not win then return end
+  vim.api.nvim_win_call(win, function()
+    vim.cmd("normal! " .. math.abs(lines) .. (lines > 0 and "\5" or "\25"))
+  end)
 end
 
 --- Zoom around the middle of the window; no factor = fit the width.
 function M.zoom(buf, factor)
   local v = views[buf]
-  local win, wpx, hpx = viewport(buf)
-  if not win then return end
-  local _, vw, vh, sx = geometry(v, wpx, hpx)
-  local mx, my = sx + vw / 2, v.sy + vh / 2
-  local zoom = factor and math.max(ZOOM_MIN, math.min(v.zoom * factor, ZOOM_MAX)) or 1
+  local win = win_of(buf)
+  if not v or not win or not v.lay then return end
+  local zmax = MAXCELLS / win_cols(win)
+  local zoom = factor and math.max(ZOOM_MIN, math.min(v.zoom * factor, zmax)) or 1
   if zoom == v.zoom then return end
+  local anchor = get_anchor(v, win)
   v.zoom = zoom
-  v.sx, v.sy = mx - v.maxw / zoom / 2, my - hpx * v.maxw / (wpx * zoom) / 2
-  draw(buf)
+  relayout(buf, anchor)
 end
 
---- Move sideways by a fraction of the window width (only matters when zoomed in).
-function M.pan(buf, dx)
-  local v = views[buf]
-  local win, wpx, hpx = viewport(buf)
+--- Scroll sideways by `cells` (only matters when zoomed in).
+function M.pan(buf, cells)
+  local win = win_of(buf)
   if not win then return end
-  local _, vw, _, sx = geometry(v, wpx, hpx)
-  if vw >= v.maxw then return end
-  v.sx = sx + dx * 0.2 * vw
-  draw(buf)
+  vim.api.nvim_win_call(win, function() vim.cmd("normal! " .. math.abs(cells) .. (cells > 0 and "zl" or "zh")) end)
 end
 
 local ENTITIES = { amp = "&", lt = "<", gt = ">", quot = '"', apos = "'" }
@@ -593,25 +585,32 @@ local function load_links(v, cb)
 end
 
 --- Where the viewport is, to come back to after following a link.
-local function position(v)
-  return { sy = v.sy, sx = v.sx, zoom = v.zoom }
+local function position(v, win)
+  return { anchor = get_anchor(v, win), zoom = v.zoom }
 end
 
 function M.back(buf)
   local v = views[buf]
-  local pos = v and table.remove(v.back)
+  local win = win_of(buf)
+  local pos = v and win and table.remove(v.back)
   if not pos then return end
-  v.sy, v.sx, v.zoom = pos.sy, pos.sx, pos.zoom
-  draw(buf)
+  if pos.zoom ~= v.zoom then
+    v.zoom = pos.zoom
+    relayout(buf, pos.anchor)
+  else
+    set_anchor(v, win, pos.anchor)
+  end
 end
 
 --- Follow a link: another place in the document (remembered for `back`) or a URL.
 function M.follow(buf, link)
   local v = views[buf]
+  local win = win_of(buf)
   if link.uri then return vim.ui.open(link.uri) end
-  table.insert(v.back, position(v))
-  v.sy = v.offs[link.page] + (link.y or 0) - 12
-  draw(buf)
+  if not v or not win then return end
+  table.insert(v.back, position(v, win))
+  local L = v.lay[link.page]
+  scroll_to(v, win, L.row + (link.y or 0) / size_of(v, link.page)[2] * L.rows, 0.1)
 end
 
 local function link_label(v, page, link)
@@ -648,23 +647,19 @@ end
 function M.click(buf)
   local v = views[buf]
   local m = vim.fn.getmousepos()
-  local win = vim.fn.bufwinid(buf)
-  if not v or win < 0 or m.winid ~= win then return end
+  local win = win_of(buf)
+  if not v or not win or m.winid ~= win or not v.lay then return end
   vim.api.nvim_set_current_win(win)
-  local place = v.place
-  local geom, shown = place and place.geom, place and place.shown
-  if not geom or not shown then return end
-  local pos = vim.api.nvim_win_get_position(win)
-  local bar = vim.wo[win].winbar ~= "" and 1 or 0
-  local col = m.screencol - 1 - pos[2] - vim.fn.getwininfo(win)[1].textoff
-  local row = m.screenrow - 1 - pos[1] - bar
-  local fx, fy = (col - geom.left + 0.5) / geom.w, (row - geom.top + 0.5) / geom.h
-  if fx < 0 or fx > 1 or fy < 0 or fy > 1 then return end
-  local dx, dy = shown.sx + fx * shown.w / shown.scale, shown.sy + fy * shown.h / shown.scale
-  local page = page_at(v, dy)
+  local row = m.line - 1
+  local page = page_at_row(v, row)
+  local L = v.lay[page]
+  if row > L.row + L.rows - 1 then return end
+  local col = m.wincol - 1 - vim.fn.getwininfo(win)[1].textoff + leftcol(win)
+  local fx, fy = (col - L.pad + 0.5) / L.cols, (row - L.row + 0.5) / L.rows
+  if fx < 0 or fx > 1 then return end
   local s = size_of(v, page)
-  local px, py = dx - (v.maxw - s[1]) / 2, dy - v.offs[page]
-  local tol = 0.5 * shown.h / geom.h / shown.scale -- half a cell, in pt
+  local px, py = fx * s[1], fy * s[2]
+  local tol = 0.5 * s[2] / L.rows -- half a cell, in pt
   load_links(v, function()
     if views[buf] ~= v then return end
     local best, dist = nil, math.huge
@@ -684,23 +679,22 @@ local function highlight_pages(v)
     v.by_page[hit.page] = v.by_page[hit.page] or {}
     table.insert(v.by_page[hit.page], { rects = hit.rects, cur = i == v.cur })
   end
+  v.hlver = v.hlver + 1
 end
 
 --- Make hit `i` the current one: show its page, highlighted.
 function M.goto_hit(buf, i)
   local v = views[buf]
-  if not v or #v.hits == 0 then return end
+  local win = win_of(buf)
+  if not v or not win or #v.hits == 0 then return end
   v.cur = (i - 1) % #v.hits + 1
   local hit = v.hits[v.cur]
   highlight_pages(v)
-  local vw, vh = view_pt(buf)
-  if vh then
-    local r = hit.rects[1]
-    local s = size_of(v, hit.page)
-    v.sy = v.offs[hit.page] + r[2] - vh * 0.3
-    v.sx = (v.maxw - s[1]) / 2 + (r[1] + r[3]) / 2 - vw / 2
-  end
-  draw(buf)
+  local L, s, r = v.lay[hit.page], size_of(v, hit.page), hit.rects[1]
+  local col = v.cols_max > win_cols(win) and (L.pad + (r[1] + r[3]) / 2 / s[1] * L.cols) or nil
+  scroll_to(v, win, L.row + r[2] / s[2] * L.rows, 0.3, col)
+  set_status(buf)
+  pump(buf)
 end
 
 --- Next (`delta` 1) or previous (-1) hit.
@@ -715,11 +709,10 @@ function M.search(buf, query, stay)
   local v = views[buf]
   if not v then return end
   if not query or query == "" then
-    local had = #v.hits > 0
     v.query, v.hits, v.cur = nil, {}, 0
     highlight_pages(v)
-    if had then draw(buf) else set_status(buf) end
-    return
+    set_status(buf)
+    return pump(buf)
   end
   v.query = query
   load_words(v, function()
@@ -753,7 +746,8 @@ function M.search(buf, query, stay)
       v.cur = 0
       highlight_pages(v)
       vim.notify("Pattern not found: " .. query, vim.log.levels.WARN)
-      return draw(buf)
+      set_status(buf)
+      return pump(buf)
     end
     local start = 1
     for i, hit in ipairs(hits) do
@@ -762,7 +756,8 @@ function M.search(buf, query, stay)
     if not stay then return M.goto_hit(buf, start) end
     v.cur = start
     highlight_pages(v)
-    draw(buf)
+    set_status(buf)
+    pump(buf)
   end)
 end
 
@@ -778,23 +773,27 @@ local function teardown(buf)
   local v = views[buf]
   views[buf] = nil
   if not v then return end
-  if v.place then v.place:close() end
-  close_all(v.stale)
-  clear_frames(v)
-  clear_bands(v)
+  for _, st in pairs(v.pages) do
+    if st.img then Snacks.image.terminal.request { a = "d", d = "I", i = st.img.id } end
+    if st.png then os.remove(st.png) end
+  end
   if v.timer and not v.timer:is_closing() then v.timer:stop(); v.timer:close() end
 end
 
+--- Turn `buf` into a viewer of `pdf`.
 function M.attach(buf, pdf)
   teardown(buf) -- :bdelete only unloads, so the next :e re-attaches the same buffer
   pdf = vim.fn.fnamemodify(pdf, ":p")
   local v = {
-    pdf = pdf, page = 1, n = 1, sizes = {}, offs = {}, maxw = 1, total = 1, zoom = 1, sx = 0, sy = 0, stale = {},
-    frames = {}, bands = {}, band_order = {}, inflight = {}, dir = 1, prev_sy = 0, seq = 0, epoch = 0, waiting = {}, hits = {}, cur = 0, by_page = {}, back = {},
+    pdf = pdf, page = 1, n = 1, sizes = {}, maxw = 1, zoom = 1, cols_max = 1, scale = 1, total_rows = 1, W = 0,
+    left = 0, cw = 10, ch = 20, pages = {}, gen = 0, jobs = 0, seq = 0, epoch = 0, waiting = {}, hits = {}, cur = 0,
+    by_page = {}, hlver = 0, back = {},
   }
   views[buf] = v
+  Snacks.image.setup()
   vim.bo[buf].buftype = "nofile"
   vim.bo[buf].swapfile = false
+  vim.bo[buf].undolevels = -1
   vim.bo[buf].filetype = "pdfview"
   vim.bo[buf].modifiable = false
 
@@ -803,19 +802,13 @@ function M.attach(buf, pdf)
       vim.keymap.set("n", k, fn, { buffer = buf, desc = "PDF: " .. desc })
     end
   end
-  map({ "k", "<Down>", "<ScrollWheelDown>" }, function() M.scroll(buf, 0.12) end, "scroll down")
-  map({ "j", "<Up>", "<ScrollWheelUp>" }, function() M.scroll(buf, -0.12) end, "scroll up")
-  map({ "<PageDown>", "<C-f>" }, function() M.scroll(buf, 0.9) end, "page down")
-  map({ "<PageUp>", "<C-b>" }, function() M.scroll(buf, -0.9) end, "page up")
-  map({ "<C-d>" }, function() M.scroll(buf, 0.5) end, "half page down")
-  map({ "<C-u>" }, function() M.scroll(buf, -0.5) end, "half page up")
-  map({ "gg" }, function() M.goto_page(buf, 1) end, "top")
-  map({ "G" }, function() M.to_end(buf) end, "bottom")
+  map({ "k", "<Down>" }, function() M.scroll(buf, 3 * vim.v.count1) end, "scroll down")
+  map({ "j", "<Up>" }, function() M.scroll(buf, -3 * vim.v.count1) end, "scroll up")
   map({ "+", "=", "<C-ScrollWheelUp>" }, function() M.zoom(buf, ZOOM_STEP) end, "zoom in")
   map({ "-", "<C-ScrollWheelDown>" }, function() M.zoom(buf, 1 / ZOOM_STEP) end, "zoom out")
   map({ "0" }, function() M.zoom(buf) end, "fit width")
-  map({ "<Left>", "h", "<ScrollWheelLeft>" }, function() M.pan(buf, -1) end, "pan left")
-  map({ "<Right>", "l", "<ScrollWheelRight>" }, function() M.pan(buf, 1) end, "pan right")
+  map({ "<Left>", "h" }, function() M.pan(buf, -6) end, "pan left")
+  map({ "<Right>", "l" }, function() M.pan(buf, 6) end, "pan right")
   map({ "/" }, function() M.prompt_search(buf) end, "search")
   map({ "n" }, function() M.next_hit(buf, 1) end, "next match")
   map({ "N" }, function() M.next_hit(buf, -1) end, "previous match")
@@ -833,27 +826,47 @@ function M.attach(buf, pdf)
     if now and now ~= v.mtime then M.refresh(buf) end
   end))
 
+  local saved = {} ---@type table<number, table>
   local group = vim.api.nvim_create_augroup("pdfview" .. buf, { clear = true })
   vim.api.nvim_create_autocmd("BufWinEnter", {
     group = group,
     buffer = buf,
     callback = function()
-      vim.wo.winbar = "%=%{get(b:, 'pdfview_status', '')} "
-      -- snacks hides a placement whose buffer left every window and never un-hides it: redraw fresh
+      local win = vim.api.nvim_get_current_win()
+      saved[win] = {}
+      for name, value in pairs(WINOPTS) do
+        saved[win][name] = vim.wo[win][name]
+        vim.wo[win][name] = value
+      end
       vim.schedule(function() M.refresh(buf) end)
     end,
   })
   vim.api.nvim_create_autocmd("BufWinLeave", {
     group = group,
     buffer = buf,
-    callback = function() vim.wo.winbar = "" end,
+    callback = function()
+      local win = vim.api.nvim_get_current_win()
+      for name, value in pairs(saved[win] or {}) do vim.wo[win][name] = value end
+      saved[win] = nil
+    end,
   })
   vim.api.nvim_create_autocmd({ "BufUnload", "BufWipeout" }, {
     group = group,
     buffer = buf,
     callback = function() teardown(buf) end,
   })
-  -- the rendered pixels depend on the window size
+  -- scrolling brings new pages into range; resizing changes the size every page is drawn at
+  local tick = vim.uv.new_timer()
+  vim.api.nvim_create_autocmd("WinScrolled", {
+    group = group,
+    callback = function()
+      if views[buf] ~= v or not win_of(buf) then return end
+      tick:stop()
+      tick:start(30, 0, vim.schedule_wrap(function()
+        if views[buf] == v then set_status(buf); pump(buf) end
+      end))
+    end,
+  })
   local resize = vim.uv.new_timer()
   vim.api.nvim_create_autocmd({ "WinResized", "VimResized" }, {
     group = group,
@@ -861,11 +874,10 @@ function M.attach(buf, pdf)
       if views[buf] ~= v then return end
       resize:stop()
       resize:start(120, 0, vim.schedule_wrap(function()
-        if views[buf] == v then draw(buf) end
+        if views[buf] == v then M.refresh(buf) end
       end))
     end,
   })
-  vim.wo.winbar = "%=%{get(b:, 'pdfview_status', '')} "
 
   Snacks.image.terminal.detect(function() vim.schedule(function() M.refresh(buf) end) end)
 end
