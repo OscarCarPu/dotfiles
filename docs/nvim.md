@@ -117,6 +117,13 @@ Opening a `*.pdf` (`nvim file.pdf`, `:e`, the file tree) shows it in a normal bu
 (`lua/pdfview.lua`): `pdftoppm` rasterises one page, drawn by `snacks.nvim`'s image module (kitty
 graphics protocol, needs `imagemagick`/`poppler`). It lives in the tabufline, opens in the window
 the file tree targets and is centred; neighbouring pages are pre-rendered so paging is instant.
-Keys: `k`/`n`/`<PageDown>`/scroll wheel next page, `j`/`p`/`<PageUp>` previous,
+Keys: `k`/`<PageDown>`/scroll wheel next page, `j`/`<PageUp>` previous,
 `gg`/`G` first/last, `+`/`-`/`<C-ScrollWheel>` zoom, `0` fit page, arrows or `h`/`l` pan while zoomed,
 `q` close. The page number (and zoom) is in the window bar. It reloads when the file changes.
+
+Search and links (also in the `<leader>mt` preview): `/` searches the text (case-insensitive,
+`pdftotext -bbox`), highlights every hit on the page, `n`/`N` next/previous hit, `<Esc>` clears;
+the window bar shows `/query 3/12`. Internal links (index, cross-references) and URLs are read
+with `qpdf --json`: click one with the mouse, or `f` to pick from the links on the page; `<C-o>`
+or `<BS>` returns to where you were. Markdown anchors work as in pandoc: `[Intro](#intro)` points
+at the heading `# Intro`.
