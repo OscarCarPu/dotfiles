@@ -35,10 +35,10 @@ Los apuntes son **esquemas concisos** para estudiar, no una transcripción del P
 
 | PDF                             | Markdown                                                        |
 | ------------------------------- | --------------------------------------------------------------- |
-| Sección `1.`                    | `## Título` (sin número)                                        |
-| Subsección `1.1.`               | `### Título`                                                    |
+| Sección `1.`                    | `# Título` (sin número)                                         |
+| Subsección `1.1.`               | `## Título`                                                     |
 | `1.1.1.` corto (una definición) | Bullet anidado `- **Término**: …` con sub-bullets con tabulador |
-| `1.1.1.` con fórmulas o pasos   | `#### Título`                                                   |
+| `1.1.1.` con fórmulas o pasos   | `### Título`                                                    |
 
 Se omiten: introducción del módulo, autoría, leyendas de figuras y bibliografía.
 
@@ -67,7 +67,7 @@ Se omiten: introducción del módulo, autoría, leyendas de figuras y bibliograf
   - Coma decimal `$0","167$`: con `$0,167$` Typst añade un espacio tras la coma. Llaves literales con barra: `$\{7, 1, 1\}$`.
   - Si se puede, compilar las fórmulas para comprobarlas: `pip install typst` en un venv del scratchpad y `typst.compile(...)` sobre un `.typ` con cada fórmula.
 - Código en bloques con lenguaje (```` ```r ````, ```` ```python ````), con comentarios breves en línea; para las funciones, una tabla `operación | código`.
-- Diagramas, solo si ayudan, en ```` ```mermaid ````.
+- **Diagramas** en ```` ```mermaid ```` (nunca árboles o flechas en ASCII), cuando ayuden: flujos de ejecución, dependencias entre pasos, arquitecturas, jerarquías. Pequeños y sin decorar (`flowchart LR`/`TD`, sin estilos); un diagrama por idea, y no repetir en bullets lo que ya muestra.
 
 ## Qué dejar y qué quitar
 
@@ -78,18 +78,18 @@ Se omiten: introducción del módulo, autoría, leyendas de figuras y bibliograf
 ## Ejemplo
 
 ```markdown
-## Definiendo modelo de datos
+# Definiendo modelo de datos
 
 Un **modelo de datos** determina la manera en la que se organizan y estructuran los datos.
 
-### Estructuras de los modelos de datos
+## Estructuras de los modelos de datos
 
 - **Estructurados**: longitud y formato determinados (números, fechas, cadenas…). Número de columnas fijo
 	- **Generados por máquinas**: sensores, GPS, *logs*
 	- **Generados por personas**: datos de entrada, *clickstream*
 - **No estructurados**: no se ajustan a un esquema; estructura no predecible. Son la mayoría (≈ 80 %)
 
-### Operaciones con datos
+## Operaciones con datos
 
 - **Unión**: junta conjuntos con **la misma estructura** y elimina duplicados
 - **Proyección**: recupera solo ciertos campos → **todas** las filas de las columnas elegidas

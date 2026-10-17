@@ -870,6 +870,8 @@ function M.attach(buf, pdf)
   end
   map({ "<Down>" }, function() M.scroll(buf, 3 * vim.v.count1) end, "scroll down")
   map({ "<Up>" }, function() M.scroll(buf, -3 * vim.v.count1) end, "scroll up")
+  map({ "k" }, function() M.goto_page(buf, views[buf].page + vim.v.count1) end, "next page")
+  map({ "j" }, function() M.goto_page(buf, views[buf].page - vim.v.count1) end, "previous page")
   map({ "+", "=", "<C-ScrollWheelUp>" }, function() M.zoom(buf, ZOOM_STEP) end, "zoom in")
   map({ "-", "<C-ScrollWheelDown>" }, function() M.zoom(buf, 1 / ZOOM_STEP) end, "zoom out")
   map({ "0" }, function() M.zoom(buf) end, "fit width")

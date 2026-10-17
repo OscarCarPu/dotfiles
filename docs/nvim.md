@@ -122,8 +122,7 @@ near the window ahead of time (three jobs in parallel, a quick low-resolution pa
 the sharp one) and pages far away are dropped again. Needs `poppler` and a kitty-graphics terminal;
 it lives in the tabufline, opens in the window the file tree targets and reloads when the file changes.
 
-Keys: scroll with the wheel and `<Down>`/`<Up>` (three lines, counts work); `j`/`k` move the cursor a
-line at a time as in any buffer (the view follows at the edges),
+Keys: scroll with the wheel and `<Down>`/`<Up>` (three lines, counts work); `k`/`j` jump to the next/previous page,
 `<C-d>`/`<C-u>`/`<C-f>`/`<C-b>`/`<PageDown>`/`<PageUp>` and `gg`/`G` as in any buffer;
 `+`/`-`/`<C-ScrollWheel>` zoom around the middle of the window, `0` fit width, `h`/`l`/arrows (or the
 horizontal wheel) pan while zoomed, `q` close. Zoom tops out where the strip reaches 297 cells (the
