@@ -122,7 +122,8 @@ near the window ahead of time (three jobs in parallel, a quick low-resolution pa
 the sharp one) and pages far away are dropped again. Needs `poppler` and a kitty-graphics terminal;
 it lives in the tabufline, opens in the window the file tree targets and reloads when the file changes.
 
-Keys: scroll with the wheel, `k`/`<Down>` (down) and `j`/`<Up>` (up) three lines (counts work),
+Keys: scroll with the wheel and `<Down>`/`<Up>` (three lines, counts work); `j`/`k` move the cursor a
+line at a time as in any buffer (the view follows at the edges),
 `<C-d>`/`<C-u>`/`<C-f>`/`<C-b>`/`<PageDown>`/`<PageUp>` and `gg`/`G` as in any buffer;
 `+`/`-`/`<C-ScrollWheel>` zoom around the middle of the window, `0` fit width, `h`/`l`/arrows (or the
 horizontal wheel) pan while zoomed, `q` close. Zoom tops out where the strip reaches 297 cells (the
@@ -133,6 +134,7 @@ is on another page, and pages are replaced in place as they re-render.
 Search and links (also in the `<leader>mt` preview): `/` searches the text (case-insensitive,
 `pdftotext -bbox`), highlights every hit on the page, `n`/`N` next/previous hit, `<Esc>` clears;
 the window bar shows `/query 3/12`. Internal links (index, cross-references) and URLs are read
-with `qpdf --json`: click one with the mouse, or `f` to pick from the links on the page; `<C-o>`
+with `qpdf --json`: hovering one turns it blue (painted onto the page from its clean raster, no re-render), click it with the
+mouse, or `f` to pick from the links on the page; `<C-o>`
 or `<BS>` returns to where you were. Markdown anchors work as in pandoc: `[Intro](#intro)` points
 at the heading `# Intro`.

@@ -12,7 +12,9 @@ local M = {}
 ---@field img? snacks.Image
 ---@field png? string
 ---@field mtime? string version of the PDF drawn
----@field hlkey number search-highlight version drawn (0 = none)
+---@field hlkey string signature of the highlights painted on it (search hits, hovered link; "" = none)
+---@field base? string the clean raster; `png` is the copy shown (with highlights) and sent to kitty
+---@field dpi? number
 
 ---@class pdfview.View
 ---@field pdf string
@@ -202,8 +204,11 @@ local function set_status(buf)
   vim.cmd.redrawstatus()
 end
 
+--- Signature of what has to be painted on `page`: search hits and the hovered link.
 local function hl_for(v, page)
-  return v.by_page[page] and v.hlver or 0
+  local sig = v.by_page[page] and ("s" .. v.hlver) or ""
+  if v.hover and v.hover.page == page then sig = sig .. "h" .. v.hover.link[1] .. "," .. v.hover.link[2] end
+  return sig
 end
 
 --- Free a page's image and blank its rows.
@@ -213,7 +218,8 @@ local function clear_page(v, buf, page)
   if not st or st.level == 0 then return end
   if st.img then Snacks.image.terminal.request { a = "d", d = "I", i = st.img.id } end
   if st.png then os.remove(st.png) end
-  v.pages[page] = { level = 0, hlkey = 0 }
+  if st.base then os.remove(st.base) end
+  v.pages[page] = { level = 0, hlkey = "" }
   if vim.api.nvim_buf_is_valid(buf) then
     pcall(vim.api.nvim_buf_del_extmark, buf, ns, page)
     local blank = string.rep(" ", v.left + v.cols_max)
@@ -222,10 +228,10 @@ local function clear_page(v, buf, page)
 end
 
 --- Show the transmitted image `img` in the rows of `page`; the previous image of the page is freed.
-local function install(v, buf, page, img, png, level, mtime, hlkey)
+local function install(v, buf, page, img, png, base, dpi, level, mtime, hlkey)
   local L = v.lay[page]
   local st = v.pages[page]
-  local old_img, old_png = st.img, st.png
+  local old_img, old_png, old_base = st.img, st.png, st.base
   Snacks.image.terminal.request { a = "p", U = 1, i = img.id, p = page, C = 1, c = L.cols, r = L.rows }
   local group = string.format("PdfView%d_%d", buf, page)
   Snacks.util.set_hl { [group] = { fg = img.id, sp = page, bg = "none", nocombine = true } }
@@ -243,31 +249,92 @@ local function install(v, buf, page, img, png, level, mtime, hlkey)
       undo_restore = false, strict = false,
     })
   end
-  v.pages[page] = { level = level, img = img, png = png, mtime = mtime, hlkey = hlkey }
+  v.pages[page] = { level = level, img = img, png = png, base = base, dpi = dpi, mtime = mtime, hlkey = hlkey }
   if old_img then Snacks.image.terminal.request { a = "d", d = "I", i = old_img.id } end
   if old_png then os.remove(old_png) end
+  if old_base and old_base ~= base then os.remove(old_base) end
 end
 
---- Paint the search hits of `page` onto the raster (current hit stronger).
-local function highlight_cmd(v, page, dpi, png)
+--- magick command painting the search hits (current one stronger) and the hovered link of `page`
+--- onto the clean raster `src`, written to `out`; nil when there is nothing to paint.
+local function highlight_cmd(v, page, dpi, src, out)
   local hits = v.by_page[page]
-  if not hits then return end
+  local hover = v.hover and v.hover.page == page and v.hover.link
+  if not hits and not hover then return end
   local k = dpi / 72
-  local cmd = { "magick", png }
+  local cmd = { "magick", src }
+  local function rect(r)
+    cmd[#cmd + 1] = "-draw"
+    cmd[#cmd + 1] = string.format("rectangle %d,%d %d,%d", r[1] * k - 1, r[2] * k - 1, r[3] * k + 1, r[4] * k + 1)
+  end
   for _, pass in ipairs { false, true } do
     cmd[#cmd + 1] = "-fill"
     cmd[#cmd + 1] = pass and "rgba(255,140,0,0.45)" or "rgba(255,225,0,0.4)"
-    for _, hit in ipairs(hits) do
+    for _, hit in ipairs(hits or {}) do
       if hit.cur == pass then
-        for _, r in ipairs(hit.rects) do
-          cmd[#cmd + 1] = "-draw"
-          cmd[#cmd + 1] = string.format("rectangle %d,%d %d,%d", r[1] * k - 1, r[2] * k - 1, r[3] * k + 1, r[4] * k + 1)
-        end
+        for _, r in ipairs(hit.rects) do rect(r) end
       end
     end
   end
-  cmd[#cmd + 1] = png
+  if hover then
+    cmd[#cmd + 1] = "-fill"
+    cmd[#cmd + 1] = "rgba(40,110,255,0.35)"
+    rect(hover)
+  end
+  cmd[#cmd + 1] = out
   return cmd
+end
+
+--- Send the clean raster `base` of `page` to kitty (painted if needed) and show it. A job holds one of
+--- the JOBS slots until it is shown (`counted`); a repaint of an already rendered page does not.
+local function present(v, buf, page, gen, seq, base, dpi, level, mtime, hlkey, counted)
+  local out = string.format("%s/%d-%d-%d-d.png", dir, buf, page, seq)
+  local function alive()
+    return views[buf] == v and v.gen == gen and vim.api.nvim_buf_is_valid(buf)
+  end
+  -- a layout change already zeroed the counters: only a job of the current layout gives its slot back
+  local function release(failed)
+    if not alive() then return end
+    if counted then v.jobs = v.jobs - 1 end
+    v.pages[page].busy = false
+    if failed then v.pages[page].failed = mtime end
+  end
+  local function drop()
+    os.remove(out)
+    if counted then os.remove(base) end -- a new raster nobody owns yet
+  end
+  local function drawn()
+    local size = Snacks.image.util.dim(out)
+    local info = Snacks.image.convert.convert { src = out }
+    local step = info.steps[#info.steps]
+    -- hand snacks the `identify` result so it skips spawning magick for every page
+    vim.fn.writefile({ string.format("PNG %dx%d 72x72", size.width, size.height) }, step.file)
+    local img = Snacks.image.image.new(out)
+    local function place()
+      if not alive() then
+        Snacks.image.terminal.request { a = "d", d = "I", i = img.id }
+        return drop()
+      end
+      release()
+      install(v, buf, page, img, out, base, dpi, level, mtime, hlkey)
+      set_status(buf)
+      pump(buf)
+    end
+    if img.sent then return place() end
+    img.placements[-seq] = { update = function() img.placements[-seq] = nil; place() end }
+  end
+  local paint = highlight_cmd(v, page, dpi, base, out)
+  if not paint then
+    vim.uv.fs_copyfile(base, out)
+    return drawn()
+  end
+  vim.system(paint, {}, vim.schedule_wrap(function(r)
+    if r.code ~= 0 or not alive() then
+      drop()
+      return release(r.code ~= 0)
+    end
+    drawn()
+  end))
 end
 
 local function start_job(v, buf, page, level)
@@ -277,58 +344,31 @@ local function start_job(v, buf, page, level)
   v.seq = v.seq + 1
   local seq, gen, mtime, hlkey = v.seq, v.gen, v.mtime, hl_for(v, page)
   local prefix = string.format("%s/%d-%d-%d", dir, buf, page, seq)
-  local png = prefix .. ".png"
+  local base = prefix .. ".png"
   local dpi = v.scale * 72 * (level == 1 and LOW or 1)
   vim.fn.mkdir(dir, "p")
-
-  local function alive()
-    return views[buf] == v and v.gen == gen and vim.api.nvim_buf_is_valid(buf)
-  end
-  -- a layout change already zeroed the counters: only a job of the current layout gives its slot back
-  local function release(failed)
-    if not alive() then return end
-    v.jobs = v.jobs - 1
-    st.busy = false
-    if failed then st.failed = mtime end
-  end
-  local function drawn()
-    local size = Snacks.image.util.dim(png)
-    local info = Snacks.image.convert.convert { src = png }
-    local step = info.steps[#info.steps]
-    -- hand snacks the `identify` result so it skips spawning magick for every page
-    vim.fn.writefile({ string.format("PNG %dx%d 72x72", size.width, size.height) }, step.file)
-    local img = Snacks.image.image.new(png)
-    local function place()
-      if not alive() then
-        Snacks.image.terminal.request { a = "d", d = "I", i = img.id }
-        os.remove(png)
-        return
-      end
-      release()
-      install(v, buf, page, img, png, level, mtime, hlkey)
-      set_status(buf)
-      pump(buf)
-    end
-    if img.sent then return place() end
-    img.placements[-seq] = { update = function() img.placements[-seq] = nil; place() end }
-  end
-
   local cmd = { "pdftoppm", "-png", "-singlefile", "-r", string.format("%.2f", dpi), "-f", page, "-l", page, v.pdf, prefix }
   vim.system(vim.tbl_map(tostring, cmd), {}, vim.schedule_wrap(function(r)
-    if r.code ~= 0 or not alive() then
-      os.remove(png)
-      return release(r.code ~= 0)
-    end
-    local paint = highlight_cmd(v, page, dpi, png)
-    if not paint then return drawn() end
-    vim.system(paint, {}, vim.schedule_wrap(function()
-      if not alive() then
-        os.remove(png)
-        return release()
+    local alive = views[buf] == v and v.gen == gen and vim.api.nvim_buf_is_valid(buf)
+    if r.code ~= 0 or not alive then
+      os.remove(base)
+      if alive then
+        v.jobs = v.jobs - 1
+        st.busy = false
+        st.failed = mtime
       end
-      drawn()
-    end))
+      return
+    end
+    present(v, buf, page, gen, seq, base, dpi, level, mtime, hlkey, true)
   end))
+end
+
+--- Repaint the highlights of an already rendered page from its clean raster (no pdftoppm).
+local function start_repaint(v, buf, page)
+  local st = v.pages[page]
+  st.busy = true
+  v.seq = v.seq + 1
+  present(v, buf, page, v.gen, v.seq, st.base, st.dpi, st.level, st.mtime, hl_for(v, page), false)
 end
 
 --- Pages that should be drawn for the current window position: page -> level, in priority order.
@@ -358,9 +398,14 @@ function pump(buf)
   for p, st in pairs(v.pages) do
     if st.level > 0 and not st.busy and (p < p0 - FAR - 2 or p > p1 + FAR + 2) then clear_page(v, buf, p) end
   end
+  for p, st in pairs(v.pages) do -- cheap: no rendering involved, so no slot needed
+    if st.level > 0 and not st.busy and st.base and st.mtime == v.mtime and want[p] and st.hlkey ~= hl_for(v, p) then
+      start_repaint(v, buf, p)
+    end
+  end
   for _, p in ipairs(order) do
     if v.jobs >= JOBS then break end
-    v.pages[p] = v.pages[p] or { level = 0, hlkey = 0 }
+    v.pages[p] = v.pages[p] or { level = 0, hlkey = "" }
     local st = v.pages[p]
     if not st.busy and st.failed ~= v.mtime then
       local level
@@ -368,7 +413,7 @@ function pump(buf)
         level = (p >= p0 and p <= p1 and want[p] == 2) and 1 or want[p]
       elseif st.level < want[p] then
         level = want[p]
-      elseif st.mtime ~= v.mtime or st.hlkey ~= hl_for(v, p) then
+      elseif st.mtime ~= v.mtime then
         level = st.level == 1 and 1 or 2
       end
       if level then start_job(v, buf, p, level) end
@@ -388,6 +433,7 @@ function relayout(buf, anchor)
     local st = v.pages[p]
     if st.img then Snacks.image.terminal.request { a = "d", d = "I", i = st.img.id } end
     if st.png then os.remove(st.png) end
+    if st.base then os.remove(st.base) end
   end
   vim.api.nvim_buf_clear_namespace(buf, ns, 0, -1)
   local b = build_layout(v, W, cw, ch)
@@ -409,7 +455,7 @@ function M.refresh(buf, page)
   if changed then
     v.mtime = now
     v.epoch = v.epoch + 1
-    v.words, v.links, v.hits, v.by_page = nil, nil, {}, {}
+    v.words, v.links, v.hits, v.by_page, v.hover = nil, nil, {}, {}, nil
     read_info(v)
   end
   local win = win_of(buf)
@@ -643,13 +689,8 @@ function M.pick_link(buf)
   end)
 end
 
---- Mouse click: follow the link under the pointer.
-function M.click(buf)
-  local v = views[buf]
-  local m = vim.fn.getmousepos()
-  local win = win_of(buf)
-  if not v or not win or m.winid ~= win or not v.lay then return end
-  vim.api.nvim_set_current_win(win)
+--- The page and link under a mouse position (`m` from getmousepos), once the links are loaded.
+local function link_at(v, win, m)
   local row = m.line - 1
   local page = page_at_row(v, row)
   local L = v.lay[page]
@@ -660,17 +701,41 @@ function M.click(buf)
   local s = size_of(v, page)
   local px, py = fx * s[1], fy * s[2]
   local tol = 0.5 * s[2] / L.rows -- half a cell, in pt
+  local best, dist = nil, math.huge
+  for _, l in ipairs((v.links or {})[page] or {}) do
+    local ex = math.max(l[1] - px, 0, px - l[3])
+    local ey = math.max(l[2] - py, 0, py - l[4])
+    local d = math.sqrt(ex * ex + ey * ey)
+    if d <= tol and d < dist then best, dist = l, d end
+  end
+  return page, best
+end
+
+--- Mouse click: follow the link under the pointer.
+function M.click(buf)
+  local v = views[buf]
+  local m = vim.fn.getmousepos()
+  local win = win_of(buf)
+  if not v or not win or m.winid ~= win or not v.lay then return end
+  vim.api.nvim_set_current_win(win)
   load_links(v, function()
     if views[buf] ~= v then return end
-    local best, dist = nil, math.huge
-    for _, l in ipairs(v.links[page] or {}) do
-      local ex = math.max(l[1] - px, 0, px - l[3])
-      local ey = math.max(l[2] - py, 0, py - l[4])
-      local d = math.sqrt(ex * ex + ey * ey)
-      if d <= tol and d < dist then best, dist = l, d end
-    end
-    if best then M.follow(buf, best) end
+    local _, link = link_at(v, win, m)
+    if link then M.follow(buf, link) end
   end)
+end
+
+--- Mouse moved: the link under the pointer turns blue (painted onto the page from its clean raster).
+function M.hover(buf)
+  local v = views[buf]
+  local m = vim.fn.getmousepos()
+  local win = win_of(buf)
+  if not v or not win or m.winid ~= win or not v.lay then return end
+  if not v.links then return load_links(v, function() end) end -- the next move finds them
+  local page, link = link_at(v, win, m)
+  if (v.hover and v.hover.link) == link then return end
+  v.hover = link and { page = page, link = link } or nil
+  pump(buf)
 end
 
 local function highlight_pages(v)
@@ -776,6 +841,7 @@ local function teardown(buf)
   for _, st in pairs(v.pages) do
     if st.img then Snacks.image.terminal.request { a = "d", d = "I", i = st.img.id } end
     if st.png then os.remove(st.png) end
+    if st.base then os.remove(st.base) end
   end
   if v.timer and not v.timer:is_closing() then v.timer:stop(); v.timer:close() end
 end
@@ -802,8 +868,8 @@ function M.attach(buf, pdf)
       vim.keymap.set("n", k, fn, { buffer = buf, desc = "PDF: " .. desc })
     end
   end
-  map({ "k", "<Down>" }, function() M.scroll(buf, 3 * vim.v.count1) end, "scroll down")
-  map({ "j", "<Up>" }, function() M.scroll(buf, -3 * vim.v.count1) end, "scroll up")
+  map({ "<Down>" }, function() M.scroll(buf, 3 * vim.v.count1) end, "scroll down")
+  map({ "<Up>" }, function() M.scroll(buf, -3 * vim.v.count1) end, "scroll up")
   map({ "+", "=", "<C-ScrollWheelUp>" }, function() M.zoom(buf, ZOOM_STEP) end, "zoom in")
   map({ "-", "<C-ScrollWheelDown>" }, function() M.zoom(buf, 1 / ZOOM_STEP) end, "zoom out")
   map({ "0" }, function() M.zoom(buf) end, "fit width")
@@ -814,6 +880,7 @@ function M.attach(buf, pdf)
   map({ "N" }, function() M.next_hit(buf, -1) end, "previous match")
   map({ "<Esc>" }, function() M.search(buf, nil) end, "clear search")
   map({ "<LeftMouse>" }, function() M.click(buf) end, "follow link")
+  map({ "<MouseMove>" }, function() M.hover(buf) end, "highlight the link under the pointer")
   map({ "f" }, function() M.pick_link(buf) end, "pick a link on the page")
   map({ "<C-o>", "<BS>" }, function() M.back(buf) end, "back from a link")
   map({ "q" }, function() vim.cmd.bdelete { bang = true } end, "close")
@@ -827,12 +894,15 @@ function M.attach(buf, pdf)
   end))
 
   local saved = {} ---@type table<number, table>
+  local moves ---@type boolean? mousemoveevent before the viewer turned it on (needed for link hover)
   local group = vim.api.nvim_create_augroup("pdfview" .. buf, { clear = true })
   vim.api.nvim_create_autocmd("BufWinEnter", {
     group = group,
     buffer = buf,
     callback = function()
       local win = vim.api.nvim_get_current_win()
+      moves = moves or vim.o.mousemoveevent
+      vim.o.mousemoveevent = true
       saved[win] = {}
       for name, value in pairs(WINOPTS) do
         saved[win][name] = vim.wo[win][name]
@@ -848,6 +918,7 @@ function M.attach(buf, pdf)
       local win = vim.api.nvim_get_current_win()
       for name, value in pairs(saved[win] or {}) do vim.wo[win][name] = value end
       saved[win] = nil
+      if moves ~= nil then vim.o.mousemoveevent = moves; moves = nil end
     end,
   })
   vim.api.nvim_create_autocmd({ "BufUnload", "BufWipeout" }, {
