@@ -290,6 +290,11 @@ echo 'test' | pandoc -o /tmp/t.pdf   # exits 0 and writes a PDF, or names the mi
 - `docker`, `docker-runit`, `docker-compose`, `docker-buildx` — container
   runtime + BuildKit CLI plugin. `install.sh --system` activates the `docker`
   runit service and adds the invoking user to the `docker` group
+- `virtualbox`, `virtualbox-host-dkms` — VM host for `.ova` appliances. Uses
+  the DKMS modules (built against `linux-headers`) because the prebuilt
+  `virtualbox-host-modules-artix` lags the `virtualbox` version. `install.sh
+  --system` loads `vboxdrv`/`vboxnetadp`/`vboxnetflt` at boot and adds the
+  invoking user to `vboxusers`
 - `aws-cli-v2` — AWS CLI v2 (`aws`). Plain `aws-cli` is the legacy v1
 - `aws-sam-cli-bin` (AUR) — AWS SAM CLI (`sam`). The `-bin` build tracks
   upstream releases; the source `aws-sam-cli` lags months behind. `sam local`

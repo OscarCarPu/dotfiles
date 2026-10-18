@@ -87,6 +87,7 @@ USER_RUNIT_SERVICES=(
 declare -A SYSTEM_DOTFILES=(
     ["configs/sysctl.d/90-disable-ipv6.conf"]="/etc/sysctl.d/90-disable-ipv6.conf"
     ["configs/modules-load.d/evdi.conf"]="/etc/modules-load.d/evdi.conf"
+    ["configs/modules-load.d/virtualbox.conf"]="/etc/modules-load.d/virtualbox.conf"
     ["configs/NetworkManager/dispatcher.d/10-eth-no-offloads"]="/etc/NetworkManager/dispatcher.d/10-eth-no-offloads"
     ["configs/udev/rules.d/50-dock-usb-no-autosuspend.rules"]="/etc/udev/rules.d/50-dock-usb-no-autosuspend.rules"
     ["runit/system-overrides/elogind-run"]="/etc/runit/sv/elogind/run"
@@ -127,7 +128,15 @@ SYSTEM_GROUPS=(
     uucp
     adbusers
     realtime
+    vboxusers
 )
+
+# Every link target is built from $(pwd), so running from anywhere else would
+# create dangling links (including /etc/pacman.conf in --system mode).
+if [ "$(pwd -P)" != "$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd -P)" ]; then
+    echo "Run from the repo root: cd ~/.dotfiles && bash install.sh" >&2
+    exit 1
+fi
 
 DOTFILES_DIR=$(pwd)
 
