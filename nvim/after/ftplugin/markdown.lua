@@ -65,19 +65,27 @@ local function alnum(str)
   return str:lower():gsub("[^%w\128-\255]", "")
 end
 
-local hay_stamp, hay_cache -- the PDF's text, per version of the file (the cursor moves far more often than it changes)
+local hay_stamp, hay_cache -- per page: the PDF's text (letters/digits only) and the height of each of its characters
 
 local function cursor_page()
   local st = vim.uv.fs_stat(pdf)
   local stamp = st and (st.mtime.sec .. "." .. st.mtime.nsec)
   if stamp ~= hay_stamp or not hay_cache then
-    local r = vim.system({ "pdftotext", pdf, "-" }):wait()
-    local pages = vim.split(r.stdout or "", "\f", { plain = true })
-    if pages[#pages] == "" then table.remove(pages) end
-    hay_stamp, hay_cache = stamp, vim.tbl_map(alnum, pages)
+    local r = vim.system({ "pdftotext", "-bbox", pdf, "-" }):wait()
+    local pages = {}
+    for chunk in (r.stdout or ""):gmatch "<page [^>]*>.-</page>" do
+      local ph = tonumber(chunk:match 'height="([%d.]+)"') or 1
+      local text, ys = {}, {}
+      for y0, y1, word in chunk:gmatch '<word xMin="[%d.]+" yMin="([%d.]+)" xMax="[%d.]+" yMax="([%d.]+)">([^<]*)</word>' do
+        local w = alnum(word)
+        text[#text + 1] = w
+        ys[#ys + 1] = { #w, (tonumber(y0) + tonumber(y1)) / 2 / ph }
+      end
+      pages[#pages + 1] = { text = table.concat(text), ys = ys }
+    end
+    hay_stamp, hay_cache = stamp, pages
   end
-  local hay = hay_cache
-  local pages = hay
+  local pages = hay_cache
   if #pages == 0 then return 1 end
   local lines = vim.api.nvim_buf_get_lines(buf, 0, -1, false)
   local row = vim.api.nvim_win_get_cursor(vim.fn.bufwinid(buf) > 0 and vim.fn.bufwinid(buf) or 0)[1]
@@ -86,8 +94,15 @@ local function cursor_page()
       local text = lines[i] and alnum((lines[i]:gsub("%$[^$]*%$", ""))) or ""
       if #text >= 12 then
         local needle = text:sub(1, 24)
-        for page, h in ipairs(hay) do
-          if h:find(needle, 1, true) then return page end
+        for page, h in ipairs(pages) do
+          local at = h.text:find(needle, 1, true)
+          if at then
+            local n = 0
+            for _, w in ipairs(h.ys) do
+              n = n + w[1]
+              if n >= at then return page, w[2] end
+            end
+          end
         end
       end
     end
@@ -116,7 +131,8 @@ local function render(done)
             os.rename(tmp, typ)
             os.rename(pdf_tmp, pdf)
             if view_buf and vim.api.nvim_buf_is_valid(view_buf) then
-              require("pdfview").refresh(view_buf, cursor_page())
+              local page, fy = cursor_page()
+              require("pdfview").refresh(view_buf, page, fy)
             end
             vim.diagnostic.reset(ns, buf)
             last_error = nil
@@ -212,7 +228,8 @@ local function launch_terminal()
     end,
   })
   show_preview()
-  require("pdfview").refresh(view_buf, cursor_page())
+  local page, fy = cursor_page()
+  require("pdfview").refresh(view_buf, page, fy)
 end
 
 local function start(mode)
@@ -244,6 +261,14 @@ vim.keymap.set("n", "<leader>mt", function()
   elseif server then stop()
   else start "terminal" end
 end, { desc = "Markdown: live Typst preview (buffer in a split)", buffer = true })
+
+-- the wheel acts on the window under the pointer but mappings come from the focused buffer (this one),
+-- so ctrl+wheel over the preview has to be forwarded to the viewer
+for key, factor in pairs { ["<C-ScrollWheelUp>"] = 1.25, ["<C-ScrollWheelDown>"] = 1 / 1.25 } do
+  vim.keymap.set({ "n", "i" }, key, function()
+    if view_buf and vim.fn.getmousepos().winid == vim.fn.bufwinid(view_buf) then require("pdfview").zoom(view_buf, factor) end
+  end, { buffer = true, desc = "Markdown: zoom the preview under the pointer" })
+end
 
 vim.keymap.set("n", "<leader>me", function()
   local pdf = string.format("%s/%s.pdf", dir, base)

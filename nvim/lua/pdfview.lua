@@ -59,6 +59,7 @@ local GAP = 1 -- blank rows between pages
 local NEAR, FAR = 2, 6 -- pages beyond the window drawn sharp / at low resolution
 local JOBS = 3 -- parallel pdftoppm processes
 local LOW = 0.3 -- resolution of the quick first pass
+local SUPER = 1.5 -- sharp pass is rasterised at this multiple of the screen resolution; kitty averages it down
 local PLACEHOLDER = vim.fn.nr2char(0x10EEEE)
 local ns = vim.api.nvim_create_namespace "pdfview"
 local WINOPTS = {
@@ -143,7 +144,7 @@ local function same_layout(a, b)
 end
 
 local function page_at_row(v, row)
-  local lo, hi = 1, v.n
+  local lo, hi = 1, math.max(1, #v.lay) -- v.n can already be the new document's while the layout is the old one
   while lo < hi do
     local mid = math.ceil((lo + hi) / 2)
     if v.lay[mid].row <= row then lo = mid else hi = mid - 1 end
@@ -345,7 +346,7 @@ local function start_job(v, buf, page, level)
   local seq, gen, mtime, hlkey = v.seq, v.gen, v.mtime, hl_for(v, page)
   local prefix = string.format("%s/%d-%d-%d", dir, buf, page, seq)
   local base = prefix .. ".png"
-  local dpi = v.scale * 72 * (level == 1 and LOW or 1)
+  local dpi = v.scale * 72 * (level == 1 and LOW or SUPER)
   vim.fn.mkdir(dir, "p")
   local cmd = { "pdftoppm", "-png", "-singlefile", "-r", string.format("%.2f", dpi), "-f", page, "-l", page, v.pdf, prefix }
   vim.system(vim.tbl_map(tostring, cmd), {}, vim.schedule_wrap(function(r)
@@ -447,7 +448,7 @@ function relayout(buf, anchor)
 end
 
 --- Redraw; re-reads the PDF when it changed on disk and scrolls to `page` if given and not on screen.
-function M.refresh(buf, page)
+function M.refresh(buf, page, fy)
   local v = views[buf]
   if not v then return end
   local now = stamp(v.pdf)
@@ -469,14 +470,22 @@ function M.refresh(buf, page)
     pump(buf)
   end
   if changed and v.query then M.search(buf, v.query, true) end
-  if page and page ~= v.page then M.goto_page(buf, page) end
+  if page and (fy or page ~= v.page) then M.goto_page(buf, page, fy) end
 end
 
-function M.goto_page(buf, page)
+function M.goto_page(buf, page, fy)
   local v = views[buf]
   local win = win_of(buf)
   if not v or not win or not v.lay then return end
-  scroll_to(v, win, v.lay[math.max(1, math.min(page, v.n))].row, 0, nil)
+  local L = v.lay[math.max(1, math.min(page, v.n))]
+  if not fy then
+    return scroll_to(v, win, L.row, 0, nil)
+  end
+  -- a page taller than the window: follow the spot on it, unless that is already well inside the window
+  local row = L.row + fy * L.rows
+  local top, bot = top_bot(win)
+  local h = bot - top
+  if row < top - 1 + h * 0.15 or row > bot - 1 - h * 0.15 then scroll_to(v, win, row, 0.4, v.zoom > 1 and leftcol(win) + win_cols(win) / 2 or nil) end
 end
 
 --- Scroll by `lines` (positive = down).
