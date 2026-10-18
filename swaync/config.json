@@ -2,5 +2,5 @@
   "positionX": "right",
   "positionY": "top",
   "timeout": 5,
-  "timeout-critical": 0
+  "timeout-critical": 30
 }
