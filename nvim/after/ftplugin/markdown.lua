@@ -8,7 +8,7 @@ local buf = vim.api.nvim_get_current_buf()
 local dir = vim.fn.expand "%:p:h"
 local base = vim.fn.expand "%:t:r"
 local typ = string.format("%s/.%s.preview.typ", dir, base)
-local server, timer, last_error, view_buf
+local server, timer, last_error, view_buf, control_port
 
 local function free_port()
   local sock = vim.uv.new_tcp()
@@ -110,6 +110,32 @@ local function cursor_page()
   return math.max(1, math.min(#pages, math.ceil(row / #lines * #pages)))
 end
 
+-- browser preview: tinymist's control plane scrolls it to the Typst line holding the text around the cursor
+local function scroll_browser()
+  if not control_port or view_buf then return end
+  local win = vim.fn.bufwinid(buf)
+  local row = vim.api.nvim_win_get_cursor(win > 0 and win or 0)[1]
+  local lines = vim.api.nvim_buf_get_lines(buf, 0, -1, false)
+  local out = vim.fn.readfile(typ)
+  for d = 0, 12 do
+    for _, i in ipairs(d == 0 and { row } or { row - d, row + d }) do
+      local text = lines[i] and alnum((lines[i]:gsub("%$[^$]*%$", ""))) or ""
+      if #text >= 12 then
+        local needle = text:sub(1, 24)
+        for n, l in ipairs(out) do
+          if alnum(l):find(needle, 1, true) then
+            local js = [[const w = new WebSocket(process.argv[1]); w.onopen = () => { w.send(JSON.stringify({
+              event: "panelScrollTo", filepath: process.argv[2], line: +process.argv[3], character: 0 })); setTimeout(() => process.exit(), 200) }
+              w.onerror = () => process.exit(1)]]
+            vim.system { "node", "-e", js, "ws://127.0.0.1:" .. control_port, typ, tostring(n - 1) }
+            return
+          end
+        end
+      end
+    end
+  end
+end
+
 local function render(done)
   if busy then dirty = true; return end
   busy = true
@@ -134,6 +160,7 @@ local function render(done)
               local page, fy = cursor_page()
               require("pdfview").refresh(view_buf, page, fy)
             end
+            vim.defer_fn(scroll_browser, 300) -- let tinymist recompile the new .typ first
             vim.diagnostic.reset(ns, buf)
             last_error = nil
           else
@@ -165,7 +192,7 @@ local function stop()
   os.remove(pdf)
   os.remove(pdf_tmp)
   vim.diagnostic.reset(ns, buf)
-  busy, dirty, last_error = false, false, nil
+  busy, dirty, last_error, control_port = false, false, nil, nil
   vim.api.nvim_clear_autocmds { group = "MdPreview" .. buf }
 end
 
@@ -183,6 +210,7 @@ end
 local function launch_browser()
   -- own free ports so previews never collide
   local data, control = free_port(), free_port()
+  control_port = control
   server = vim.fn.jobstart {
     "tinymist", "preview", "--no-open", "--root", dir,
     "--data-plane-host", "127.0.0.1:" .. data,

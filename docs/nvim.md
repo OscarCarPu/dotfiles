@@ -101,7 +101,7 @@ hidden `.name.preview.typ`, previewed with `tinymist`. `$...$` is **Typst math**
 
 | Key (markdown buffer) | Action |
 |---|---|
-| `<leader>mp` | live preview in a new browser window, updates as you type; compile errors show as a warning |
+| `<leader>mp` | live preview in a new browser window, updates as you type and scrolls to the text you are editing (via tinymist's control port, needs `node`); compile errors show as a warning |
 | `<leader>mt` | live preview as a buffer in a vertical split (listed in the tabufline like any file); redraws as you type and jumps to the page of the text you are editing; press again to close it, or to re-show it if hidden. Page keys as in PDFs below |
 | `<leader>me` | export `name.pdf` next to the note |
 
