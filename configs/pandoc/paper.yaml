@@ -34,4 +34,5 @@ variables:
 filters:
   - typst-math.lua
   - typst-boxes.lua
+  - typst-mermaid.lua
 citeproc: true

@@ -105,6 +105,8 @@ hidden `.name.preview.typ`, previewed with `tinymist`. `$...$` is **Typst math**
 | `<leader>mt` | live preview as a buffer in a vertical split (listed in the tabufline like any file); redraws as you type and jumps to the page of the text you are editing; press again to close it, or to re-show it if hidden. Page keys as in PDFs below |
 | `<leader>me` | export `name.pdf` next to the note |
 
+Mermaid: a ```` ```mermaid ```` block renders as a diagram (`typst-mermaid.lua`, needs `mmdc`; cached in `.mermaid/` beside the file, so add it to the project's .gitignore if unwanted).
+
 Framed blocks use pandoc fenced divs (`typst-boxes.lua`): `::: box` ... `:::` draws a bordered square
 (`::: {.box title="Definición"}` adds a bold title), `::: nota` a shaded block with a left bar. Math,
 lists, etc. work inside.

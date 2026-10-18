@@ -104,7 +104,7 @@ local function render(done)
     if done then vim.schedule(done) end
   end
   local text = table.concat(vim.api.nvim_buf_get_lines(buf, 0, -1, false), "\n")
-  local job = vim.fn.jobstart({ "pandoc", "-d", "paper", "--resource-path", dir, "-o", tmp }, {
+  local job = vim.fn.jobstart({ "pandoc", "-d", "paper", "--resource-path", dir, "-M", "mermaid_dir=" .. dir, "-o", tmp }, {
     stdin = "pipe",
     on_exit = function(_, code)
       if not server then os.remove(tmp); busy = false; return end

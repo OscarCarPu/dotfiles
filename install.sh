@@ -44,6 +44,7 @@ declare -A DOTFILES=(
     ["configs/pandoc/paper.yaml"]="$HOME/.local/share/pandoc/defaults/paper.yaml"
     ["configs/pandoc/typst-math.lua"]="$HOME/.local/share/pandoc/filters/typst-math.lua"
     ["configs/pandoc/typst-boxes.lua"]="$HOME/.local/share/pandoc/filters/typst-boxes.lua"
+    ["configs/pandoc/typst-mermaid.lua"]="$HOME/.local/share/pandoc/filters/typst-mermaid.lua"
     ["configs/zettlr/config.json"]="$HOME/.config/Zettlr/config.json"
     ["configs/zettlr/custom.css"]="$HOME/.config/Zettlr/custom.css"
     ["configs/zettlr/user.dic"]="$HOME/.config/Zettlr/user.dic"
