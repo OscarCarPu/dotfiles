@@ -42,7 +42,6 @@ Based on [NvChad v2.5](https://github.com/NvChad/NvChad) with the **oxocarbon** 
 | **conform.nvim** | Code formatting (stylua, gofumpt, ktlint, rustfmt, ruff) |
 | **nvim-lspconfig** | LSP support (HTML, CSS, Go, Rust, Kotlin, XML, Svelte, Python) |
 | **nvim-treesitter** | Syntax highlighting (vim, lua, vimdoc, html, css, go, rust, kotlin, java, xml, markdown, svelte, js, ts, python) |
-| **typst-preview.nvim** | Live browser preview for Typst (`<leader>mp`, needs `tinymist`; LSP `tinymist`, formatter `typstyle`) |
 | **nvim-surround** | Surround text with brackets, quotes, tags, etc. |
 
 ## Editor Settings
@@ -93,6 +92,8 @@ Based on [NvChad v2.5](https://github.com/NvChad/NvChad) with the **oxocarbon** 
 nvim-tree opens automatically on startup and can be toggled with `Space + e`.
 
 ## Markdown → Typst
+
+`.typ` buffers use the same preview and the same keys (`lua/mdpreview.lua`), compiling the buffer directly instead of going through pandoc.
 
 Markdown is rendered through Typst, never LaTeX: `pandoc -d paper` (defaults in
 `configs/pandoc/paper.yaml`, math filter `typst-math.lua`) turns the buffer into a

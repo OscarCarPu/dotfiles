@@ -161,15 +161,6 @@ return {
     },
   },
 
-  -- Typst live preview (browser, updates as you type)
-  {
-    "chomosuke/typst-preview.nvim",
-    ft = "typst",
-    opts = {
-      dependencies_bin = { tinymist = "tinymist" },
-    },
-  },
-
   -- Inline images (kitty graphics protocol) in buffers: PDF viewer and Typst preview
   {
     "folke/snacks.nvim",
