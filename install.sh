@@ -643,6 +643,8 @@ for script in "$SCRIPTS_DIR"/*; do
     link_file "$script" "$LOCAL_BIN/$script_name"
 done
 
+"$SCRIPTS_DIR/hide-launcher-entries"
+
 echo "Done."
 echo
 echo "Next:"

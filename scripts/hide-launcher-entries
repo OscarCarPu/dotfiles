@@ -1,0 +1,30 @@
+#!/usr/bin/env bash
+# Hide x42 plugin and game entries from the wofi launcher (drun).
+# System entries get a NoDisplay stub in ~/.local/share/applications, which
+# shadows the packaged file of the same name. Steam's own per-game shortcuts
+# already live there, so they are patched in place. Re-run after installing
+# new Steam games (install.sh calls it too).
+set -euo pipefail
+
+apps="$HOME/.local/share/applications"
+mkdir -p "$apps"
+
+hide() {
+    local f=$1
+    grep -q '^NoDisplay=true' "$f" || sed -i '0,/^\[Desktop Entry\]/s//[Desktop Entry]\nNoDisplay=true/' "$f"
+}
+
+for f in /usr/share/applications/com.x42_plugins.*.desktop; do
+    [ -e "$f" ] || continue
+    printf '[Desktop Entry]\nType=Application\nName=%s\nNoDisplay=true\n' "$(basename "$f" .desktop)" > "$apps/$(basename "$f")"
+done
+
+for f in /usr/share/applications/*.desktop; do
+    grep -qE '^Categories=.*\bGame\b' "$f" || continue
+    [ -e "$apps/$(basename "$f")" ] && continue
+    printf '[Desktop Entry]\nType=Application\nName=%s\nNoDisplay=true\n' "$(basename "$f" .desktop)" > "$apps/$(basename "$f")"
+done
+
+for f in "$apps"/*.desktop; do
+    grep -qE '^Categories=.*\bGame\b' "$f" && hide "$f"
+done
