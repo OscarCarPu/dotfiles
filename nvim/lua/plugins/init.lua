@@ -15,6 +15,19 @@ return {
     end,
   },
 
+  -- accept completion with Shift+Enter; plain Enter always inserts a newline
+  {
+    "hrsh7th/nvim-cmp",
+    opts = function(_, opts)
+      local cmp = require "cmp"
+      opts.mapping["<CR>"] = cmp.config.disable
+      opts.mapping["<S-CR>"] = cmp.mapping.confirm {
+        behavior = cmp.ConfirmBehavior.Insert,
+        select = true,
+      }
+    end,
+  },
+
   -- test new blink
   -- { import = "nvchad.blink.lazyspec" },
 
