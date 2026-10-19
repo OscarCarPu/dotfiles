@@ -8,7 +8,7 @@ local buf = vim.api.nvim_get_current_buf()
 local dir = vim.fn.expand "%:p:h"
 local base = vim.fn.expand "%:t:r"
 local typ = string.format("%s/.%s.preview.typ", dir, base)
-local server, timer, last_error, view_buf, control_port
+local server, timer, last_error, view_buf, scroller, last_target
 
 local function free_port()
   local sock = vim.uv.new_tcp()
@@ -81,7 +81,7 @@ local function cursor_page()
         text[#text + 1] = w
         ys[#ys + 1] = { #w, (tonumber(y0) + tonumber(y1)) / 2 / ph }
       end
-      pages[#pages + 1] = { text = table.concat(text), ys = ys }
+      pages[#pages + 1] = { text = table.concat(text), ys = ys, height = ph }
     end
     hay_stamp, hay_cache = stamp, pages
   end
@@ -100,7 +100,7 @@ local function cursor_page()
             local n = 0
             for _, w in ipairs(h.ys) do
               n = n + w[1]
-              if n >= at then return page, w[2] end
+              if n >= at then return page, w[2], h.height end
             end
           end
         end
@@ -110,30 +110,14 @@ local function cursor_page()
   return math.max(1, math.min(#pages, math.ceil(row / #lines * #pages)))
 end
 
--- browser preview: tinymist's control plane scrolls it to the Typst line holding the text around the cursor
+-- browser preview: tinymist's control plane scrolls it to the page position of the text around the cursor
 local function scroll_browser()
-  if not control_port or view_buf then return end
-  local win = vim.fn.bufwinid(buf)
-  local row = vim.api.nvim_win_get_cursor(win > 0 and win or 0)[1]
-  local lines = vim.api.nvim_buf_get_lines(buf, 0, -1, false)
-  local out = vim.fn.readfile(typ)
-  for d = 0, 12 do
-    for _, i in ipairs(d == 0 and { row } or { row - d, row + d }) do
-      local text = lines[i] and alnum((lines[i]:gsub("%$[^$]*%$", ""))) or ""
-      if #text >= 12 then
-        local needle = text:sub(1, 24)
-        for n, l in ipairs(out) do
-          if alnum(l):find(needle, 1, true) then
-            local js = [[const w = new WebSocket(process.argv[1]); w.onopen = () => { w.send(JSON.stringify({
-              event: "panelScrollTo", filepath: process.argv[2], line: +process.argv[3], character: 0 })); setTimeout(() => process.exit(), 200) }
-              w.onerror = () => process.exit(1)]]
-            vim.system { "node", "-e", js, "ws://127.0.0.1:" .. control_port, typ, tostring(n - 1) }
-            return
-          end
-        end
-      end
-    end
-  end
+  if not scroller or view_buf then return end
+  local page, fy, height = cursor_page()
+  local target = string.format("%d %f", page, (fy or 0) * (height or 0))
+  if target == last_target then return end -- the viewer animates every scroll, so only send real moves
+  last_target = target
+  vim.fn.chansend(scroller, target .. "\n")
 end
 
 local function render(done)
@@ -154,7 +138,9 @@ local function render(done)
         vim.schedule(function()
           if not server then os.remove(tmp); busy = false; return end
           if r.code == 0 then
-            os.rename(tmp, typ)
+            -- rewritten in place: tinymist stops watching a file that gets replaced by a rename
+            vim.fn.writefile(vim.fn.readfile(tmp, "b"), typ, "b")
+            os.remove(tmp)
             os.rename(pdf_tmp, pdf)
             if view_buf and vim.api.nvim_buf_is_valid(view_buf) then
               local page, fy = cursor_page()
@@ -182,6 +168,7 @@ end
 local function stop()
   if timer then timer:stop(); timer:close(); timer = nil end
   if server then vim.fn.jobstop(server); server = nil end
+  if scroller then vim.fn.jobstop(scroller); scroller = nil end
   if view_buf then
     local vb = view_buf
     view_buf = nil
@@ -192,7 +179,7 @@ local function stop()
   os.remove(pdf)
   os.remove(pdf_tmp)
   vim.diagnostic.reset(ns, buf)
-  busy, dirty, last_error, control_port = false, false, nil, nil
+  busy, dirty, last_error, last_target = false, false, nil, nil
   vim.api.nvim_clear_autocmds { group = "MdPreview" .. buf }
 end
 
@@ -210,7 +197,15 @@ end
 local function launch_browser()
   -- own free ports so previews never collide
   local data, control = free_port(), free_port()
-  control_port = control
+  -- tinymist drops its editor channel (and with it the live updates) when a control connection closes,
+  -- so one connection stays open for the whole preview and gets a page and offset per scroll
+  local js = [[const w = new WebSocket(process.argv[1]); let buf = ""
+    process.stdin.on("data", d => { buf += d; let i
+      while ((i = buf.indexOf("\n")) >= 0) {
+        const [page_no, y] = buf.slice(0, i).split(" ").map(Number); buf = buf.slice(i + 1)
+        if (w.readyState === 1) w.send(JSON.stringify({ event: "panelScrollByPosition", position: { page_no, x: 0, y } }))
+      } })]]
+  scroller = vim.fn.jobstart({ "node", "-e", js, "ws://127.0.0.1:" .. control })
   server = vim.fn.jobstart {
     "tinymist", "preview", "--no-open", "--root", dir,
     "--data-plane-host", "127.0.0.1:" .. data,
