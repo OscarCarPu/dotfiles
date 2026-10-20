@@ -3,7 +3,7 @@
     "from": "User",
     "is_custom_defined": "1",
     "version": "2.4.0.0",
-    "inherits": "Prusa Generic ASA @CORE One HF 0.4",
+    "inherits": "Prusa Generic ASA @CORE One",
     "compatible_printers": ["core-one-obxidian"],
     "compatible_printers_condition": "",
     "bed_type": ["Textured PEI Plate"],
