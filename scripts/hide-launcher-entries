@@ -9,6 +9,9 @@ set -euo pipefail
 apps="$HOME/.local/share/applications"
 mkdir -p "$apps"
 
+# Games that stay visible in the launcher.
+keep=(steam.desktop Factorio.desktop)
+
 hide() {
     local f=$1
     grep -q '^NoDisplay=true' "$f" || sed -i '0,/^\[Desktop Entry\]/s//[Desktop Entry]\nNoDisplay=true/' "$f"
@@ -21,10 +24,12 @@ done
 
 for f in /usr/share/applications/*.desktop; do
     grep -qE '^Categories=.*\bGame\b' "$f" || continue
+    [[ " ${keep[*]} " == *" $(basename "$f") "* ]] && continue
     [ -e "$apps/$(basename "$f")" ] && continue
     printf '[Desktop Entry]\nType=Application\nName=%s\nNoDisplay=true\n' "$(basename "$f" .desktop)" > "$apps/$(basename "$f")"
 done
 
 for f in "$apps"/*.desktop; do
+    [[ " ${keep[*]} " == *" $(basename "$f") "* ]] && continue
     grep -qE '^Categories=.*\bGame\b' "$f" && hide "$f"
 done
