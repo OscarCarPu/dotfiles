@@ -10,7 +10,7 @@ apps="$HOME/.local/share/applications"
 mkdir -p "$apps"
 
 # Games that stay visible in the launcher.
-keep=(steam.desktop Factorio.desktop)
+keep=(steam.desktop Factorio.desktop org.prismlauncher.PrismLauncher.desktop)
 
 hide() {
     local f=$1
