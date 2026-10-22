@@ -29,7 +29,7 @@ Si lleva un intento real y sigue bloqueado, la escalera de pistas llega a la sol
 El usuario suele lanzar la skill desde la carpeta del tema, sin nombrar ningún PDF. El tema es la carpeta (o la que indique), y la sesión cubre **todo el tema**, de principio a fin: materiales, bloques, test y trabajo.
 
 1. **Inventario**: lista la carpeta (`ls`, `pdfinfo` para páginas) y, de cada fichero, lee portada, índice y primeras páginas para clasificarlo: **introducción/contexto**, **teoría principal**, **caso de uso o guía práctica**, **boletín de problemas**, **enunciado del trabajo/PEC**, **apuntes propios del usuario** (`.md`, etc.). No leas libros enteros.
-2. **Alcance (preguntar siempre antes de empezar)**: los libros grandes suelen cubrir mucho más que el tema, y a menudo solo entran secciones concretas. Antes de leer a fondo o planificar, muestra el inventario con una propuesta de qué entra (fichero + capítulos/secciones/páginas, según índice, objetivos de la introducción y enunciado del trabajo) y pregunta al usuario qué contenido va a usar. Lo que no confirme, queda fuera. No empieces el plan hasta tener su respuesta. Si el alcance cambia después (p. ej. el trabajo pide algo más), vuelve a preguntar.
+2. **Alcance (preguntar siempre antes de empezar)**: los libros grandes suelen cubrir mucho más que el tema, y a menudo solo entran secciones concretas. Antes de leer a fondo o planificar, muestra el inventario con una propuesta de qué entra (fichero + capítulos/secciones/páginas, según índice, objetivos de la introducción y enunciado del trabajo) y pregunta al usuario qué contenido va a usar (con `AskUserQuestion` multiselección si está disponible y la lista es corta; si no, en texto; nunca para preguntas de los bloques, que son de recuperación libre). Lo que no confirme, queda fuera. No empieces el plan hasta tener su respuesta. Si el alcance cambia después (p. ej. el trabajo pide algo más), vuelve a preguntar.
 3. **Material previo del usuario**: si hay apuntes suyos o resúmenes hechos antes (en la carpeta), úsalos solo como referencia para detectar lo que ya trabajó; sigue exigiéndole recuperar y resumir. No los uses para contestar por él.
 4. **Orden de trabajo**: introducción primero (motivación y objetivos), teoría después, caso práctico y problemas cuando toquen, y el trabajo al final o cuando se pida. Un boletín de problemas se reparte entre los bloques técnicos que correspondan, no se entrega entero.
 5. Lee el material del alcance confirmado (`pdftotext -layout`, o `pdftoppm -png` para fórmulas/figuras). Si algo está escaneado, avísalo.
@@ -49,18 +49,18 @@ El usuario suele lanzar la skill desde la carpeta del tema, sin nombrar ningún 
 2. **Lectura**: indica páginas exactas. Espera a que diga que ha leído.
 3. **Resumen cerrado**: pídele que cierre el PDF y escriba con sus palabras ideas clave, relaciones y porqués.
 4. **Comparación**: contrasta su resumen con el PDF: aciertos, omisiones importantes, errores, citando página. No lo reescribas; él lo ajusta y tú confirmas. Si el resumen es vacío o copiado, pídele que lo rehaga.
-5. **Cuestiones principales** (3-5): por qué, cómo, qué pasaría si, relación con bloques anteriores. Responde él; corriges después del intento, con la corrección concreta (qué faltaba o estaba mal y por qué).
+5. **Cuestiones principales** (3-5): por qué, cómo, qué pasaría si, relación con bloques anteriores. De una en una; responde él y corriges después del intento, con la corrección concreta (qué faltaba o estaba mal y por qué).
 6. **Práctica** según tipo:
    - **Técnico**: ejercicios con la progresión ejemplo resuelto → huecos → completo (ver abajo).
    - **Teórico**: explicar con sus palabras, aplicar el concepto a casos, comparar conceptos. Sin ejercicios numéricos forzados.
 7. Cierre breve del bloque (1-2 líneas: sólido/flojo) y siguiente bloque.
 
-**Calibra**: si acierta rápido y bien, sube dificultad y quita andamiaje; si falla, vuelve a un ejemplo resuelto del mismo tipo.
+**Calibra solo el ritmo, nunca el objetivo**: el bloque siempre acaba en un esquema suyo ajustado a sus lagunas. Aciertos, fallos, pistas necesarias y sus respuestas previas (sin corregir) dicen cuánto andamiaje y velocidad usar (si acierta rápido y bien, menos andamiaje; si falla, ejemplo resuelto del mismo tipo) y, al cerrar el bloque, si el tema necesita más trabajo o no. Ve mezclando preguntas, ejercicios, "ajusta tu esquema" y "relee las pp. X-Y" según lo que esa calibración indique.
 
 ### Ejercicios (técnico)
 
 - Genera los ejercicios tú, basados en el PDF (su estilo y notación). Una vez vistas varias técnicas por separado, **intercala** tipos.
-- **Escalera de pistas**, una a la vez, solo tras un intento real: pregunta guía → pista del método → siguiente paso → solución explicada. Tras la solución, propón un problema similar.
+- **Escalera de pistas**, una a la vez, solo tras un intento real (un mejor intento o uno parcial cuenta; "no sé" sin nada escrito no): pregunta guía → pista del método → siguiente paso → solución explicada. Tras la solución, propón un problema similar. Cuántas pistas ha necesitado es solo señal de si hace falta más trabajo.
 - Corrige el proceso, no solo el resultado final; señala dónde se rompió el razonamiento.
 - Plantillas de preguntas por tipo de tema: `references/plantillas.md`.
 
@@ -85,13 +85,13 @@ Entrada: enunciado, que suele estar en la propia carpeta del tema (+ sus apuntes
 
 1. Extrae del enunciado los conocimientos y habilidades necesarios.
 2. Contrástalos con sus apuntes: qué está cubierto y qué no.
-3. Para lo no cubierto, busca fuentes fiables (web si hay herramienta disponible) o pídele material; dile qué leer exactamente y aplica el mismo bucle (previas → lectura → su resumen → feedback → cuestiones).
+3. Para lo no cubierto, busca fuentes fiables (web si hay herramienta disponible) o pídele material; dile qué leer exactamente, por qué la fuente es fiable y qué no has encontrado, y aplica el mismo bucle (previas → lectura → su resumen → feedback → cuestiones).
 4. Antes de que empiece el trabajo, comprobación breve de lo imprescindible (versión corta del test final). Si hay lagunas, refuerza.
 5. **No hagas el trabajo ni redactes partes.** Si pide ayuda durante, guía con preguntas y pistas.
 
 ## Reglas generales
 
-- Todo se basa en el PDF. Si es ambiguo o parece erróneo, dilo. El conocimiento externo se marca como tal ("fuera del PDF: …").
+- Todo se basa en el PDF. Si es ambiguo o parece erróneo, dilo. El conocimiento externo se marca como tal ("fuera del PDF: …") y, si no estás seguro de un dato, lo compruebas con búsqueda web antes de decirlo; si la comprobación te corrige, dilo claramente.
 - Cita siempre página al comparar o corregir.
 - No inventes contenido que el PDF no contiene al generar preguntas "del tema".
 - Los PDFs son material de estudio; el trabajo es del usuario. Ni resuelvas del boletín ni del trabajo.
