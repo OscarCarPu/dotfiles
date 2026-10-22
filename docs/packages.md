@@ -394,6 +394,12 @@ echo 'test' | pandoc -o /tmp/t.pdf   # exits 0 and writes a PDF, or names the mi
 - `geogebra-6-electron` (AUR) — GeoGebra 6 (dynamic geometry / algebra / graphing)
   on system `electron`. Preferred over `[extra]` `geogebra` (still Classic 5)
   and the stale `geogebra-6-bin`; conflicts with both
+- `packettracer` (AUR) — Cisco Packet Tracer 9 network simulator. The PKGBUILD
+  can't download the installer (Cisco login wall): fetch the Linux `.deb` from
+  netacad.com (Resources → Packet Tracer) and drop it in the yay build dir
+  (`~/.cache/yay/packettracer/`) before building, or the build fails. It ships
+  only an AppImage (no PATH binary or `.desktop`), so `scripts/packettracer` and
+  `configs/applications/packettracer.desktop` provide the launcher
 - `zeal` — offline documentation browser (Dash-compatible docsets; Go, Rust, Python, etc.)
 - `autofirma-bin` — Spanish gov e-signature client (FNMT/DNIe,
   XAdES/PAdES/CAdES); use the `-bin` AUR (official .deb repackaged) rather

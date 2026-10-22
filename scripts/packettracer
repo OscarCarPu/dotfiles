@@ -1,0 +1,5 @@
+#!/bin/bash
+# Cisco Packet Tracer launcher. The AUR package ships only the AppImage under
+# /usr/lib/packettracer, with no binary in PATH and no .desktop file.
+
+exec /usr/lib/packettracer/packettracer.AppImage "$@"
