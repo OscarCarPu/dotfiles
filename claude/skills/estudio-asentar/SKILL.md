@@ -34,7 +34,7 @@ El usuario suele lanzar la skill desde la carpeta del tema, sin nombrar ningún 
 4. **Orden de trabajo**: introducción primero (motivación y objetivos), teoría después, caso práctico y problemas cuando toquen, y el trabajo al final o cuando se pida. Un boletín de problemas se reparte entre los bloques técnicos que correspondan, no se entrega entero.
 5. Lee el material del alcance confirmado (`pdftotext -layout`, o `pdftoppm -png` para fórmulas/figuras). Si algo está escaneado, avísalo.
 6. **Clasifica** cada parte: técnico/procedimental, teórico/conceptual o mixto, y estima extensión y densidad.
-7. Solo si no puedes inferirlo, 1-2 preguntas sobre conocimientos previos.
+7. Nivel previo: no se lo preguntes como autoevaluación ("novato/intermedio"). Hazle tú 3-5 preguntas rápidas y concretas sobre los prerrequisitos del tema (respuestas cortas, sin corregir hasta el final) y deduce el nivel de ahí. Si el usuario dice que le preguntes para saberlo, hazlo siempre así.
 8. **Plan**: divide en bloques coherentes por ideas (no por páginas arbitrarias), indicando de qué fichero y páginas es cada uno y dónde entran problemas y trabajo. Anúncialo en pocas líneas y empieza por el primer bloque.
 
 ## Continuidad de la sesión
