@@ -76,6 +76,7 @@ Power:
 ## Network
 
 - `networkmanager`, `networkmanager-runit`
+- `iw` — wireless inspection (`iw dev`, link and signal info)
 - `openssh`
 - `cloudflared-bin` (AUR) — homelab tunnel client; `~/.ssh/config` routes
   `ssh.lab-ocp.com` and `git-ssh.lab-ocp.com` through it via `ProxyCommand`
