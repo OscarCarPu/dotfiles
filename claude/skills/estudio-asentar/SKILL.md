@@ -5,11 +5,11 @@ description: Guiar el estudio y asentamiento de un tema universitario (carpeta c
 
 # Estudio y asentamiento de un tema
 
-El usuario estudia; tú diseñas y corriges. Tú lees el PDF, decides el flujo y generas TODAS las preguntas, ejercicios y tests. El usuario lee, resume con material cerrado, responde y resuelve. Tono directo, respuestas cortas, un bloque cada vez, sin relleno.
+El usuario estudia; tú diseñas y corriges. Tú lees el PDF, decides el flujo y generas TODAS las preguntas, ejercicios y tests. El usuario lee, pregunta dudas, elabora su esquema, responde y resuelve. Tono directo, respuestas cortas, un bloque cada vez, sin relleno.
 
 ## Por qué este diseño (evidencia)
 
-- **Recuperación > releer/subrayar** (Dunlosky 2013; Karpicke y Blunt 2011): el resumen se escribe con el PDF cerrado.
+- **Recuperación > releer/subrayar** (Dunlosky 2013; Karpicke y Blunt 2011): pero solo tras comprender: con material complejo, recuperar de memoria justo después de una primera lectura sobrecarga y no aporta sobre releer (Redifer 2025, un estudio). Por eso primero se comprende y se hace el esquema con el PDF abierto, y la recuperación estricta va después, por escrito y en piezas pequeñas.
 - **Feedback corrector** casi duplica el efecto de la recuperación (Rowland 2014): tras cada intento, corrección concreta, no solo "correcto/incorrecto".
 - **Preguntas previas** mejoran lo preguntado (g≈0,5): se hacen antes de leer.
 - **Autoexplicación** (Bisra 2018): pedir "por qué/cómo".
@@ -35,7 +35,7 @@ El usuario suele lanzar la skill desde la carpeta del tema, sin nombrar ningún 
 5. Lee el material del alcance confirmado (`pdftotext -layout`, o `pdftoppm -png` para fórmulas/figuras). Si algo está escaneado, avísalo.
 6. **Clasifica** cada parte: técnico/procedimental, teórico/conceptual o mixto, y estima extensión y densidad.
 7. Nivel previo: no se lo preguntes como autoevaluación ("novato/intermedio"). Hazle tú 3-5 preguntas rápidas y concretas sobre los prerrequisitos del tema (respuestas cortas, sin corregir hasta el final) y deduce el nivel de ahí. Si el usuario dice que le preguntes para saberlo, hazlo siempre así.
-8. **Plan**: divide en bloques coherentes por ideas (no por páginas arbitrarias), indicando de qué fichero y páginas es cada uno y dónde entran problemas y trabajo. Anúncialo en pocas líneas y empieza por el primer bloque.
+8. **Plan**: divide en bloques coherentes por ideas (no por páginas arbitrarias), pequeños si el contenido es denso (p. ej. uno por método), indicando de qué fichero y páginas es cada uno y dónde entran problemas y trabajo. Anúncialo en pocas líneas y empieza por el primer bloque.
 
 ## Continuidad de la sesión
 
@@ -46,14 +46,15 @@ El usuario suele lanzar la skill desde la carpeta del tema, sin nombrar ningún 
 ## Bucle por bloque (de uno en uno)
 
 1. **Preguntas previas** (2-4) sobre lo que va a leer. Que responda aunque sea por intuición; los fallos no se penalizan ni se corrigen aún (se resolverán al leer).
-2. **Lectura**: indica páginas exactas. Espera a que diga que ha leído.
-3. **Resumen cerrado**: pídele que cierre el PDF y escriba con sus palabras ideas clave, relaciones y porqués.
-4. **Comparación**: contrasta su resumen con el PDF: aciertos, omisiones importantes, errores, citando página. No lo reescribas; él lo ajusta y tú confirmas. Si el resumen es vacío o copiado, pídele que lo rehaga.
-5. **Cuestiones principales** (3-5): por qué, cómo, qué pasaría si, relación con bloques anteriores. De una en una; responde él y corriges después del intento, con la corrección concreta (qué faltaba o estaba mal y por qué).
-6. **Práctica** según tipo:
+2. **Lectura por trozos**: indica páginas exactas y espera a que diga que ha leído. Si el contenido es denso (fórmulas, procedimientos, teoría con muchas relaciones), lee en trozos de unas 3-4 páginas, cortados por ideas. Repite 3-4 por cada trozo.
+3. **Dudas**: pregunta qué no ha entendido. Aclara en corto, citando página y guiando con una pregunta; no le hagas el esquema ni resuelvas lo que luego debe practicar. Si un tramo sigue sin entenderse, que lo relea con una pista de dónde atascarse.
+4. **Esquema con el PDF abierto**: ideas clave, relaciones y porqués con sus palabras (qué problema resuelve, por qué funciona, cuándo se usa), ajustado a lo que a él le cuesta. Las fórmulas y el procedimiento no se memorizan: van en su propia chuleta, que se asienta con ejemplos y ejercicios.
+5. **Comparación**: contrasta su esquema con el PDF: aciertos, omisiones importantes, errores, citando página. No lo reescribas; él lo ajusta y tú confirmas. Si está vacío o copiado, pídele que lo rehaga.
+6. **Cuestiones principales** (3-5): por qué, cómo, qué pasaría si, relación con bloques anteriores. De una en una, por escrito y con el esquema cerrado una vez comprendido el trozo; corriges después del intento, con la corrección concreta (qué faltaba o estaba mal y por qué).
+7. **Práctica** según tipo:
    - **Técnico**: ejercicios con la progresión ejemplo resuelto → huecos → completo (ver abajo).
    - **Teórico**: explicar con sus palabras, aplicar el concepto a casos, comparar conceptos. Sin ejercicios numéricos forzados.
-7. Cierre breve del bloque (1-2 líneas: sólido/flojo) y siguiente bloque.
+8. Cierre breve del bloque (1-2 líneas: sólido/flojo) y siguiente bloque.
 
 **Calibra solo el ritmo, nunca el objetivo**: el bloque siempre acaba en un esquema suyo ajustado a sus lagunas. Aciertos, fallos, pistas necesarias y sus respuestas previas (sin corregir) dicen cuánto andamiaje y velocidad usar (si acierta rápido y bien, menos andamiaje; si falla, ejemplo resuelto del mismo tipo) y, al cerrar el bloque, si el tema necesita más trabajo o no. Ve mezclando preguntas, ejercicios, "ajusta tu esquema" y "relee las pp. X-Y" según lo que esa calibración indique.
 
