@@ -46,7 +46,7 @@ El usuario suele lanzar la skill desde la carpeta del tema, sin nombrar ningún 
 ## Bucle por bloque (de uno en uno)
 
 1. **Preguntas previas** (2-4) sobre lo que va a leer. Que responda aunque sea por intuición; los fallos no se penalizan ni se corrigen aún (se resolverán al leer).
-2. **Lectura por trozos**: indica páginas exactas y espera a que diga que ha leído. Si el contenido es denso (fórmulas, procedimientos, teoría con muchas relaciones), lee en trozos de unas 3-4 páginas, cortados por ideas. Repite 3-4 por cada trozo.
+2. **Lectura por trozos**: indica páginas exactas y espera a que diga que ha leído. Si el contenido es denso (fórmulas, procedimientos, teoría con muchas relaciones), parte la lectura en trozos cortados por ideas, sin fijar un número de páginas: el tamaño lo marca la densidad, y si no es denso, el bloque entero de una vez. Repite el paso 3 por cada trozo.
 3. **Dudas**: pregunta qué no ha entendido. Aclara en corto, citando página y guiando con una pregunta; no le hagas el esquema ni resuelvas lo que luego debe practicar. Si un tramo sigue sin entenderse, que lo relea con una pista de dónde atascarse.
 4. **Esquema con el PDF abierto**: ideas clave, relaciones y porqués con sus palabras (qué problema resuelve, por qué funciona, cuándo se usa), ajustado a lo que a él le cuesta. Las fórmulas y el procedimiento no se memorizan: van en su propia chuleta, que se asienta con ejemplos y ejercicios.
 5. **Comparación**: contrasta su esquema con el PDF: aciertos, omisiones importantes, errores, citando página. No lo reescribas; él lo ajusta y tú confirmas. Si está vacío o copiado, pídele que lo rehaga.
