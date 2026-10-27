@@ -38,6 +38,11 @@ declare -A DOTFILES=(
     ["configs/applications/orca-slicer.desktop"]="$HOME/.local/share/applications/orca-slicer.desktop"
     ["configs/applications/packettracer.desktop"]="$HOME/.local/share/applications/packettracer.desktop"
     ["claude/skills"]="$HOME/.claude/skills"
+    # Folder-scoped skills: each dir is the whole .claude/skills of its folder
+    ["claude/scoped-skills/CV"]="$HOME/docs/personal/CV/.claude/skills"
+    ["claude/scoped-skills/carrera"]="$HOME/docs/personal/carrera/.claude/skills"
+    ["claude/scoped-skills/edu"]="$HOME/edu/.claude/skills"
+    ["claude/scoped-skills/punteiros"]="$HOME/docs/plasteiros/punteiros/.claude/skills"
     ["claude/settings.json"]="$HOME/.claude/settings.json"
     ["claude/statusline.sh"]="$HOME/.claude/statusline.sh"
     ["configs/librewolf.overrides.cfg"]="$HOME/.librewolf/librewolf.overrides.cfg"
