@@ -232,9 +232,12 @@ unmounts all, right-click opens Thunar.
 - `pgformatter` — provides `pg_format`, SQL formatter for nvim's
   format-on-save. Indent width comes from `configs/pg_format`, symlinked to
   `~/.pg_format`; a project `.pg_format` overrides it
+- `shfmt` — shell formatter for nvim's format-on-save (`sh`/`bash`)
 - `uv` — Python package and project manager
 - `tk` — Tcl/Tk toolkit, provides `tkinter` for Python GUIs
 - `r` — R statistical computing language
+- `air-language-server-bin` (AUR) — provides `air`, the R formatter for nvim's
+  format-on-save
 - `rstudio-desktop-bin` (AUR) — R IDE
 - `pandoc-cli` — Markdown → PDF converter; the `pandoc` binary Zettlr's export
   and `jupyter-nbconvert --to pdf` shell out to
