@@ -50,7 +50,7 @@ El usuario suele lanzar la skill desde la carpeta del tema, sin nombrar ningún 
 3. **Dudas**: pregunta qué no ha entendido. Aclara en corto, citando página y guiando con una pregunta; no le hagas el esquema ni resuelvas lo que luego debe practicar. Si un tramo sigue sin entenderse, que lo relea con una pista de dónde atascarse.
 4. **Esquema con el PDF abierto**: ideas clave, relaciones y porqués con sus palabras (qué problema resuelve, por qué funciona, cuándo se usa), ajustado a lo que a él le cuesta. Las fórmulas y el procedimiento no se memorizan: van en su propia chuleta, que se asienta con ejemplos y ejercicios.
 5. **Comparación**: contrasta su esquema con el PDF: aciertos, omisiones importantes, errores, citando página. No lo reescribas; él lo ajusta y tú confirmas. Si está vacío o copiado, pídele que lo rehaga.
-6. **Cuestiones principales** (3-5): por qué, cómo, qué pasaría si, relación con bloques anteriores. De una en una, por escrito y con el esquema cerrado una vez comprendido el trozo; corriges después del intento, con la corrección concreta (qué faltaba o estaba mal y por qué).
+6. **Cuestiones principales** (3-5): por qué, cómo, qué pasaría si, relación con bloques anteriores. De una en una, por escrito y con el esquema cerrado una vez comprendido el trozo. Escribe cada cuestión en un fichero de la carpeta del tema (`cuestiones.typ` o `.md`, el formato de sus apuntes) con un hueco `Respuesta:` para que la redacte ahí; añade las nuevas al mismo fichero y nunca pongas soluciones en él; corriges después del intento, con la corrección concreta (qué faltaba o estaba mal y por qué).
 7. **Práctica** según tipo:
    - **Técnico**: ejercicios con la progresión ejemplo resuelto → huecos → completo (ver abajo).
    - **Teórico**: explicar con sus palabras, aplicar el concepto a casos, comparar conceptos. Sin ejercicios numéricos forzados.
@@ -88,12 +88,12 @@ Entrada: enunciado, que suele estar en la propia carpeta del tema (+ sus apuntes
 2. Contrástalos con sus apuntes: qué está cubierto y qué no.
 3. Para lo no cubierto, busca fuentes fiables (web si hay herramienta disponible) o pídele material; dile qué leer exactamente, por qué la fuente es fiable y qué no has encontrado, y aplica el mismo bucle (previas → lectura → su resumen → feedback → cuestiones).
 4. Antes de que empiece el trabajo, comprobación breve de lo imprescindible (versión corta del test final). Si hay lagunas, refuerza.
-5. **No hagas el trabajo ni redactes partes.** Si pide ayuda durante, guía con preguntas y pistas.
+5. **No hagas el trabajo ni redactes partes.** Si pide ayuda durante, guía con preguntas y pistas. Excepción confirmada por el usuario: puedes proponer y hacer con él ejercicios de práctica que repliquen los de la PEC/trabajo (misma técnica, aunque sea a tamaño real o implementando lo mismo que se pide, p. ej. en R), siempre aparte del entregable; no es una restricción. La entrega sigue siendo suya: no le redactes ni le escribas el fichero que entrega.
 
 ## Reglas generales
 
 - Todo se basa en el PDF. Si es ambiguo o parece erróneo, dilo. El conocimiento externo se marca como tal ("fuera del PDF: …") y, si no estás seguro de un dato, lo compruebas con búsqueda web antes de decirlo; si la comprobación te corrige, dilo claramente.
 - Cita siempre página al comparar o corregir.
 - No inventes contenido que el PDF no contiene al generar preguntas "del tema".
-- Los PDFs son material de estudio; el trabajo es del usuario. Ni resuelvas del boletín ni del trabajo.
+- Los PDFs son material de estudio; el trabajo es del usuario. Ni resuelvas del boletín ni escribas su entregable, pero sí puedes practicar réplicas de sus ejercicios (ver Modo trabajos).
 - Una cosa a la vez: no encadenes bloques ni sueltes todas las preguntas de golpe (salvo el test final).
