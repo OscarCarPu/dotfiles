@@ -7,7 +7,6 @@ x-scheme-handler/https=librewolf.desktop
 x-scheme-handler/about=librewolf.desktop
 x-scheme-handler/unknown=librewolf.desktop
 x-scheme-handler/smowlcm=smowlcm.desktop
-x-scheme-handler/stremio=stremio-enhanced.desktop
 x-scheme-handler/pttp=CiscoPacketTracerPtsa-9.0.1.desktop
 application/x-pka=CiscoPacketTracer-9.0.1.desktop
 application/x-pkt=CiscoPacketTracer-9.0.1.desktop

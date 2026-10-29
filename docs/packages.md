@@ -216,7 +216,6 @@ unmounts all, right-click opens Thunar.
 
 - `ttf-cascadia-code-nerd`
 - `ttf-firacode-nerd`
-- `otf-latin-modern` — Latin Modern Roman for the Zettlr editor (`configs/zettlr/custom.css`)
 
 ## Editor / dev
 
@@ -237,9 +236,8 @@ unmounts all, right-click opens Thunar.
 - `r` — R statistical computing language
 - `air-language-server-bin` (AUR) — provides `air`, the R formatter for nvim's
   format-on-save
-- `rstudio-desktop-bin` (AUR) — R IDE
-- `pandoc-cli` — Markdown → PDF converter; the `pandoc` binary Zettlr's export
-  and `jupyter-nbconvert --to pdf` shell out to
+- `pandoc-cli` — Markdown → PDF converter; the `pandoc` binary
+  `jupyter-nbconvert --to pdf` shell out to
 - `typst`, `tinymist`, `typstyle` — Typst compiler, its LSP/live-preview backend, and
   formatter. Typst embeds New Computer Modern, so no font package is needed
 - `qpdf` — reads a PDF's link annotations and destinations as JSON; nvim's PDF
@@ -247,8 +245,8 @@ unmounts all, right-click opens Thunar.
 - `texlive-basic`, `texlive-latex`, `texlive-latexrecommended`,
   `texlive-latexextra`, `texlive-fontsrecommended`, `texlive-xetex`,
   `texlive-plaingeneric`, `texlive-langspanish` — the LaTeX toolchain behind
-  **PDF export**, used by `rmarkdown`/`knitr` in RStudio, by
-  `jupyter-nbconvert --to pdf` and by Zettlr's PDF export. See
+  **PDF export**, used by `rmarkdown`/`knitr` and by
+  `jupyter-nbconvert --to pdf`. See
   [Why all eight](#why-all-eight-texlive-collections) below.
 ### Why all eight texlive collections
 
@@ -339,7 +337,6 @@ echo 'test' | pandoc -o /tmp/t.pdf   # exits 0 and writes a PDF, or names the mi
   mid-exam
 - `discord` — voice/text chat
 - `telegram-desktop` — Telegram chat client (Arch `[extra]`)
-- `stremio-enhanced-bin` (AUR) — Stremio client with plugin/theme support
 - `spotify` — runs on workspace 3
 - `prismlauncher` — Minecraft instance launcher/manager (Artix `[galaxy]`, not AUR)
 - `seafile` (AUR) — Seafile command-line sync client (`seaf-cli`)
@@ -354,21 +351,6 @@ echo 'test' | pandoc -o /tmp/t.pdf   # exits 0 and writes a PDF, or names the mi
   silently on every run and no platform was ever installed. Reinstall those
   three and run `sdkmanager` by hand if you ever build Android apps
 - `android-udev` — udev rules so non-root users (in `adbusers`) can reach connected devices
-- `aspell-es` — Spanish word list; `install.sh` expands it into Zettlr's `es-ES` hunspell dictionary (see `zettlr`)
-- `zettlr` — markdown notes / knowledge base (Arch `[extra]`). Replaced
-  `obsidian` **2026-10-09**: Obsidian's Chromium spellchecker (`es-ES-3-0.bdic`)
-  flagged valid words ("medible", "categorización", "extractivo"). Zettlr's
-  bundled `es-ES` hunspell dictionary lacks e.g. "computacional" and "medible",
-  and Arch's `hunspell-es_any` lacks derived forms like "categorización". So
-  `install.sh` expands `aspell-es` (~885k forms) into a hunspell dictionary at
-  `~/.config/Zettlr/dict/es-ES/` (generated, ~11 MB, not tracked; Zettlr
-  searches that dir before its bundled `dict`).
-  `config.json` (spellcheck `es-ES` + `en-US`), `user.dic` (personal words, migrated from Obsidian), `display.theme` = built-in `karl-marx-stadt` (sans-serif) and `custom.css`
-  (per-level heading colours + padding only; margins/font-size overrides break
-  CodeMirror click mapping) are symlinked from `configs/zettlr/`. The Obsidian setup
-  (Nord theme, plugins, `obsidian-theme` runit service) was deleted; it is in
-  git history before this date. The per-vault `.obsidian/` dirs under `~/edu`
-  and `~/docs` were deleted too (Syncthing `.stversions` copies left alone)
 - `openscad-git` — programmers' 3D CAD modeller. The BOSL2 library is vendored
   as a git submodule under `configs/OpenSCAD/libraries/BOSL2` and the whole
   `configs/OpenSCAD/libraries` dir is symlinked to
@@ -391,7 +373,6 @@ echo 'test' | pandoc -o /tmp/t.pdf   # exits 0 and writes a PDF, or names the mi
 - `python-pyqt6`, `python-pyqt6-webengine` — Qt6 Python bindings + WebEngine
   module
 - `obs-studio` — screen/video capture and streaming
-- `teams-for-linux` (AUR) — Microsoft Teams unofficial client
 - `vlc` — multimedia player and framework
 - `okular` — PDF viewer
 - `packettracer` (AUR) — Cisco Packet Tracer 9 network simulator. The PKGBUILD

@@ -51,11 +51,7 @@ declare -A DOTFILES=(
     ["configs/pandoc/typst-math.lua"]="$HOME/.local/share/pandoc/filters/typst-math.lua"
     ["configs/pandoc/typst-boxes.lua"]="$HOME/.local/share/pandoc/filters/typst-boxes.lua"
     ["configs/pandoc/typst-mermaid.lua"]="$HOME/.local/share/pandoc/filters/typst-mermaid.lua"
-    ["configs/zettlr/config.json"]="$HOME/.config/Zettlr/config.json"
-    ["configs/zettlr/custom.css"]="$HOME/.config/Zettlr/custom.css"
-    ["configs/zettlr/user.dic"]="$HOME/.config/Zettlr/user.dic"
     ["configs/fontconfig/fonts.conf"]="$HOME/.config/fontconfig/fonts.conf"
-    ["configs/zettlr/Paper PDF.yaml"]="$HOME/.config/Zettlr/defaults/Paper PDF.yaml"
 )
 
 # Files COPIED rather than symlinked, because the app rewrites them with
@@ -585,18 +581,6 @@ for src in "${!SEED_FILES[@]}"; do
     echo " Seeding: $src -> $target"
     cp "$DOTFILES_DIR/$src" "$target"
 done
-
-# Zettlr Spanish spellcheck: expand aspell-es (~885k forms) into a hunspell
-# dictionary in the user dict dir, which Zettlr searches before its small
-# bundled es-ES. Generated, not tracked (~11 MB).
-zdict="$HOME/.config/Zettlr/dict/es-ES"
-[ -L "$HOME/.config/Zettlr/dict" ] && rm "$HOME/.config/Zettlr/dict"
-mkdir -p "$zdict"
-aspell -d es dump master | aspell --lang=es expand | tr ' ' '\n' | sed '/^$/d' | sort -u > "$zdict/words.tmp"
-{ echo "SET UTF-8"; grep '^TRY' /usr/share/hunspell/es.aff 2>/dev/null; } > "$zdict/es-ES.aff"
-{ wc -l < "$zdict/words.tmp"; cat "$zdict/words.tmp"; } > "$zdict/es-ES.dic"
-rm -f "$zdict/words.tmp"
-echo " Built Zettlr es-ES dictionary ($(head -1 "$zdict/es-ES.dic") words)"
 
 echo "Symlinking user runit services..."
 for svc in "${USER_RUNIT_SERVICES[@]}"; do
