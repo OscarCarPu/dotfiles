@@ -39,7 +39,7 @@ Based on [NvChad v2.5](https://github.com/NvChad/NvChad) with the **oxocarbon** 
 |--------|---------|
 | **nvim-tree** | File explorer sidebar, opens on startup |
 | **supermaven** | AI code completion |
-| **conform.nvim** | Code formatting (stylua, gofumpt, ktlint, rustfmt, ruff, shfmt, air) |
+| **conform.nvim** | Code formatting (stylua, gofumpt, ktlint, rustfmt, ruff, air) |
 | **nvim-lspconfig** | LSP support (HTML, CSS, Go, Rust, Kotlin, XML, Svelte, Python) |
 | **nvim-treesitter** | Syntax highlighting (vim, lua, vimdoc, html, css, go, rust, kotlin, java, xml, markdown, svelte, js, ts, python) |
 | **nvim-surround** | Surround text with brackets, quotes, tags, etc. |
