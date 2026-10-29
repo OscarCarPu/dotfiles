@@ -4,6 +4,7 @@
 declare -A DOTFILES=(
     ["bash/.bash_profile"]="$HOME/.bash_profile"
     ["bash/.bashrc"]="$HOME/.bashrc"
+    ["bash/.inputrc"]="$HOME/.inputrc"
     ["home/Makefile"]="$HOME/Makefile"
     ["hypr"]="$HOME/.config/hypr"
     ["nvim"]="$HOME/.config/nvim"
