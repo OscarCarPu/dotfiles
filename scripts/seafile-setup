@@ -55,8 +55,19 @@ until seaf-cli list >/dev/null 2>&1; do
 done
 
 synced=$(seaf-cli list 2>/dev/null || true)
+remote=$(seaf-cli list-remote -s "$SEAFILE_SERVER" -u "$SEAFILE_USER" -p "$SEAFILE_PASS")
 
 for DIR in $FOLDERS; do
+    NAME=$(basename "$DIR")
+    # Reuse a library that already exists on the server instead of creating a
+    # duplicate, so a fresh machine pulls it down.
+    LIB_ID=$(printf '%s\n' "$remote" | awk -v n="$NAME" '$1 == n { print $2; exit }')
+    if [ -n "$LIB_ID" ] && ! printf '%s\n' "$synced" | grep -qF "$DIR"; then
+        echo ">> Syncing existing library '$NAME' to $DIR"
+        mkdir -p "$DIR"
+        seaf-cli sync -l "$LIB_ID" -s "$SEAFILE_SERVER" -d "$DIR" -u "$SEAFILE_USER" -p "$SEAFILE_PASS"
+        continue
+    fi
     [ -d "$DIR" ] || {
         echo ">> skip $DIR (does not exist)"
         continue
@@ -69,7 +80,6 @@ for DIR in $FOLDERS; do
         echo ">> skip $DIR (already syncing; ignore refreshed)"
         continue
     fi
-    NAME=$(basename "$DIR")
     echo ">> Creating library '$NAME' and syncing $DIR"
     LIB_ID=$(seaf-cli create -s "$SEAFILE_SERVER" -n "$NAME" -u "$SEAFILE_USER" -p "$SEAFILE_PASS")
     seaf-cli sync -l "$LIB_ID" -s "$SEAFILE_SERVER" -d "$DIR" -u "$SEAFILE_USER" -p "$SEAFILE_PASS"

@@ -39,7 +39,15 @@ MENU=$(
     entry '󰅖' 'Cancel'
 )
 
-CHOICE=$(wofi --dmenu --allow-markup --prompt "System" --cache-file /dev/null \
+# Every power path goes through this menu, so the downloads nag lives in its
+# prompt: visible at the moment of choosing, never in the way.
+DL_LIMIT_GB=10
+DL_KB=$(du -sk "$HOME/downloads" 2>/dev/null | cut -f1)
+DL_GB=$(( ${DL_KB:-0} / 1024 / 1024 ))
+PROMPT="System"
+[ "$DL_GB" -ge "$DL_LIMIT_GB" ] && PROMPT="System — ~/downloads at ${DL_GB} GB, clean it"
+
+CHOICE=$(wofi --dmenu --allow-markup --prompt "$PROMPT" --cache-file /dev/null \
     --lines "$(grep -c '' <<< "$MENU")" --insensitive <<< "$MENU" 2>/dev/null)
 
 # Match on the label alone. Labels are unique and contain no double space,

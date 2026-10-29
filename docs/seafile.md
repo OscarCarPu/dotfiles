@@ -8,9 +8,10 @@ Two-way file sync via `seaf-cli` to a self-hosted Seafile
 
 Libraries are listed in
 [`configs/seafile-cli/libraries`](../configs/seafile-cli/libraries) — currently
-`~/edu`, `~/docs`, `~/downloads`, `~/media` (~26 GB). That file is the single
+`~/edu`, `~/docs`, `~/downloads`, `~/media`, `~/axeigo`. That file is the single
 source of truth: both `seafile-setup` and the `seafile-watch` service read it,
-so adding a line and re-running `seafile-setup` is the whole procedure.
+so adding a line and re-running `seafile-setup` is the whole procedure. A name
+that already exists on the server is downloaded rather than created again.
 
 `~/dev` is deliberately **not** synced — those are git repos, backed by Gitea
 and GitHub. `install.sh --check` flags any repo there without a remote.
