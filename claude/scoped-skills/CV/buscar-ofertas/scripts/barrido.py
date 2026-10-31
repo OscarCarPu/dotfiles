@@ -85,9 +85,9 @@ def landing():
 
 def himalayas():
     for q in ("data%20engineer", "analytics%20engineer", "backend%20engineer", "python%20engineer"):
-        for off in (0, 20, 40):
-            d = json.loads(baja(f"him_{q[:4]}_{off}.json",
-                                f"https://himalayas.app/jobs/api/search?q={q}&country=Spain&sort=recent&offset={off}"))
+        for pag in (1, 2, 3):  # la búsqueda pagina con page=; offset= se ignora y repite la página 1
+            d = json.loads(baja(f"him_{q[:4]}_{pag}.json",
+                                f"https://himalayas.app/jobs/api/search?q={q}&country=Spain&sort=recent&page={pag}"))
             for j in d["jobs"]:
                 lr = j["locationRestrictions"]
                 if lr and "Spain" not in lr:
