@@ -22,6 +22,7 @@ declare -A DOTFILES=(
     ["configs/user-dirs.dirs"]="$HOME/.config/user-dirs.dirs"
     ["configs/mimeapps.list"]="$HOME/.config/mimeapps.list"
     ["configs/pg_format"]="$HOME/.pg_format"
+    ["configs/air.toml"]="$HOME/.air.toml"
     ["configs/gtk-3.0/bookmarks"]="$HOME/.config/gtk-3.0/bookmarks"
     ["configs/gtk-3.0/settings.ini"]="$HOME/.config/gtk-3.0/settings.ini"
     ["configs/OrcaSlicer/user/default/filament"]="$HOME/.config/OrcaSlicer/user/default/filament"

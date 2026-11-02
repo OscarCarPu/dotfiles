@@ -20,18 +20,22 @@
 	"inner_wall_line_width": "0.4",
 
 	"wall_loops": "6",
-	"precise_outer_wall": "0",
+	"precise_outer_wall": "1",
+	"only_one_wall_top": "1",
+	"gap_fill_target": "everywhere",
 	"detect_thin_wall": "1",
 	"infill_wall_overlap": "25%",
 	"top_surface_pattern": "monotonic",
 	"ironing_type": "top",
 
+	"outer_wall_speed": "120",
 	"small_perimeter_speed": "60",
 	"small_perimeter_threshold": "0",
 	"outer_wall_acceleration": "4000",
 	"top_surface_acceleration": "2000",
 	"seam_slope_type": "external",
 	"seam_slope_conditional": "1",
+	"wipe_on_loops": "1",
 	"enable_arc_fitting": "1",
 
 	"enable_support": "0",

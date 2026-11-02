@@ -235,7 +235,8 @@ unmounts all, right-click opens Thunar.
 - `tk` — Tcl/Tk toolkit, provides `tkinter` for Python GUIs
 - `r` — R statistical computing language
 - `air-language-server-bin` (AUR) — provides `air`, the R formatter for nvim's
-  format-on-save
+  format-on-save. Indent width comes from `configs/air.toml`, symlinked to
+  `~/.air.toml` (air walks up parent dirs); a project `air.toml` overrides it
 - `pandoc-cli` — Markdown → PDF converter; the `pandoc` binary
   `jupyter-nbconvert --to pdf` shell out to
 - `typst`, `tinymist`, `typstyle` — Typst compiler, its LSP/live-preview backend, and
@@ -373,8 +374,7 @@ echo 'test' | pandoc -o /tmp/t.pdf   # exits 0 and writes a PDF, or names the mi
 - `python-pyqt6`, `python-pyqt6-webengine` — Qt6 Python bindings + WebEngine
   module
 - `obs-studio` — screen/video capture and streaming
-- `vlc` — multimedia player and framework
-- `okular` — PDF viewer
+- `mpv` — minimal keyboard-driven media player
 - `packettracer` (AUR) — Cisco Packet Tracer 9 network simulator. The PKGBUILD
   can't download the installer (Cisco login wall): fetch the Linux `.deb` from
   netacad.com (Resources → Packet Tracer) and drop it in the yay build dir
