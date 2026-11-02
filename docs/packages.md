@@ -352,7 +352,7 @@ echo 'test' | pandoc -o /tmp/t.pdf   # exits 0 and writes a PDF, or names the mi
   silently on every run and no platform was ever installed. Reinstall those
   three and run `sdkmanager` by hand if you ever build Android apps
 - `android-udev` — udev rules so non-root users (in `adbusers`) can reach connected devices
-- `openscad-git` — programmers' 3D CAD modeller. The BOSL2 library is vendored
+- `openscad` — programmers' 3D CAD modeller. The BOSL2 library is vendored
   as a git submodule under `configs/OpenSCAD/libraries/BOSL2` and the whole
   `configs/OpenSCAD/libraries` dir is symlinked to
   `~/.local/share/OpenSCAD/libraries` by `install.sh`, so any `.scad` can
