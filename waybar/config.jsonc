@@ -19,6 +19,7 @@
         "custom/brightness",
         "pulseaudio#speaker",
         "pulseaudio#mic",
+        "custom/power-profile",
         "custom/touchpad",
         "battery"
     ],
@@ -127,6 +128,15 @@
         "on-click": "pactl set-source-mute @DEFAULT_SOURCE@ toggle",
         "tooltip": true,
         "on-click-middle": "pavucontrol"
+    },
+    "custom/power-profile": {
+        "format": "{}",
+        "exec": "~/.dotfiles/hypr/scripts/power_profile.sh get",
+        "return-type": "json",
+        "interval": 10,
+        "signal": 9,
+        "on-click": "~/.dotfiles/hypr/scripts/power_profile.sh toggle",
+        "tooltip": true
     },
     "custom/touchpad": {
         "exec": "~/.dotfiles/hypr/scripts/touchpad.sh get",

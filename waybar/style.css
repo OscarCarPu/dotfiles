@@ -127,6 +127,7 @@ tooltip label {
 #tray,
 #custom-notification,
 #custom-power,
+#custom-power-profile,
 #custom-touchpad {
     padding: 1px 10px;
     margin: 2px 2px;
@@ -179,6 +180,16 @@ tooltip label {
 #pulseaudio.mic.muted {
     background-color: @overlay0;
     color: @text-primary;
+}
+
+#custom-power-profile.performance {
+    background-color: @red;
+    color: @text-dark;
+}
+
+#custom-power-profile.powersave {
+    background-color: @green;
+    color: @text-dark;
 }
 
 #custom-touchpad.enabled {
