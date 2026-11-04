@@ -32,7 +32,7 @@ import glob, json, math, os, re, shutil, subprocess, sys, tempfile, time, uuid, 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))))
 import arcos_agujeros as A
 
-P = os.path.realpath(os.path.join(os.path.dirname(os.path.abspath(__file__)), '../../..'))
+P = os.path.normpath(os.path.join(os.path.dirname(os.path.abspath(__file__)), '../../..'))
 U = os.path.expanduser('~/.dotfiles/configs/OrcaSlicer/user/default/')
 SISTEMA = os.path.expanduser('~/.config/OrcaSlicer/system/*/*/*.json')
 MAQUINA = 'machine/core-one-obxidian.json'
