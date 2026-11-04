@@ -24,5 +24,6 @@
     "filament_z_hop": ["0.6"],
     "chamber_temperature": ["50"],
     "chamber_minimal_temperature": ["45"],
-    "filament_max_volumetric_speed": ["11.5"]
+    "filament_max_volumetric_speed": ["13.5"],
+    "filament_start_gcode": ["M572 S0.025\nM142 S40"]
 }
