@@ -11,6 +11,7 @@ Esta skill **solo busca y apunta**. No adapta el CV, no escribe cartas y no apli
 
 ## 0. Antes de buscar
 
+0. **Pausa hasta el 2027-01-01** (decidida por Oscar el 2026-11-05 para prepararse). Si hoy es antes de esa fecha, no busques: contesta en una línea que la búsqueda está en pausa hasta el 2027-01-01. Solo se busca si Oscar lo pide explícitamente sabiendo que está en pausa.
 0. **Comprueba que han pasado 72 h (3 días)** desde la última búsqueda, antes de leer nada más: `python3 .claude/skills/buscar-ofertas/scripts/puede_buscar.py ofertas_vistas.md`. Si escribe `ESPERA` (sale con 1), **para aquí**: no busques, no leas fuentes y no toques ningún archivo. Contesta solo con una línea que diga cuándo fue la última búsqueda y a partir de qué hora se puede hacer la siguiente. La única excepción es que Oscar pida explícitamente forzarla ("fuerza la búsqueda", "aunque no hayan pasado 72 h").
 1. Lee `CLAUDE.md` (perfil, bandas de salario y qué no exagerar), `aplicaciones.md` y `ofertas_vistas.md`.
 2. Mira `Última búsqueda` en `ofertas_vistas.md` (formato `AAAA-MM-DD HH:MM`). Busca solo lo publicado desde esa fecha, con un día de margen. Si es la primera vez (`—`), busca los últimos 30 días.
@@ -64,8 +65,8 @@ Usa WebFetch para los listados y WebSearch para las búsquedas en ATS. Si WebFet
    - Si una fuente sale con `FALLO` varios días seguidos, mira si cambió la URL o el formato y arregla el script.
 4. **Hacker News "Who is hiring?":** usa la API de Algolia con `curl`.
    - Para encontrar el hilo del mes: `curl -s 'https://hn.algolia.com/api/v1/search_by_date?tags=story,author_whoishiring&hitsPerPage=3'` y quédate con el que se titula "Who is hiring?".
-   - Para leer solo los comentarios nuevos: `curl -s 'https://hn.algolia.com/api/v1/search?tags=comment,story_<ID>&query=<termino>&numericFilters=created_at_i><epoch_ultima_busqueda>&hitsPerPage=100'`. Los términos son `data engineer`, `analytics engineer`, `dbt`, `airflow` y `data platform`. Quédate con los que mencionan Europe, EU, EMEA, Spain, CET o anywhere.
-   - Guarda cada respuesta en un archivo del scratchpad (`curl -o`) y procésalos después. Si encadenas varias peticiones en una sola tubería, alguna llega vacía y rompe el `json.loads`.
+   - Para leer solo los comentarios nuevos: `curl -s 'https://hn.algolia.com/api/v1/search?tags=comment,story_<ID>&query=<termino>&numericFilters=created_at_i%3E<epoch_ultima_busqueda>&hitsPerPage=100'`. Los términos son `data engineer`, `analytics engineer`, `dbt`, `airflow` y `data platform`. Quédate con los que mencionan Europe, EU, EMEA, Spain, CET o anywhere.
+   - Guarda cada respuesta en un archivo del scratchpad (`curl -o`) y procésalos después. El `>` del filtro va codificado como `%3E`: sin codificar, la API devuelve un 400 en HTML (pasó el 2026-11-05). Si encadenas varias peticiones en una sola tubería, alguna llega vacía y rompe el `json.loads`.
    - Quédate solo con los comentarios de primer nivel (`parent_id == story_id`). Para leer un post completo: `https://hn.algolia.com/api/v1/items/<id>`.
    - Guarda el ID del hilo en `ofertas_vistas.md` ("Último hilo de HN…").
 5. **ATS de empresas de producto**, con WebSearch. Rinde poco: `site:` suele devolver agregadores o páginas cerradas (404). Haz como mucho 2 búsquedas. Así salen las ofertas que nunca llegan a los agregadores:

@@ -87,7 +87,7 @@ Entrada: enunciado, que suele estar en la propia carpeta del tema (+ sus apuntes
 1. Extrae del enunciado los conocimientos y habilidades necesarios.
 2. Contrástalos con sus apuntes: qué está cubierto y qué no.
 3. Para lo no cubierto, busca fuentes fiables (web si hay herramienta disponible) o pídele material; dile qué leer exactamente, por qué la fuente es fiable y qué no has encontrado, y aplica el mismo bucle (previas → lectura → su resumen → feedback → cuestiones).
-4. Antes de que empiece el trabajo, comprobación breve de lo imprescindible (versión corta del test final). Si hay lagunas, refuerza.
+4. Sin comprobación previa de conocimientos: el usuario prefiere que, al llegar al trabajo, le vayas indicando "haz este ejercicio/tarea" uno a uno y él pregunta dudas si las tiene. Solo da avisos prácticos (erratas, plantilla, normas de entrega).
 5. **No hagas el trabajo ni redactes partes.** Si pide ayuda durante, guía con preguntas y pistas. Excepción confirmada por el usuario: puedes proponer y hacer con él ejercicios de práctica que repliquen los de la PEC/trabajo (misma técnica, aunque sea a tamaño real o implementando lo mismo que se pide, p. ej. en R), siempre aparte del entregable; no es una restricción. La entrega sigue siendo suya: no le redactes ni le escribas el fichero que entrega.
 
 ## Reglas generales
