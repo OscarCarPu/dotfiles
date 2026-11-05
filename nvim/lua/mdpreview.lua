@@ -268,7 +268,9 @@ function M.attach(label, to_typ)
         timer:start(150, 0, vim.schedule_wrap(render))
       end,
     })
-    vim.api.nvim_create_autocmd({ "BufUnload", "VimLeavePre" }, { group = "MdPreview" .. buf, callback = stop })
+    -- scoped to this buffer: floats (notify, cmp docs, LSP hover) are wiped all the time while typing
+    vim.api.nvim_create_autocmd("BufUnload", { group = "MdPreview" .. buf, buffer = buf, callback = stop })
+    vim.api.nvim_create_autocmd("VimLeavePre", { group = "MdPreview" .. buf, callback = stop })
   end
 
   vim.keymap.set("n", "<leader>mp", function()
