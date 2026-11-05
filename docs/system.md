@@ -165,6 +165,26 @@ sudo rm /etc/runit/runsvdir/default/logind
 sudo pkill -f "runsv logind"
 ```
 
+### `bluetoothd` logging
+
+Stock `/etc/runit/sv/bluetoothd/run` sends stdout to `/dev/null` and has no
+`log/` service, so bluetoothd's errors (e.g. a BLE mouse that connects but
+never becomes an input device because HID reads fail) only show up truncated
+in `ps -ww -C runsvdir`. `install.sh --system` replaces it with
+[`runit/system/bluetoothd`](../runit/system/bluetoothd), which sends stderr
+into svlogd at `/var/log/bluetoothd`.
+
+runsv only looks for `log/` when it starts, so after the first install restart
+the supervisor (this drops BT connections for a moment):
+
+```bash
+sudo sv exit bluetoothd   # runsvdir respawns runsv, which picks up log/
+sudo tail -f /var/log/bluetoothd/current
+```
+
+A `bluez-runit` upgrade may overwrite `run`. Re-run `install.sh --system`
+after that.
+
 ### `elogind` run script that respawns forever
 
 Stock `/etc/runit/sv/elogind/run` does `exec /usr/lib/elogind/elogind`, but

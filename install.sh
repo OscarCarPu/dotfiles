@@ -112,6 +112,7 @@ declare -A SYSTEM_SUDOERS=(
 # (`runit/system/<svc>/run`).
 SYSTEM_RUNIT_SERVICES=(
     displaylink
+    bluetoothd
 )
 
 # System-level runit services to activate at boot. Each entry is symlinked
