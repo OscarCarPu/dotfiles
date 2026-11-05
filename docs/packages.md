@@ -370,7 +370,6 @@ echo 'test' | pandoc -o /tmp/t.pdf   # exits 0 and writes a PDF, or names the mi
   Note: Orca loads `libwebkit2gtk-4.1`, so it inherits the `libjxl` 0.11 pin.
   `webkit2gtk-4.1` is held at 2.52.4 in `IgnorePkg` (see `configs/pacman.conf`)
   because 2.52.5 links `libjxl.so.0.12` and fails to load under the pin.
-- `libreoffice-still` — office suite (stable branch)
 - `python-pyqt6`, `python-pyqt6-webengine` — Qt6 Python bindings + WebEngine
   module
 - `obs-studio` — screen/video capture and streaming
