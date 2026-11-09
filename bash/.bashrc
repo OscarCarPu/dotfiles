@@ -1,3 +1,12 @@
+# OPENSPEC:START
+# OpenSpec shell completions configuration
+if [ -d '/home/ocp/.local/share/bash-completion/completions' ]; then
+  for f in '/home/ocp/.local/share/bash-completion/completions'/*; do
+    [ -f "$f" ] && . "$f"
+  done
+fi
+# OPENSPEC:END
+
 #
 # ~/.bashrc
 #

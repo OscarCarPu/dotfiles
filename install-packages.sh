@@ -82,6 +82,11 @@ espup install
 echo "Installing sqlc via go install..."
 go install github.com/sqlc-dev/sqlc/cmd/sqlc@latest
 
+# --- bun-installed global JS tooling --------------------------------------
+
+echo "Installing openspec via bun (spec-driven dev CLI)..."
+bun add -g @fission-ai/openspec
+
 # -- claude code -----------------------------------------------------------
 
 if ! command -v claude >/dev/null 2>&1; then

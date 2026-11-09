@@ -253,6 +253,34 @@ else:
 " "$since" 2>/dev/null || echo "  Unable to fetch news."
 }
 
+# Global tools installed outside pacman: bun globals, uv tools, cargo crates.
+# Run after the pacman upgrade, never alongside it — uv tool venvs sit on the
+# system python, which that upgrade may replace. Every installed item is picked
+# up from each manager's own list, so a new global needs no edit here. A failure
+# does not undo the system update; it only turns the power countdown off.
+upgrade_user_tools() {
+    local failed=()
+    echo -e "\n\033[1;32m[ Updating bun / uv / cargo tools ]\033[0m"
+    if command -v bun &>/dev/null; then
+        # mmdc drives the system chromium; without this, puppeteer would
+        # download its own copy on every update.
+        PUPPETEER_SKIP_DOWNLOAD=1 bun update -g --latest || failed+=(bun)
+    fi
+    if command -v uv &>/dev/null; then
+        uv tool upgrade --all || failed+=(uv)
+    fi
+    if command -v cargo &>/dev/null; then
+        # Registry crates only: git/path installs print "(source)" before the
+        # colon and have no newer version to fetch. Up-to-date crates are
+        # skipped by cargo itself.
+        local crates
+        mapfile -t crates < <(cargo install --list | sed -n 's/^\([^ ]*\) v[^ ]*:$/\1/p')
+        [ "${#crates[@]}" -gt 0 ] && { cargo install --locked "${crates[@]}" || failed+=(cargo); }
+    fi
+    [ "${#failed[@]}" -gt 0 ] && PENDING+=("tool upgrade failed: ${failed[*]}")
+    return 0
+}
+
 sync_repo_db & PID_REPO=$!
 [ -f "$DOTFILES_DIR/install.sh" ] && { check_drift & PID_DRIFT=$!; }
 fetch_news   > "$RUN_DIR/news" & PID_NEWS=$!
@@ -346,6 +374,7 @@ if [ -z "$ALL_UPDATES" ]; then
     else
         echo -e "\n\033[1;32m✓ Nothing to update outside the IgnorePkg list.\033[0m"
     fi
+    upgrade_user_tools
     exit 0
 fi
 
@@ -470,6 +499,8 @@ if [ -z "${UPDATE_FAILED:-}" ] && [ -n "$AUR_UPDATES" ] && command -v yay &>/dev
     echo -e "\n\033[1;32m[ Updating AUR ]\033[0m"
     run_filtered yay -Sua --noconfirm || UPDATE_FAILED=1
 fi
+
+[ -z "${UPDATE_FAILED:-}" ] && upgrade_user_tools
 
 # --- Step 6: Tracked blockers (started back at step 2) ---------------------
 print_blockers

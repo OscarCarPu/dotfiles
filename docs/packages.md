@@ -430,6 +430,9 @@ above and skipped by `install-packages.sh`.
   `PUPPETEER_SKIP_DOWNLOAD=1 bun add -g @mermaid-js/mermaid-cli`; it drives the system
   `chromium`. Without it, mermaid blocks stay as plain code. Diagrams are cached as PNGs
   in `.mermaid/` next to the document
+- `openspec` — spec-driven development CLI (`openspec init` in a repo sets up
+  `openspec/` + agent slash commands). Installed by `install-packages.sh` via
+  `bun add -g @fission-ai/openspec`; lands in `~/.bun/bin`. Needs node >= 22.12
 - `pyright`, `ruff` — Python LSP + formatter for nvim. Installed by
   `install-packages.sh` via `uv tool install`. Pyright auto-detects the
   per-project `.venv` (see `nvim/lua/configs/python.lua`)

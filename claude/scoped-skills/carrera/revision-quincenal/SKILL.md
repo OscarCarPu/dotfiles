@@ -1,6 +1,6 @@
 ---
 name: revision-quincenal
-description: Revisión quincenal del plan de carrera de Oscar (cada dos lunes). Mide el % de tiempo real por proyecto desde gv, le pregunta el % de avance, lo que obtiene y lo que falla de cada uno, decide si añadir un proyecto, reducir expectativas o reajustar los %, y lo apunta en revisiones.md sin contenido concreto. Usar cuando diga "revisión quincenal", "revisión de carrera", "toca la revisión del lunes" o /revision-quincenal.
+description: Revisión quincenal del plan de carrera de Oscar (cada dos lunes). Mide el % de tiempo real por proyecto desde gv, repasa el tiempo total, los huecos y las pérdidas de tiempo del periodo, le pregunta el % de avance, lo que obtiene y lo que falla de cada uno, decide si añadir un proyecto, reducir expectativas o reajustar los %, y lo apunta en revisiones.md sin contenido concreto. Usar cuando diga "revisión quincenal", "revisión de carrera", "toca la revisión del lunes" o /revision-quincenal.
 ---
 
 # Revisión quincenal
@@ -19,8 +19,19 @@ reglas duras.
 
 Ejecuta la consulta de `CLAUDE.md` (sección "Medir el % de tiempo") con los ids de `gv` de la tabla de
 `plan.md` §3 y la fecha de la revisión anterior. Calcula el reparto **entre los proyectos de la tabla**
-y compáralo con el planeado. Enséñale a Oscar solo los porcentajes: las horas no se muestran ni se
-apuntan.
+y compáralo con el planeado.
+
+Mira además **todo el tiempo del periodo, no solo carrera** (carrera sigue siendo lo principal):
+
+- **Horas totales:** total registrado, por proyecto raíz y por tarea, y por día. La tarea «Nazaries» es
+  trabajo: cuenta en el total, pero no en el reparto de carrera.
+- **Huecos:** los tramos largos sin registrar fuera de las noches, cruzados con `plan_blocks`. Pregúntale
+  a Oscar si están justificados; no lo deduzcas.
+- **Pérdidas de tiempo:** si algo concreto se llevó mucho tiempo, sobre todo si superó a los proyectos de
+  carrera. Compara también con los bloques planificados.
+
+Trabaja las horas con Oscar **en la conversación**. En los archivos solo se apuntan porcentajes y
+conclusiones generales, nunca horas.
 
 ## 3. Preguntar, proyecto por proyecto
 
