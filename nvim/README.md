@@ -15,10 +15,7 @@ Format-on-save is enabled via [conform.nvim](https://github.com/stevearc/conform
 | Language | Formatters          |
 |----------|---------------------|
 | Lua      | stylua              |
-| Go       | gofumpt, goimports  |
 | Rust     | rustfmt             |
-
-Go files also auto-organize imports on save via a `BufWritePre` autocmd in `lua/configs/go.lua`.
 
 # Rust
 

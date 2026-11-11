@@ -39,9 +39,9 @@ Based on [NvChad v2.5](https://github.com/NvChad/NvChad) with the **oxocarbon** 
 |--------|---------|
 | **nvim-tree** | File explorer sidebar, opens on startup |
 | **supermaven** | AI code completion |
-| **conform.nvim** | Code formatting (stylua, gofumpt, ktlint, rustfmt, ruff, air) |
-| **nvim-lspconfig** | LSP support (HTML, CSS, Go, Rust, Kotlin, XML, Svelte, Python) |
-| **nvim-treesitter** | Syntax highlighting (vim, lua, vimdoc, html, css, go, rust, kotlin, java, xml, markdown, svelte, js, ts, python) |
+| **conform.nvim** | Code formatting (stylua, ktlint, rustfmt, ruff, air) |
+| **nvim-lspconfig** | LSP support (HTML, CSS, Rust, Kotlin, XML, Svelte, Python) |
+| **nvim-treesitter** | Syntax highlighting (vim, lua, vimdoc, html, css, rust, kotlin, java, xml, markdown, svelte, js, ts, python) |
 | **nvim-surround** | Surround text with brackets, quotes, tags, etc. |
 
 ## Editor Settings
@@ -56,12 +56,6 @@ Based on [NvChad v2.5](https://github.com/NvChad/NvChad) with the **oxocarbon** 
 - **Formatter**: rustfmt (format on save via conform.nvim)
 - **Indentation**: Uses treesitter-based indentation (`after/indent/rust.lua`) instead of the built-in cindent. The default `indent/rust.vim` falls back to `cindent`, which is a C indenter and misindents code after Rust structs (no trailing `;` like C requires), causing wrong indentation in subsequent `impl` blocks.
 - Config: `configs/rust.lua`
-
-## Go
-
-- **LSP**: gopls with staticcheck and gofumpt enabled
-- **Auto-import**: Organizes imports automatically on save
-- Config: `configs/go.lua`
 
 ## Kotlin
 

@@ -224,10 +224,7 @@ unmounts all, right-click opens Thunar.
 - `rustup` — Rust toolchain manager (installs `rustc`/`cargo`; required by
   `espup` for Xtensa toolchain). `install-packages.sh` runs `rustup default
   stable` to materialize the host toolchain
-- `go` — Go toolchain
 - `gcc-fortran` — provides `gfortran`
-- `gopls`, `gofumpt`, `go-tools` — Go LSP + formatters for nvim (`go-tools`
-  provides `goimports`)
 - `pgformatter` — provides `pg_format`, SQL formatter for nvim's
   format-on-save. Indent width comes from `configs/pg_format`, symlinked to
   `~/.pg_format`; a project `.pg_format` overrides it

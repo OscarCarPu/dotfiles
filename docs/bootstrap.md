@@ -298,7 +298,7 @@ bash install-packages.sh
 
 Bootstraps `yay` if absent, then installs everything in
 [`packages.md`](packages.md) plus the toolchains that do not come from pacman:
-`uv tool` (pyright, ruff), `cargo` (espup, espflash), `go` (sqlc), and Claude
+`uv tool` (pyright, ruff), `cargo` (espup, espflash), and Claude
 Code via its own installer.
 
 Two steps in it will *skip with a warning* on a first run, by design:

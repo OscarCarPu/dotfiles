@@ -77,11 +77,6 @@ cargo install --locked espflash
 export PATH="$HOME/.cargo/bin:$PATH"
 espup install
 
-# --- go-installed tooling -------------------------------------------------
-
-echo "Installing sqlc via go install..."
-go install github.com/sqlc-dev/sqlc/cmd/sqlc@latest
-
 # --- bun-installed global JS tooling --------------------------------------
 
 echo "Installing openspec via bun (spec-driven dev CLI)..."
