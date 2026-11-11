@@ -1,0 +1,39 @@
+{
+	"name": "core-one-pla-obxidian-quality-capuchon",
+	"from": "User",
+	"inherits": "0.10mm FAST DETAIL @CORE One 0.4",
+	"print_settings_id": "core-one-pla-obxidian-quality-capuchon",
+	"compatible_printers": [
+		"core-one-obxidian"
+	],
+	"compatible_printers_condition": "",
+	"print_extruder_id": [
+		"1"
+	],
+	"print_extruder_variant": [
+		"Direct Drive Standard"
+	],
+	"version": "2.4.0.0",
+
+	"wall_generator": "classic",
+	"wall_loops": "3",
+	"sparse_infill_pattern": "concentric",
+	"sparse_infill_density": "25%",
+	"top_shell_layers": "5",
+	"top_shell_thickness": "0",
+	"bottom_shell_layers": "4",
+	"bottom_shell_thickness": "0",
+
+	"outer_wall_speed": "30",
+	"inner_wall_speed": "50",
+
+	"extra_perimeters_on_overhangs": "1",
+	"overhang_fan_threshold": "10%",
+
+	"seam_position": "random",
+	"elefant_foot_compensation": "0.15",
+	"brim_type": "outer_only",
+	"brim_width": "3",
+
+	"enable_support": "0"
+}
