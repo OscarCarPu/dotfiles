@@ -8,6 +8,7 @@ hypr/wallpaper_index.json
 # Cache and state files
 .cache/
 *.log
+__pycache__/
 
 # Battery notification state
 battery_notify_state
