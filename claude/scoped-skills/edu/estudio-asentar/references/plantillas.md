@@ -2,12 +2,6 @@
 
 Adapta siempre al contenido real del PDF; son moldes, no preguntas literales.
 
-## Preguntas previas (antes de leer)
-- ¿Qué crees que es [concepto] y para qué sirve?
-- ¿Qué problema crees que resuelve [método]?
-- Si tuvieras que [tarea], ¿cómo lo intentarías con lo que sabes?
-- ¿Qué relación esperas entre [A] y [B]?
-
 ## Técnico / procedimental
 **Cuestiones del bloque**
 - ¿Por qué funciona este paso del método? ¿Qué pasaría si se omite?

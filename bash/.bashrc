@@ -22,3 +22,5 @@ export BUN_INSTALL="$HOME/.bun"
 export PATH="$BUN_INSTALL/bin:$PATH"
 
 eval "$(direnv hook bash)"
+
+R() { if [[ $1 == CMD ]]; then command R "$@"; else radian --restore-data --ask-save "$@"; fi; }
