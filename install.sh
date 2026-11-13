@@ -72,6 +72,8 @@ declare -A DOTFILES=(
 declare -A SEED_FILES=(
     ["configs/ardour9/config"]="$HOME/.config/ardour9/config"
     ["configs/ardour9/ui_config"]="$HOME/.config/ardour9/ui_config"
+    ["configs/dolphin-emu/Dolphin.ini"]="$HOME/.config/dolphin-emu/Dolphin.ini"
+    ["configs/torrent-tui/settings.json"]="$HOME/.config/torrent-tui/settings.json"
 )
 
 # User-level runit services. Only `run` and `log/run` are symlinked into each

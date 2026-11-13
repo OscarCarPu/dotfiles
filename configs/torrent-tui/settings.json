@@ -1,0 +1,18 @@
+{
+  "downloadPath": "~/downloads",
+  "maxConnections": 50,
+  "torrentFolder": "~/downloads",
+  "categories": [],
+  "defaultCategoryId": null,
+  "downloadRateLimitBps": 0,
+  "uploadRateLimitBps": 0,
+  "enableWebSeeds": true,
+  "maxWebSeedConnections": 3,
+  "webSeedMaxRequestBytes": 16777216,
+  "blocklistEnabled": false,
+  "blocklistPaths": [],
+  "blocklistUrl": "",
+  "blocklistRefreshHours": 168,
+  "encryption": "preferred",
+  "enableLsd": true
+}

@@ -374,6 +374,8 @@ echo 'test' | pandoc -o /tmp/t.pdf   # exits 0 and writes a PDF, or names the mi
   module
 - `obs-studio` — screen/video capture and streaming
 - `mpv` — minimal keyboard-driven media player
+- `torrent-tui` (AUR) — terminal BitTorrent client; `configs/torrent-tui/settings.json`
+  (seeded) points downloads at `~/downloads`
 - `packettracer` (AUR) — Cisco Packet Tracer 9 network simulator. The PKGBUILD
   can't download the installer (Cisco login wall): fetch the Linux `.deb` from
   netacad.com (Resources → Packet Tracer) and drop it in the yay build dir
@@ -401,6 +403,9 @@ echo 'test' | pandoc -o /tmp/t.pdf   # exits 0 and writes a PDF, or names the mi
   dependency; `vulkan-intel` under "Hardware" is the 64-bit half. Both lib32
   entries are listed explicitly so `yay -S` resolves those two virtual deps
   without stopping to ask which provider to use
+- `dolphin-emu` — GameCube/Wii emulator; emulates the Skylanders Portal of
+  Power (Controllers → USB Emulation), so the Wii Skylanders games run
+  without the physical portal
 
 ## AUR helper
 
