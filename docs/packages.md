@@ -236,7 +236,9 @@ unmounts all, right-click opens Thunar.
   `~/.air.toml` (air walks up parent dirs); a project `air.toml` overrides it
 - `radian` (AUR) — R console replacement: syntax-highlights the code as you type
   (output stays plain, so input and results are easy to tell apart), plus
-  multiline editing and autocompletion. Launch with `radian` instead of `R`
+  multiline editing and autocompletion. Launch with `radian` instead of `R`.
+  Completion is on Shift+Enter (kitty map → F24, bound in `configs/radian/keys.py`);
+  Tab only indents
 - `pandoc-cli` — Markdown → PDF converter; the `pandoc` binary
   `jupyter-nbconvert --to pdf` shell out to
 - `typst`, `tinymist`, `typstyle` — Typst compiler, its LSP/live-preview backend, and

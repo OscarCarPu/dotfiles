@@ -53,6 +53,7 @@ declare -A DOTFILES=(
     ["configs/pandoc/typst-math.lua"]="$HOME/.local/share/pandoc/filters/typst-math.lua"
     ["configs/pandoc/typst-boxes.lua"]="$HOME/.local/share/pandoc/filters/typst-boxes.lua"
     ["configs/fontconfig/fonts.conf"]="$HOME/.config/fontconfig/fonts.conf"
+    ["configs/radian"]="$HOME/.config/radian"
 )
 
 # Files COPIED rather than symlinked, because the app rewrites them with

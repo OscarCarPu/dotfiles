@@ -1,0 +1,6 @@
+options(radian.on_load_hooks = list(function() {
+    cat("\033]2;radian\007")  # window title kitty matches for the Shift+Enter map
+    getOption("rchitect.py_tools")$py_eval(
+        sprintf("__import__('runpy').run_path(%s)", shQuote(path.expand("~/.config/radian/keys.py"))))
+    invisible()
+}))
