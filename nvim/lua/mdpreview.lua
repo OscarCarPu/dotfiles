@@ -237,13 +237,20 @@ function M.attach(label, to_typ)
 
   local function launch_terminal()
     view_buf = vim.api.nvim_create_buf(true, true)
-    vim.api.nvim_buf_set_name(view_buf, base .. " (preview)")
+    -- full path: two files with the same name in different folders get distinct preview buffers
+    vim.api.nvim_buf_set_name(view_buf, string.format("%s/%s (preview)", dir, base))
     require("pdfview").attach(view_buf, pdf)
-    vim.api.nvim_create_autocmd("BufWipeout", {
+    -- the viewer's q is :bdelete, which only unloads: end the preview and wipe the leftover buffer too
+    vim.api.nvim_create_autocmd({ "BufUnload", "BufWipeout" }, {
       buffer = view_buf,
       once = true,
-      callback = function()
-        if view_buf then view_buf = nil; vim.schedule(stop) end
+      callback = function(ev)
+        if view_buf ~= ev.buf then return end
+        view_buf = nil
+        vim.schedule(function()
+          stop()
+          if vim.api.nvim_buf_is_valid(ev.buf) then vim.api.nvim_buf_delete(ev.buf, { force = true }) end
+        end)
       end,
     })
     show_preview()
