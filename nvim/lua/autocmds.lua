@@ -35,3 +35,9 @@ vim.api.nvim_create_autocmd("BufReadCmd", {
     require("pdfview").attach(args.buf, args.file)
   end,
 })
+
+-- Spell-check prose (English + Spanish; es dictionary lives in spell/)
+vim.api.nvim_create_autocmd("FileType", {
+  pattern = { "markdown", "typst", "text", "tex", "gitcommit" },
+  callback = function() vim.opt_local.spell = true end,
+})

@@ -10,3 +10,4 @@ o.softtabstop = 4
 o.expandtab = true
 o.wrap = true
 o.linebreak = true
+o.spelllang = "en,es"
