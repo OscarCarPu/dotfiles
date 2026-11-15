@@ -6,7 +6,7 @@ ls.filetype_set("markdown", {})
 local dir = vim.fn.expand "%:p:h"
 local base = vim.fn.expand "%:t:r"
 require("mdpreview").attach("Markdown", function(text, out, done)
-  local job = vim.fn.jobstart({ "pandoc", "-d", "paper", "--resource-path", dir, "-M", "mermaid_dir=" .. dir, "-o", out }, {
+  local job = vim.fn.jobstart({ "pandoc", "-d", "paper", "--resource-path", dir, "-o", out }, {
     stdin = "pipe",
     on_exit = function(_, code) done(code, code ~= 0 and "error: pandoc failed" or "") end,
   })

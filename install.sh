@@ -52,7 +52,6 @@ declare -A DOTFILES=(
     ["configs/pandoc/paper.yaml"]="$HOME/.local/share/pandoc/defaults/paper.yaml"
     ["configs/pandoc/typst-math.lua"]="$HOME/.local/share/pandoc/filters/typst-math.lua"
     ["configs/pandoc/typst-boxes.lua"]="$HOME/.local/share/pandoc/filters/typst-boxes.lua"
-    ["configs/pandoc/typst-mermaid.lua"]="$HOME/.local/share/pandoc/filters/typst-mermaid.lua"
     ["configs/fontconfig/fonts.conf"]="$HOME/.config/fontconfig/fonts.conf"
 )
 

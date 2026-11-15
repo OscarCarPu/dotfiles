@@ -430,11 +430,6 @@ above and skipped by `install-packages.sh`.
 - `direnv` — per-directory env loader, install via
   `curl -sfL https://direnv.net/install.sh | bash`. Lands in `~/.bun/bin/direnv`.
   `bash/.bashrc` runs `eval "$(direnv hook bash)"`
-- `mmdc` — mermaid-cli, renders ```` ```mermaid ```` blocks in the Markdown preview/export
-  (`configs/pandoc/typst-mermaid.lua`). Install with
-  `PUPPETEER_SKIP_DOWNLOAD=1 bun add -g @mermaid-js/mermaid-cli`; it drives the system
-  `chromium`. Without it, mermaid blocks stay as plain code. Diagrams are cached as PNGs
-  in `.mermaid/` next to the document
 - `openspec` — spec-driven development CLI (`openspec init` in a repo sets up
   `openspec/` + agent slash commands). Installed by `install-packages.sh` via
   `bun add -g @fission-ai/openspec`; lands in `~/.bun/bin`. Needs node >= 22.12

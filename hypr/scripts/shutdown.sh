@@ -262,9 +262,7 @@ upgrade_user_tools() {
     local failed=()
     echo -e "\n\033[1;32m[ Updating bun / uv / cargo tools ]\033[0m"
     if command -v bun &>/dev/null; then
-        # mmdc drives the system chromium; without this, puppeteer would
-        # download its own copy on every update.
-        PUPPETEER_SKIP_DOWNLOAD=1 bun update -g --latest || failed+=(bun)
+        bun update -g --latest || failed+=(bun)
     fi
     if command -v uv &>/dev/null; then
         uv tool upgrade --all || failed+=(uv)
