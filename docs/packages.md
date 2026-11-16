@@ -231,6 +231,8 @@ unmounts all, right-click opens Thunar.
 - `uv` — Python package and project manager
 - `tk` — Tcl/Tk toolkit, provides `tkinter` for Python GUIs
 - `r` — R statistical computing language
+- `nlopt` — system NLopt library for the `nloptr` R package (dependency of
+  `lme4` → `car`); without it `nloptr` tries to build its bundled copy and fails
 - `air-language-server-bin` (AUR) — provides `air`, the R formatter for nvim's
   format-on-save. Indent width comes from `configs/air.toml`, symlinked to
   `~/.air.toml` (air walks up parent dirs); a project `air.toml` overrides it

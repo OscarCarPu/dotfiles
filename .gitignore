@@ -18,3 +18,4 @@ configs/seafile-cli/credentials
 
 # Claude account-synced skills (managed by Claude Code, not user config)
 claude/skills/synced/
+claude/skills/.trash/
