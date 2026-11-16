@@ -12,3 +12,8 @@ user_pref("browser.sessionstore.resume_from_crash", false);
 // userscript then submits the form).
 user_pref("signon.rememberSignons", true);
 user_pref("signon.autofillForms", true);
+
+// Client-certificate dialog: default the "remember" dropdown to "never" (0)
+// instead of "temporarily" (2), so the cert picker shows on every request
+// rather than reusing the last chosen cert for the rest of the session.
+user_pref("security.client_auth_certificate_default_remember_setting", 0);
