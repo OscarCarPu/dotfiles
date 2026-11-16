@@ -144,6 +144,17 @@ tooltip label {
     color: @text-primary;
 }
 
+/* Clock shown above fullscreen windows (hypr/scripts/fullscreen_clock.sh):
+   no bar background and a see-through pill so the content shows through. */
+window#waybar.fullscreen-clock {
+    background-color: transparent;
+}
+
+window#waybar.fullscreen-clock #clock {
+    background-color: alpha(@surface1, 0.3);
+    color: alpha(@text-primary, 0.75);
+}
+
 #cpu {
     background-color: @green;
     color: @text-dark;
