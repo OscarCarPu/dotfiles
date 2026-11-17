@@ -1,4 +1,4 @@
-.phony: axeigo-forms-2026 ssh-lab
+.phony: axeigo-forms-2026 ssh-lab windows-reboot
 
 axeigo-forms-2026:
 	cd /home/ocp/dev/axeigo/formularios/obradoiros && uv run main.py
