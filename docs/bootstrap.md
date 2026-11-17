@@ -13,12 +13,11 @@ Split in two:
 - [Part 2 — Execution](#part-2--execution-booting-artix--this-system): the repo's scripts, in order.
 - [Part 3 — Manual leftovers](#part-3--manual-leftovers): what no script can do for you.
 
-> **This machine is a special case.** It dual-boots and has **no bootloader of
-> its own** — `grub`, `efibootmgr` and `os-prober` are not installed. It boots
-> only because the neighbouring Arch install's GRUB finds
-> `/boot/vmlinuz-linux` on the Artix root partition. On a fresh single-OS
-> machine you **must** install a bootloader ([step 1.10](#110-bootloader)) or
-> the disk will not boot.
+> **This machine dual-boots** Artix, Arch and Windows from one ESP. Artix has
+> its own GRUB (`\EFI\artix\grubx64.efi`, first in `BootOrder`); the Arch GRUB
+> alongside it can still find `/boot/vmlinuz-linux` on the Artix root as a
+> fallback. Whatever the setup, you **must** have a bootloader
+> ([step 1.10](#110-bootloader)) or the disk will not boot.
 
 ---
 
@@ -188,7 +187,7 @@ EDITOR=nano visudo         # uncomment: %wheel ALL=(ALL:ALL) ALL
 ### 1.10 Bootloader
 
 **Skip only if another distro's GRUB on the same disk will pick this install
-up** (this machine's situation — see the note at the top). In that case just
+up** (how this machine booted before Artix got its own GRUB). In that case just
 run `grub-mkconfig -o /boot/grub/grub.cfg` **from the other distro** with
 `os-prober` installed and `GRUB_DISABLE_OS_PROBER=false`, and set the default
 with `grub-set-default`.

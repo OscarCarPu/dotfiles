@@ -73,6 +73,21 @@ Power:
   power states). Read-only inspection; the actual governor switching is
   `hypr/scripts/power_profile.sh` + `configs/sudoers.d/10-cpu-governor`
 
+## Boot
+
+Dual-boot with Windows (and a neighbouring Arch install) on one ESP — see
+[`bootstrap.md`](bootstrap.md#110-bootloader).
+
+- `grub` — Artix's own bootloader (`\EFI\artix\grubx64.efi`). Its
+  `/etc/default/grub` is `configs/default/grub`, symlinked by
+  `install.sh --system`
+- `efibootmgr` — UEFI boot entries; `make windows-reboot` (`home/Makefile`)
+  uses it to set `BootNext` to Windows Boot Manager for one reboot
+- `sbctl` — Secure Boot key manager. Inspection only for now (`sbctl status`):
+  no keys created or enrolled, Secure Boot off
+- `wimlib` — `wimlib-imagex`, for Windows `.wim` images (e.g. splitting an
+  `install.wim` over 4 GiB so a Windows install USB fits on FAT32)
+
 ## Network
 
 - `networkmanager`, `networkmanager-runit`
