@@ -101,6 +101,7 @@ declare -A SYSTEM_DOTFILES=(
     ["configs/pacman.conf"]="/etc/pacman.conf"
     ["configs/chrony.conf"]="/etc/chrony.conf"
     ["configs/security/limits.d/90-nofile.conf"]="/etc/security/limits.d/90-nofile.conf"
+    ["configs/default/grub"]="/etc/default/grub"
 )
 
 # Sudoers drop-ins. Cannot be symlinked — sudo refuses files not owned by

@@ -261,8 +261,13 @@ else:
 upgrade_user_tools() {
     local failed=()
     echo -e "\n\033[1;32m[ Updating bun / uv / cargo tools ]\033[0m"
-    if command -v bun &>/dev/null; then
-        bun update -g --latest || failed+=(bun)
+    # The curl-installed bun owns the globals; the session PATH only has
+    # pacman's /usr/bin/bun (a torrent-tui dep), a different version that
+    # re-resolves the whole global lockfile. --foreground keeps bun in the
+    # terminal's process group so its progress UI is not stopped by SIGTTOU;
+    # the cap turns a stalled fetch into a failure instead of a hang.
+    if [ -x "$HOME/.bun/bin/bun" ]; then
+        timeout --foreground -k 10 180 "$HOME/.bun/bin/bun" update -g --latest || failed+=(bun)
     fi
     if command -v uv &>/dev/null; then
         uv tool upgrade --all || failed+=(uv)

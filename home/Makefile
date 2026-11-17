@@ -15,3 +15,8 @@ rescan-wifi:
 wifi-oscar:
 	nmcli device wifi list --rescan yes
 	nmcli device wifi connect Oscar
+
+windows-reboot:
+	@id=$$(efibootmgr | sed -n 's/^Boot\([0-9A-F]\{4\}\)\* Windows Boot Manager.*/\1/p'); \
+	[ -n "$$id" ] || { echo "no Windows Boot Manager UEFI entry"; exit 1; }; \
+	sudo efibootmgr -q -n $$id && loginctl reboot
