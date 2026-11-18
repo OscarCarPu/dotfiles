@@ -44,5 +44,6 @@
 	"independent_support_layer_height": "0",
 	"support_remove_small_overhang": "0",
 	"initial_layer_infill_speed": "30",
-	"ensure_vertical_shell_thickness": "ensure_critical_only"
+	"ensure_vertical_shell_thickness": "ensure_critical_only",
+	"layer_height": "0.2"
 }
