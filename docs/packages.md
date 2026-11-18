@@ -422,6 +422,20 @@ echo 'test' | pandoc -o /tmp/t.pdf   # exits 0 and writes a PDF, or names the mi
   dependency; `vulkan-intel` under "Hardware" is the 64-bit half. Both lib32
   entries are listed explicitly so `yay -S` resolves those two virtual deps
   without stopping to ask which provider to use
+- `legendary` — CLI Epic Games launcher; installs Celeste (`legendary install
+  Salt --game-folder ~/Games/Celeste`). Olympus (Celeste mod manager, unpacked
+  from its Azure `linux.main` build into `~/Games/Olympus`) bundles its own
+  LÖVE and .NET, and Everest makes the Windows build run natively via the
+  `Celeste` apphost, so no wine, `love` or `dotnet` is needed. Before the
+  first Everest install, `touch ~/Games/Celeste/Celeste`: Everest picks Linux
+  only if that file exists, and a Windows-mode install drops the Linux native
+  libs (`liblua54.so`), so fixing it afterwards needs Everest's `main.zip`
+  re-extracted before `MINIINSTALLER_PLATFORM=Linux ./MiniInstaller-linux`.
+  Epic ships only Windows FMOD: download FMOD Studio API 1.10.20 Linux
+  (fmod.com, Older; 2.x is ABI-incompatible) and copy `libfmod.so*` and
+  `libfmodstudio.so*` (non-`L` variants) into `~/Games/Celeste/lib64-linux`,
+  then clear the executable-stack flag on `libfmod.so.10.20` (glibc ≥2.41
+  refuses to dlopen it): `execstack -c` or flip PF_X off its `GNU_STACK` phdr
 - `dolphin-emu` — GameCube/Wii emulator; emulates the Skylanders Portal of
   Power (Controllers → USB Emulation), so the Wii Skylanders games run
   without the physical portal
