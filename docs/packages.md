@@ -401,6 +401,8 @@ echo 'test' | pandoc -o /tmp/t.pdf   # exits 0 and writes a PDF, or names the mi
   (`~/.cache/yay/packettracer/`) before building, or the build fails. It ships
   only an AppImage (no PATH binary or `.desktop`), so `scripts/packettracer` and
   `configs/applications/packettracer.desktop` provide the launcher
+- `graphs` — native GTK4/libadwaita math plotter (Arch `[extra]`): functions
+  and data, curve fitting, derivatives and integrals
 - `zeal` — offline documentation browser (Dash-compatible docsets; Go, Rust, Python, etc.)
 - `autofirma-bin` — Spanish gov e-signature client (FNMT/DNIe,
   XAdES/PAdES/CAdES); use the `-bin` AUR (official .deb repackaged) rather
