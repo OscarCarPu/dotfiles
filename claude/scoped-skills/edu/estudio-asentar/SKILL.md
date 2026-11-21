@@ -48,13 +48,13 @@ El usuario suele lanzar la skill desde la carpeta del tema, sin nombrar ningún 
 2. **Dudas**: pregunta qué no ha entendido. Aclara en corto, citando página y guiando con una pregunta; no le hagas el esquema ni resuelvas lo que luego debe practicar. Si un tramo sigue sin entenderse, que lo relea con una pista de dónde atascarse.
 3. **Esquema con el PDF abierto**: ideas clave, relaciones y porqués con sus palabras (qué problema resuelve, por qué funciona, cuándo se usa), ajustado a lo que a él le cuesta. Las fórmulas y el procedimiento no se memorizan: van en su propia chuleta, que se asienta con ejemplos y ejercicios.
 4. **Comparación**: contrasta su esquema con el PDF: aciertos, omisiones importantes, errores, citando página. No lo reescribas; él lo ajusta y tú confirmas. Si está vacío o copiado, pídele que lo rehaga.
-5. **Cuestiones principales** (3-5): por qué, cómo, qué pasaría si, relación con bloques anteriores. De una en una, por escrito y con el esquema cerrado una vez comprendido el trozo. Escribe cada cuestión en un fichero de la carpeta del tema (`cuestiones.typ` o `.md`, el formato de sus apuntes) con un hueco `Respuesta:` para que la redacte ahí; añade las nuevas al mismo fichero y nunca pongas soluciones en él; corriges después del intento, con la corrección concreta (qué faltaba o estaba mal y por qué).
+5. **Cuestiones solo a demanda**: por defecto no hay cuestiones; tras confirmar el esquema, pasa a la práctica (técnico) o cierra el bloque (teórico). Solo se plantean cuando el usuario no entiende algo o quiere explorar más un concepto (lo dice él, o sus dudas o su esquema muestran que algo no se ha entendido; en ese caso ofrécelas, no las impongas). Entonces: por qué, cómo, qué pasaría si, relación con bloques anteriores, centradas en ese concepto, de una en una, por escrito y con el esquema cerrado. Escribe cada cuestión en un fichero de la carpeta del tema (`cuestiones.typ` o `.md`, el formato de sus apuntes) con un hueco `Respuesta:` para que la redacte ahí; añade las nuevas al mismo fichero y nunca pongas soluciones en él; corriges después del intento, con la corrección concreta (qué faltaba o estaba mal y por qué).
 6. **Práctica** según tipo:
    - **Técnico**: ejercicios con la progresión ejemplo resuelto → huecos → completo (ver abajo).
-   - **Teórico**: explicar con sus palabras, aplicar el concepto a casos, comparar conceptos. Sin ejercicios numéricos forzados.
+   - **Teórico**: sin práctica por defecto (el esquema ajustado basta); explicar, aplicar a casos o comparar conceptos solo a demanda, como las cuestiones. Sin ejercicios numéricos forzados.
 7. Cierre breve del bloque (1-2 líneas: sólido/flojo) y siguiente bloque.
 
-**Calibra solo el ritmo, nunca el objetivo**: el bloque siempre acaba en un esquema suyo ajustado a sus lagunas. Aciertos, fallos y pistas necesarias dicen cuánto andamiaje y velocidad usar (si acierta rápido y bien, menos andamiaje; si falla, ejemplo resuelto del mismo tipo) y, al cerrar el bloque, si el tema necesita más trabajo o no. Ve mezclando preguntas, ejercicios, "ajusta tu esquema" y "relee las pp. X-Y" según lo que esa calibración indique.
+**Calibra solo el ritmo, nunca el objetivo**: el bloque siempre acaba en un esquema suyo ajustado a sus lagunas. Aciertos, fallos y pistas necesarias dicen cuánto andamiaje y velocidad usar (si acierta rápido y bien, menos andamiaje; si falla, ejemplo resuelto del mismo tipo) y, al cerrar el bloque, si el tema necesita más trabajo o no. Ve mezclando ejercicios, "ajusta tu esquema" y "relee las pp. X-Y" según lo que esa calibración indique (preguntas, solo a demanda).
 
 ### Ejercicios (técnico)
 
@@ -84,7 +84,7 @@ Entrada: enunciado, que suele estar en la propia carpeta del tema (+ sus apuntes
 
 1. Extrae del enunciado los conocimientos y habilidades necesarios.
 2. Contrástalos con sus apuntes: qué está cubierto y qué no.
-3. Para lo no cubierto, busca fuentes fiables (web si hay herramienta disponible) o pídele material; dile qué leer exactamente, por qué la fuente es fiable y qué no has encontrado, y aplica el mismo bucle (lectura → su resumen → feedback → cuestiones).
+3. Para lo no cubierto, busca fuentes fiables (web si hay herramienta disponible) o pídele material; dile qué leer exactamente, por qué la fuente es fiable y qué no has encontrado, y aplica el mismo bucle (lectura → su resumen → feedback; cuestiones solo a demanda).
 4. Sin comprobación previa de conocimientos: el usuario prefiere que, al llegar al trabajo, le vayas indicando "haz este ejercicio/tarea" uno a uno y él pregunta dudas si las tiene. Solo da avisos prácticos (erratas, plantilla, normas de entrega).
 5. **No hagas el trabajo ni redactes partes.** Si pide ayuda durante, guía con preguntas y pistas. Excepción confirmada por el usuario: puedes proponer y hacer con él ejercicios de práctica que repliquen los de la PEC/trabajo (misma técnica, aunque sea a tamaño real o implementando lo mismo que se pide, p. ej. en R), siempre aparte del entregable; no es una restricción. La entrega sigue siendo suya: no le redactes ni le escribas el fichero que entrega.
 
