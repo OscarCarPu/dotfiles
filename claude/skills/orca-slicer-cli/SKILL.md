@@ -7,7 +7,23 @@ description: Slice STLs headlessly with the orca-slicer CLI (v2.4.x) using the u
 
 The CLI cannot load user presets by name. Their `inherits` chains must be flattened first.
 
-## 1. Flatten the presets
+## 0. Orca >= 2.5: system profiles are packed (`*.opc`)
+
+Since 2.5.x `~/.config/OrcaSlicer/system/` only holds binary `*.opc` bundles, so `resolve_profiles.py`
+finds no parents, and passing a preset that keeps `inherits` fails with
+`can not resolve preset ...: Preset was not found in the loaded bundle` (return -5).
+Workaround (works, verified 2.5.1):
+
+1. Sparse-clone the profile JSONs for the installed tag (`orca-slicer --help | head -1` gives the version):
+   `git clone --depth 1 --branch v2.5.1 --filter=blob:none --sparse https://github.com/SoftFever/OrcaSlicer.git orca-src && cd orca-src && git sparse-checkout set resources/profiles/Prusa resources/profiles/OrcaFilamentLibrary`
+2. `python3 -I flatten_v25.py <orca-src> <outdir> '{"process_key":"override"}'` (next to this file; edit the
+   three `go(...)` lines). It merges the full chain, follows `renamed_from` aliases (e.g. `Prusa Generic PLA @CORE One`
+   is now `Generic PLA @Prusa CORE One`), **drops `inherits` everywhere** and blanks all compatibility fields.
+3. Pass the outputs with **absolute paths** to `--load-settings` / `--load-filaments`.
+
+Several pre-positioned STLs + `--arrange 0` keep their own coordinates as separate objects (no need to merge).
+
+## 1. Flatten the presets (Orca <= 2.4)
 
 `resolve_profiles.py` (next to this file) merges each user preset over its system parents
 (`~/.config/OrcaSlicer/system/*/*/*.json`) and writes `m.json`, `p.json`, `f.json` in the cwd.
@@ -51,7 +67,7 @@ Caveat: the merged plate is a single Orca object, so parts can't be edited indiv
 
 ## 4. Output conventions (punteiros project)
 
-Save gcode in `~/docs/punteiros/gcode/` and the STL in `~/docs/punteiros/stls/`, named `DD_MM_<material>_<what>_xN.{stl,gcode}`
+Save gcode in `~/docs/plasteiros/<project>/gcode/` and the STL in `~/docs/plasteiros/<project>/stls/` (punteiros: `~/docs/plasteiros/punteiros/`), named `DD_MM_<material>_<what>_xN.{stl,gcode}`
 (e.g. `30_09_pla_punteiro_con_x2.gcode`). Don't overwrite existing files with the same name.
 
 See also: the benchmarking caveat in the project memory — punteiros STLs are cooling-limited, so use a
