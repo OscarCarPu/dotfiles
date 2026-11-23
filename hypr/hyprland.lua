@@ -9,7 +9,8 @@ local DOTS = os.getenv("HOME") .. "/.dotfiles/hypr/scripts"
 ------------------
 
 -- Monitors matched by EDID description (serial) so port names like DVI-I-3/4 don't matter.
--- Dock monitors PARK at negative coordinates on connect: eDP-1 may have been
+-- Dock monitors PARK at negative coordinates on connect (positions mirrored in
+-- setup_monitors_by_serial.sh, which re-parks absent monitors): eDP-1 may have been
 -- gap-shifted to 0x840 while undocked, so full-dock positions here would
 -- overlap it and fire the "overlaps with other monitors" notification on
 -- every re-dock. Negative X can never collide with eDP-1 (always at X>=0);
