@@ -59,6 +59,7 @@ Scripts live in `scripts/` (symlinked to `~/.local/bin/`):
 - `scripts/git-ai`
 - `scripts/git-finish-feature`
 - `scripts/git-deploy`
+- `scripts/gv-api-sql` — non-interactive SQL against the gv-api DB (read-only unless `--write`); used by the `gv-api-db` Claude skill
 
 ## Personal Makefile (`~/Makefile`)
 

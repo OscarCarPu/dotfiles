@@ -1,0 +1,15 @@
+#!/bin/bash
+# Run SQL against the gv-api Postgres on the lab box, non-interactively.
+# Read-only by default; pass --write to allow modifications.
+#   gv-api-sql "select ..."
+#   gv-api-sql < query.sql
+#   gv-api-sql --write "update ..."
+
+pgoptions="-c default_transaction_read_only=on"
+if [ "$1" = "--write" ]; then pgoptions=""; shift; fi
+
+if [ $# -gt 0 ]; then sql="$*"; else sql=$(cat); fi
+
+printf '%s\n' "$sql" | ssh -o BatchMode=yes ocp@ssh.lab-ocp.com \
+    "cd /home/ocp/docker/gv/gv-api && docker compose exec -T -e PGOPTIONS='$pgoptions' db \
+     sh -c 'psql -X -v ON_ERROR_STOP=1 -U \"\$POSTGRES_USER\" -d \"\$POSTGRES_DB\"'"
