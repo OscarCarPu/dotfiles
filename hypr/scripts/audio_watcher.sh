@@ -39,14 +39,14 @@ dock_usb_present() {
 # (pactl) when available; wpctl only proves WirePlumber is up.
 audio_ready() {
     if command -v pactl >/dev/null 2>&1; then
-        pactl info >/dev/null 2>&1
+        timeout 3 pactl info >/dev/null 2>&1
     else
-        wpctl status >/dev/null 2>&1
+        timeout 3 wpctl status >/dev/null 2>&1
     fi
 }
 
 dock_unplugged() {
-    notify-send -t 3000 "Audio" "Dock disconnected - using $(pactl get-default-sink 2>/dev/null || echo built-in audio)" 2>/dev/null || true
+    notify-send -t 3000 "Audio" "Dock disconnected - using $(timeout 3 pactl get-default-sink 2>/dev/null || echo built-in audio)" 2>/dev/null || true
 }
 
 # Bounce the PipeWire stack, then decide by USB presence whether to wait for
@@ -72,7 +72,7 @@ bounce_audio() {
         sleep "$wait_left"
         # Conditions may have changed while deferred - skip the bounce if the
         # dock audio is up and PipeWire already sees it.
-        if dock_audio_alive && wpctl status 2>/dev/null | grep -q "USB3.1"; then
+        if dock_audio_alive && timeout 3 wpctl status 2>/dev/null | grep -q "USB3.1"; then
             echo "$(date): Audio healthy after cooldown, restart not needed"
             return
         fi
@@ -167,7 +167,7 @@ udevadm monitor --subsystem-match=sound --property 2>/dev/null | while read -r l
         else
             # Dock is still there but something changed - verify audio is working
             # by checking if the sink exists in PipeWire
-            if ! wpctl status 2>/dev/null | grep -q "USB3.1"; then
+            if ! timeout 3 wpctl status 2>/dev/null | grep -q "USB3.1"; then
                 echo "$(date): Dock present in ALSA but not in PipeWire, restarting..."
                 restart_audio || true
             fi

@@ -27,9 +27,9 @@ AUDIO_BUSY_FLAG="${XDG_RUNTIME_DIR:-/run/user/$(id -u)}/audio_watcher_busy"
 # (pactl) when available; wpctl only proves WirePlumber is up.
 audio_ready() {
     if command -v pactl >/dev/null 2>&1; then
-        pactl info >/dev/null 2>&1
+        timeout 3 pactl info >/dev/null 2>&1
     else
-        wpctl status >/dev/null 2>&1
+        timeout 3 wpctl status >/dev/null 2>&1
     fi
 }
 
