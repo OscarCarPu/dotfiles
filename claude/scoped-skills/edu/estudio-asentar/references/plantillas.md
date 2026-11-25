@@ -1,50 +1,37 @@
-# Plantillas de preguntas por tipo de tema
+# Plantillas
 
-Adapta siempre al contenido real del PDF; son moldes, no preguntas literales.
+Moldes, no preguntas literales: adáptalos siempre al contenido real del PDF.
 
-## Técnico / procedimental
-**Cuestiones del bloque**
-- ¿Por qué funciona este paso del método? ¿Qué pasaría si se omite?
-- ¿Cuándo se puede aplicar y cuándo no (condiciones, hipótesis)?
-- ¿Qué error típico cometerías aquí y cómo lo detectarías?
-- ¿En qué se diferencia de [técnica anterior]?
+## Preguntas guía de la pasada cerrada (conceptual y estadística)
 
-**Ejercicios**
-- Ejemplo resuelto: muestra el procedimiento con justificación de cada paso; pide que explique el paso N con sus palabras.
-- Con huecos: mismo tipo, dejando 1-2 pasos clave en blanco.
-- Completo: mismo tipo, datos distintos.
-- Intercalado: mezcla de 3-4 problemas de técnicas distintas donde primero debe identificar qué técnica aplica y por qué.
-- Detectar el error: solución con un fallo plantado; que lo encuentre y corrija.
-- Transferencia: situación que requiere adaptar el método.
+Con el PDF cerrado, tras cada trozo; se dan juntas como guion del volcado y palabras clave valen:
+- ¿Qué problema resuelve [concepto o técnica]?
+- ¿Por qué funciona y de qué depende?
+- ¿Cuándo no se usa, y qué usarías en su lugar?
+- Un ejemplo propio, distinto de los del PDF.
 
-## Teórico / conceptual
-**Cuestiones del bloque**
-- Explica [concepto] con tus palabras a alguien que no lo conoce.
-- ¿Por qué ocurre [fenómeno]? ¿Qué causas y consecuencias tiene?
-- Compara [A] y [B]: semejanzas, diferencias, cuándo importa cada uno.
-- ¿Qué pasaría si [condición cambia]?
-- ¿Cómo se relaciona con [bloque anterior]?
+## Práctica mínima por tipo de tarea
 
-**Práctica**
-- Caso: aplica [concepto/teoría] a esta situación y justifica.
-- Clasificar: dados estos ejemplos, ¿a qué categoría pertenece cada uno y por qué?
-- Argumentar: defiende o critica [afirmación] con lo visto.
-- Ordenar o relacionar conceptos (mapa en texto con sus propias palabras).
+| Tipo | En el bloque (10-20 min) | En repasos y test |
+|---|---|---|
+| Procedimental (cálculo, métodos) | un ejercicio completo nuevo; si falla: ejemplo resuelto → con huecos → completo; con 2 o más métodos vistos, «elige el método» | problema nuevo con chuleta; elegir método; detectar el error en una solución con un fallo plantado |
+| Estadística con salidas de R | interpretar una salida nueva: coeficientes, p, IC, supuestos y conclusión en contexto, sin lenguaje causal | salida → conclusión; dos salidas que difieren en una cosa; criticar una interpretación mal hecha |
+| Código / SQL | predecir la salida; completar con huecos; escribir y ejecutar | ¿qué devuelve?; encontrar el bug; escribir una consulta corta |
+| Diseño / modelado | corregir un diseño con 2-3 fallos o hacer un mini-diseño desde un enunciado de 5 líneas | diseñar a partir de un caso breve; encontrar el defecto |
+| Conceptual / descriptivo | una pregunta de aplicación o comparación («¿cuándo X frente a Y?») | escenario → elegir y justificar; comparar; evaluar una afirmación |
 
-## Mixto
-Alterna: cuestión conceptual del porqué → ejercicio que lo aplique → pregunta de por qué ha funcionado.
+## Preguntas de repaso
 
-## Retomar (recuperación)
-- Sin mirar apuntes: ¿qué era [concepto del bloque k] y para qué servía?
-- Enuncia el procedimiento de [técnica] de memoria.
+Nunca la pregunta literal de antes: misma idea con caso, datos o formulación nuevos.
+- ¿Qué era [concepto del bloque k] y para qué servía? Aplícalo a [situación nueva].
+- ¿En qué se diferencia [A] de [B] y cuándo importa?
+- Enuncia el procedimiento de [técnica] y resuelve [mini-problema con datos nuevos].
 - ¿Cómo se conecta [bloque 1] con [bloque 3]?
-- Mini-problema rápido de una técnica ya vista.
+- Lo marcado `+` o fallado antes, reformulado.
 
-## Test final
-- Mezcla bloques sin agruparlos; ~1/4 de transferencia.
-- Técnico: problemas completos, identificar técnica, detectar error, mini-caso.
-- Teórico: explicar, relacionar, comparar, aplicar a caso nuevo, evaluar una afirmación.
-- Sin pistas ni soluciones en el enunciado.
+## Test de tema y repaso final
 
-## Comprobación previa a un trabajo
-- 3-6 preguntas/mini-problemas solo sobre lo imprescindible del enunciado, incluyendo al menos uno sobre el contenido que no estaba en los apuntes.
+- Preguntas nuevas, mezcladas sin agrupar por bloque, con material cerrado; alrededor de 1/4 de transferencia.
+- Procedimental: problemas completos, identificar la técnica, detectar el error, mini-caso.
+- Conceptual: explicar, relacionar, comparar, aplicar a un caso nuevo, evaluar una afirmación.
+- Todo el test junto, sin pistas ni soluciones en el enunciado; corriges cuando haya respondido todo, con página.

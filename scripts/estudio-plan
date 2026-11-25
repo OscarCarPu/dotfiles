@@ -1,0 +1,509 @@
+#!/usr/bin/env python3
+"""Hitos de estudio en gv para la skill estudio-asentar.
+
+Solo lee gv, salvo `plan --aplicar`, que hace la creación inicial de un tema:
+  - due_at para los bloques marcados como hito que aún no tienen fecha; la fecha sale del ritmo
+    repartido entre todos los bloques, y los que no son hito heredan en gv la del siguiente hito
+    por la cadena de dependencias (task_effective_due),
+  - tareas nuevas de bloque, encadenadas entre sí, si el plan las trae,
+  - el repaso semanal recurrente de la asignatura y su repaso final, si no existen.
+Nunca marca tareas como hechas, ni borra, ni cambia fechas ya puestas, ni añade
+dependencias a tareas que ya existían.
+
+  estudio-plan proyectos                 lista proyectos (para saber el id de la asignatura)
+  estudio-plan estado <proyecto_id>      estado del proyecto en gv (solo lectura)
+  estudio-plan plan <plan.json> [--hoy AAAA-MM-DD] [-o fichero.sql] [--aplicar]
+
+plan.json:
+  {
+    "proyecto": 24, "tema": "R3", "abrev": "AM",           # abrev opcional
+    "entrega": 323,                 # id de la tarea de la entrega (opcional)
+    "dias_entrega": 3,              # días reservados antes del due_at de la entrega (defecto 2)
+    "inicio": "2026-11-26",         # opcional; por defecto, hoy
+    "fin": "2026-12-05",            # opcional: último día para los bloques (tope: fin de la asignatura - 14 días)
+    "max_por_dia": 1,               # bloques por día (sube a 2 solo si no caben)
+    "bloques": [
+      {"id": 312},                                          # bloque que ya existe, sin fecha propia
+      {"id": 313, "hito": true},                            # hito: lleva due_at
+      {"nombre": "PCA (I)", "descripcion": "...", "horas": 1.5},  # bloque nuevo
+      {"id": 318, "despues": true, "hito": true}            # va tras la entrega
+    ]
+  }
+"""
+
+import csv
+import datetime as dt
+import io
+import json
+import math
+import re
+import subprocess
+import sys
+import unicodedata
+
+DIAS = ["lun", "mar", "mié", "jue", "vie", "sáb", "dom"]
+SEMANAL = "ea:repaso-semanal"
+FINAL = "ea:repaso-final"
+MARGEN_FINAL = 7  # el repaso final va 7 días antes del fin de la asignatura
+MARGEN_BLOQUES = 14  # los bloques acaban 2 semanas antes del fin: así pasan por un repaso semanal
+
+
+class Error(Exception):
+    pass
+
+
+def die(msg):
+    raise Error(msg)
+
+
+def sql_query(query):
+    proc = subprocess.run(
+        ["gv-api-sql"],
+        input="\\set QUIET on\n\\pset format csv\n" + query,
+        capture_output=True,
+        text=True,
+    )
+    if proc.returncode != 0:
+        die(f"fallo consultando gv:\n{proc.stderr.strip()}")
+    return list(csv.DictReader(io.StringIO(proc.stdout)))
+
+
+def q(value):
+    return "'" + str(value).replace("'", "''") + "'"
+
+
+def fecha(s):
+    return dt.date.fromisoformat(s) if s else None
+
+
+def slug(s):
+    s = unicodedata.normalize("NFKD", str(s)).encode("ascii", "ignore").decode().lower()
+    return re.sub(r"[^a-z0-9]+", "-", s).strip("-")
+
+
+def abrev_de(nombre):
+    palabras = [p for p in re.split(r"\s+", nombre) if len(p) > 2]
+    return "".join(p[0].upper() for p in palabras) or nombre[:3].upper()
+
+
+def horas_de(valor):
+    if valor in (None, ""):
+        return "null"
+    try:
+        h = float(str(valor).replace(",", "."))
+    except ValueError:
+        die(f"horas no numéricas: {valor!r}")
+    if not 0 < h < 1000:
+        die(f"horas fuera de rango: {valor!r}")
+    return f"{h:.2f}"
+
+
+def tabla(filas, cabecera):
+    anchos = [max(len(str(x)) for x in col) for col in zip(cabecera, *filas)]
+    linea = lambda f: "  ".join(str(x).ljust(a) for x, a in zip(f, anchos)).rstrip()
+    return "\n".join([linea(cabecera), linea(["-" * a for a in anchos])] + [linea(f) for f in filas])
+
+
+# ---------------------------------------------------------------- proyectos / estado
+
+
+def cmd_proyectos():
+    filas = sql_query(
+        "select p.id, coalesce(pp.name, '') as padre, p.name, coalesce(p.due_at::text, '') as fin "
+        "from projects p left join projects pp on pp.id = p.parent_id "
+        "where p.finished_at is null order by pp.name nulls first, p.id;"
+    )
+    print(tabla([[f["id"], f["padre"], f["name"], f["fin"]] for f in filas], ["id", "padre", "nombre", "fin"]))
+
+
+def cmd_estado(proyecto, hoy):
+    pid = int(proyecto)
+    p = sql_query(f"select name, due_at from projects where id = {pid};")
+    if not p:
+        die(f"no existe el proyecto {pid}")
+    filas = sql_query(
+        f"""select t.id, t.name, t.task_type, coalesce(t.due_at::text, '') as due,
+               coalesce(t.estimate_hours::text, '') as horas,
+               coalesce((t.finished_at at time zone 'Europe/Madrid')::date::text, '') as hecha,
+               exists (select 1 from task_dependencies d join tasks b on b.id = d.depends_on
+                       where d.task_id = t.id and b.finished_at is null) as bloqueada
+        from tasks t where t.project_id = {pid}
+          and (t.finished_at is null or t.finished_at > now() - interval '14 days')
+        order by (t.finished_at is not null), t.due_at nulls last, t.id;"""
+    )
+    fin = fecha(p[0]["due_at"])
+    print(f"{p[0]['name']} · fin {fin or '—'}" + (f" (faltan {(fin - hoy).days} días)" if fin else ""))
+    out = []
+    for f in filas:
+        due = fecha(f["due"])
+        if f["hecha"]:
+            marca = f"hecha {f['hecha']}"
+        elif due and due < hoy:
+            marca = f"VENCIDA ({(hoy - due).days} d)"
+        elif due == hoy:
+            marca = "hoy"
+        else:
+            marca = "bloqueada" if f["bloqueada"] == "t" else ""
+        tipo = "recurrente" if f["task_type"] == "recurring" else ""
+        out.append([f["id"], f["name"], f["due"] or "—", f["horas"], marca, tipo])
+    print(tabla(out, ["id", "tarea", "due_at", "h", "estado", ""]))
+
+
+# ---------------------------------------------------------------- plan
+
+
+def repartir(n, ini, fin, max_por_dia, etiqueta):
+    """n fechas de hito repartidas uniformemente en [ini, fin], en orden."""
+    if n == 0:
+        return [], []
+    if fin < ini:
+        die(
+            f"{etiqueta}: no hay días entre {ini} y {fin}. Pasa esos bloques a \"despues\", "
+            "baja dias_entrega o cambia el inicio."
+        )
+    k = (fin - ini).days + 1
+    avisos = []
+    if n > k * max_por_dia:
+        if max_por_dia < 2 and n <= k * 2:
+            avisos.append(f"{etiqueta}: {n} bloques en {k} días: hay días con 2 bloques")
+        else:
+            die(
+                f"{etiqueta}: {n} bloques no caben en {k} días ({ini} a {fin}) ni a 2 por día. "
+                "Pasa bloques a \"despues\", reduce el alcance o pide más días."
+            )
+    # Punto medio de n tramos iguales: crece con i; 1 por día si n ≤ k; como mucho 2 si n ≤ 2k.
+    return [ini + dt.timedelta(days=math.floor((i + 0.5) * k / n)) for i in range(n)], avisos
+
+
+def cmd_plan(ruta, hoy, salida, aplicar):
+    try:
+        with open(ruta) as fh:
+            plan = json.load(fh)
+    except (OSError, json.JSONDecodeError) as e:
+        die(f"no se puede leer {ruta}: {e}")
+    pid = int(plan["proyecto"])
+    tema = slug(plan.get("tema", "")) or die("falta 'tema'")
+    inicio = fecha(plan.get("inicio")) or hoy
+    max_por_dia = int(plan.get("max_por_dia", 1))
+    if max_por_dia < 1:
+        die("max_por_dia debe ser 1 o más")
+    bloques = plan.get("bloques")
+    if not isinstance(bloques, list):
+        die("falta la lista 'bloques' (puede ser [])")
+
+    p = sql_query(f"select name, due_at, priority from projects where id = {pid};")
+    if not p:
+        die(f"no existe el proyecto {pid}")
+    pnombre, fin_asig, prioridad = p[0]["name"], fecha(p[0]["due_at"]), int(p[0]["priority"])
+    if not fin_asig:
+        die(f"el proyecto {pid} no tiene due_at (fin de la asignatura)")
+    if fin_asig <= hoy:
+        die(f"la asignatura ya terminó ({fin_asig})")
+    abrev = plan.get("abrev") or abrev_de(pnombre)
+    ultimo_dia_bloques = fin_asig - dt.timedelta(days=MARGEN_BLOQUES)
+    fin_plan = fecha(plan.get("fin"))
+    avisos = []
+    if fin_plan:
+        if fin_plan < inicio:
+            die(f"el fin {fin_plan} es anterior al inicio {inicio}")
+        if fin_plan > ultimo_dia_bloques:
+            avisos.append(f"fin {fin_plan} limitado a {ultimo_dia_bloques} (2 semanas antes del fin de la asignatura)")
+        ultimo_dia_bloques = min(fin_plan, ultimo_dia_bloques)
+
+    entrega = None
+    if plan.get("entrega"):
+        e = sql_query(
+            f"select id, name, due_at, finished_at is not null as hecha from tasks "
+            f"where id = {int(plan['entrega'])} and project_id = {pid};"
+        )
+        if not e:
+            die(f"la entrega {plan['entrega']} no es una tarea del proyecto {pid}")
+        entrega = e[0]
+        if not entrega["due_at"]:
+            die(f"la entrega {entrega['id']} no tiene due_at")
+
+    # Normaliza los bloques: existentes por id, nuevos por marca (proyecto + tema + nombre).
+    items, vistos = [], set()
+    for b in bloques:
+        if "id" in b:
+            clave = ("id", int(b["id"]))
+            item = {"id": int(b["id"]), "despues": bool(b.get("despues")), "hito": bool(b.get("hito"))}
+        else:
+            nombre = str(b.get("nombre") or "").strip()
+            if not nombre or len(nombre) > 40:
+                die(f"nombre vacío o de más de 40 caracteres: {nombre!r}")
+            marca = f"ea:bloque:{pid}:{tema}:{slug(nombre)};"
+            clave = ("marca", marca)
+            item = {
+                "nombre": nombre,
+                "marca": marca,
+                "descripcion": str(b.get("descripcion") or "").rstrip(),
+                "horas": horas_de(b.get("horas")),
+                "despues": bool(b.get("despues")),
+                "hito": bool(b.get("hito")),
+            }
+        if clave in vistos:
+            die(f"bloque repetido en el plan: {clave[1]}")
+        vistos.add(clave)
+        items.append(item)
+
+    ids = [it["id"] for it in items if "id" in it]
+    estado = {}
+    if ids:
+        for f in sql_query(
+            "select id, name, due_at, finished_at is not null as hecha, project_id from tasks "
+            f"where id in ({','.join(map(str, ids))});"
+        ):
+            estado[int(f["id"])] = f
+    for i in ids:
+        if i not in estado or int(estado[i]["project_id"]) != pid:
+            die(f"la tarea {i} no existe o no es del proyecto {pid}")
+    marcas = [it["marca"] for it in items if "marca" in it]
+    ya_creados = {}  # marca -> id
+    if marcas:
+        cond = " or ".join(f"strpos(description, {q(m)}) > 0" for m in marcas)
+        for f in sql_query(f"select id, description from tasks where project_id = {pid} and ({cond});"):
+            ya_creados.update({m: int(f["id"]) for m in marcas if m in f["description"]})
+
+    # Qué bloques necesitan fecha, separados en antes/después de la entrega.
+    for it in items:
+        if "id" in it:
+            f = estado[it["id"]]
+            it["nombre"] = f["name"]
+            it["ref"] = str(it["id"])
+            it["fijo"] = "hecho" if f["hecha"] == "t" else ("ya tenía fecha" if f["due_at"] else None)
+            it["due_actual"] = f["due_at"]
+        else:
+            it["ref"] = f"(select id from tasks where project_id = {pid} and strpos(description, {q(it['marca'])}) > 0)"
+            it["fijo"] = "ya creado" if it["marca"] in ya_creados else None
+    pendientes = [it for it in items if not it["fijo"]]
+
+    # El ritmo se reparte entre los bloques pendientes solo si queda algún hito por fechar; si los
+    # hitos ya tienen fecha (plan ya aplicado), los demás solo heredan y no se recalcula nada.
+    if not any(it["hito"] for it in items) and pendientes:
+        die('ningún bloque es hito: marca con "hito": true los que deben llevar fecha')
+    for it in pendientes:
+        it["due"] = None
+    if any(it["hito"] for it in pendientes):
+        if inicio < hoy:
+            die(f"el inicio {inicio} ya ha pasado")
+        antes = [it for it in pendientes if entrega and not it["despues"]]
+        despues = [it for it in pendientes if not (entrega and not it["despues"])]
+        ini_desp = inicio
+        if entrega:
+            e_due = fecha(entrega["due_at"])
+            if entrega["hecha"] == "t" or e_due < inicio:
+                avisos.append(f"la entrega {entrega['id']} ya pasó o está hecha: los bloques se reparten hasta el fin")
+                despues, antes = antes + despues, []
+            else:
+                ini_desp = max(inicio, e_due + dt.timedelta(days=1))
+                limite = min(e_due - dt.timedelta(days=int(plan.get("dias_entrega", 2))), ultimo_dia_bloques)
+                fechas, av = repartir(len(antes), inicio, limite, max_por_dia, "antes de la entrega")
+                avisos += av
+                for it, d in zip(antes, fechas):
+                    it["due"] = d
+        etiqueta = "después de la entrega" if entrega and antes else "bloques"
+        fechas, av = repartir(len(despues), ini_desp, ultimo_dia_bloques, max_por_dia, etiqueta)
+        avisos += av
+        for it, d in zip(despues, fechas):
+            it["due"] = d
+        pendientes = antes + despues  # orden de fechas
+
+    # gv muestra cada tarea con la fecha más temprana entre ella y lo que depende de ella
+    # (task_effective_due): así se calcula qué fecha verá cada bloque tras aplicar el plan.
+    abiertas = {int(f["id"]): f for f in sql_query("select id, name, due_at from tasks where finished_at is null;")}
+    dependientes = {}
+    for f in sql_query(
+        "select d.task_id, d.depends_on from task_dependencies d join tasks t on t.id = d.task_id "
+        "where t.finished_at is null;"
+    ):
+        dependientes.setdefault(int(f["depends_on"]), []).append(int(f["task_id"]))
+    nodo = lambda it: it.get("id") or ya_creados.get(it["marca"]) or it["marca"]
+    for prev, it in zip(items, items[1:]):
+        if "marca" in it and it["marca"] not in ya_creados:
+            dependientes.setdefault(nodo(prev), []).append(nodo(it))
+    vence = {n: fecha(f["due_at"]) for n, f in abiertas.items() if f["due_at"]}
+    vence.update({nodo(it): it["due"] for it in pendientes if it["hito"]})
+    nombre_de = {n: f["name"] for n, f in abiertas.items()}
+    nombre_de.update({nodo(it): it["nombre"] for it in items if nodo(it) not in nombre_de})
+
+    del_plan = {nodo(it) for it in items}
+
+    def efectiva(n0):
+        """(fecha que gv dará a n0, tarea que la impone, tareas fuera del plan por las que pasa)."""
+        mejor, por, pila, padre = None, None, [n0], {n0: None}
+        while pila:
+            n = pila.pop()
+            if vence.get(n) and (mejor is None or vence[n] < mejor):
+                mejor, por = vence[n], n
+            for m in dependientes.get(n, []):
+                if m not in padre:
+                    padre[m] = n
+                    pila.append(m)
+        via, n = [], padre.get(por)
+        while n is not None and n != n0:
+            if n not in del_plan:
+                via.insert(0, n)
+            n = padre[n]
+        return mejor, por, tuple(via)
+
+    filas, sentencias, adelantan, sin_fecha = [], [], {}, []
+    for it in items:
+        if it["fijo"]:
+            filas.append([it["ref"] if "id" in it else "—", it["nombre"], it.get("due_actual") or "—", f"{it['fijo']}: sin cambios"])
+    for it in pendientes:
+        ef, por, via = efectiva(nodo(it))
+        ref = it["id"] if "id" in it else "nuevo"
+        ritmo = f" (ritmo {it['due']})" if it["due"] else ""
+        if it["hito"]:
+            filas.append([ref, it["nombre"], it["due"], "hito"])
+        elif ef:
+            filas.append([ref, it["nombre"], "—", f"sin fecha propia; en gv, {ef}" + ritmo])
+        else:
+            filas.append([ref, it["nombre"], "—", "sin fecha en gv" + ritmo])
+            sin_fecha.append(it["nombre"])
+        if ef and it["due"] and ef < it["due"] and por != nodo(it):
+            adelantan.setdefault((por, via), []).append(str(ref) if "id" in it else it["nombre"])
+        if "id" in it and it["hito"]:
+            sentencias.append(
+                f"update tasks set due_at = {q(it['due'])} where id = {it['id']} "
+                "and due_at is null and finished_at is null;"
+            )
+        elif "marca" in it:
+            desc = (it["descripcion"] + "\n\n" + it["marca"]).lstrip()
+            due_sql = q(it["due"]) if it["hito"] else "null"
+            sentencias.append(
+                "insert into tasks (project_id, name, description, due_at, priority, estimate_hours) "
+                f"select {pid}, {q(it['nombre'])}, {q(desc)}, {due_sql}, {prioridad}, {it['horas']} "
+                f"where not exists (select 1 from tasks where project_id = {pid} "
+                f"and strpos(description, {q(it['marca'])}) > 0);"
+            )
+    tarea = lambda n: f"«{nombre_de[n]}» ({n if isinstance(n, int) else 'nueva'})"
+    for (por, via), refs in adelantan.items():
+        camino = f" a través de {', '.join(tarea(n) for n in via)}" if via else ""
+        avisos.append(
+            f"{tarea(por)}, que vence el {vence[por]}, depende de {', '.join(refs)}{camino}: gv les mostrará "
+            "esa fecha, antes que su ritmo. Si no debe, que el usuario quite esa dependencia en gv "
+            "(o borre la tarea que sobre)"
+        )
+    if sin_fecha:
+        avisos.append(
+            f"sin fecha en gv (ningún hito ni tarea con fecha depende de ellos): {', '.join(sin_fecha)}. "
+            "Marca como hito alguno posterior"
+        )
+
+    # Dependencias: solo las de bloques nuevos con su anterior en el plan; nunca en tareas existentes.
+    for prev, it in zip(items, items[1:]):
+        if "marca" in it and it["marca"] not in ya_creados:
+            sentencias.append(
+                f"insert into task_dependencies (task_id, depends_on) select {it['ref']}, {prev['ref']} "
+                f"where not exists (select 1 from task_dependencies where task_id = {it['ref']} "
+                f"and depends_on = {prev['ref']});"
+            )
+    if any("marca" in it for it in pendientes):
+        sentencias.append(
+            "do $$ begin if exists (select 1 from task_dependencies d join tasks t on t.id = d.task_id "
+            f"where t.project_id = {pid} and task_dependency_would_cycle(d.task_id, array[d.depends_on])) "
+            "then raise exception 'estudio-plan: ciclo de dependencias'; end if; end $$;"
+        )
+
+    # Repaso semanal recurrente y repaso final de la asignatura (uno de cada por proyecto).
+    marcas_rep = sql_query(
+        "select project_id, due_at, description from tasks where finished_at is null and ("
+        f"strpos(description, {q(SEMANAL + ':')}) > 0 or strpos(description, {q(FINAL + ':')}) > 0);"
+    )
+    mia = lambda m, tipo: m["project_id"] == str(pid) and f"{tipo}:{pid};" in m["description"]
+    if not any(mia(m, SEMANAL) for m in marcas_rep):
+        usados = {fecha(m["due_at"]).weekday() for m in marcas_rep if SEMANAL in m["description"] and m["due_at"]}
+        dia = next((d for d in range(5) if d not in usados), 5)
+        due = inicio + dt.timedelta(days=2)
+        due += dt.timedelta(days=(dia - due.weekday()) % 7)
+        if due >= fin_asig - dt.timedelta(days=MARGEN_FINAL):
+            avisos.append("no se crea repaso semanal: ya no cabe antes del repaso final")
+        else:
+            nombre = f"Repaso semanal {abrev}"[:40]
+            desc = (
+                "Repaso de memoria de toda la asignatura (~30 min). Lánzalo con /estudio-asentar desde la "
+                f"carpeta de la asignatura y di «repaso». Al terminar, Renew.\n\n{SEMANAL}:{pid};"
+            )
+            sentencias.append(
+                "insert into tasks (project_id, name, description, due_at, priority, estimate_hours, task_type, recurrence) "
+                f"select {pid}, {q(nombre)}, {q(desc)}, {q(due)}, {prioridad}, 0.50, 'recurring', 7 "
+                f"where not exists (select 1 from tasks where finished_at is null "
+                f"and strpos(description, {q(f'{SEMANAL}:{pid};')}) > 0);"
+            )
+            filas.append(["nuevo", nombre, due, f"recurrente cada 7 días (empieza en {DIAS[due.weekday()]})"])
+    if not any(mia(m, FINAL) for m in marcas_rep):
+        otros = {fecha(m["due_at"]) for m in marcas_rep if FINAL in m["description"] and m["due_at"]}
+        due = fin_asig - dt.timedelta(days=MARGEN_FINAL)
+        while due in otros and due > hoy + dt.timedelta(days=1):
+            due -= dt.timedelta(days=1)
+        due = max(due, hoy + dt.timedelta(days=1))
+        nombre = f"Repaso final {abrev}"[:40]
+        desc = (
+            "Repaso final mezclado de toda la asignatura (~45 min), material cerrado. Lánzalo con "
+            f"/estudio-asentar desde la carpeta de la asignatura y di «repaso final».\n\n{FINAL}:{pid};"
+        )
+        sentencias.append(
+            "insert into tasks (project_id, name, description, due_at, priority, estimate_hours) "
+            f"select {pid}, {q(nombre)}, {q(desc)}, {q(due)}, {prioridad}, 0.75 "
+            f"where not exists (select 1 from tasks where finished_at is null "
+            f"and strpos(description, {q(f'{FINAL}:{pid};')}) > 0);"
+        )
+        filas.append(["nuevo", nombre, due, "repaso final"])
+
+    print(f"{pnombre} ({abrev}) · tema {tema} · fin de la asignatura {fin_asig}", file=sys.stderr)
+    if entrega:
+        print(f"Entrega: {entrega['name']} (due_at {entrega['due_at']})", file=sys.stderr)
+    print(tabla(filas, ["id", "tarea", "due_at", "qué"]), file=sys.stderr)
+    for a in avisos:
+        print(f"aviso: {a}", file=sys.stderr)
+
+    if not sentencias:
+        print("Nada que crear.", file=sys.stderr)
+        return
+    sql = "begin;\n" + "\n".join(sentencias) + "\ncommit;\n"
+    if salida:
+        with open(salida, "w") as fh:
+            fh.write(sql)
+    elif not aplicar:
+        print(sql)
+    if aplicar:
+        proc = subprocess.run(["gv-api-sql", "--write"], input=sql, capture_output=True, text=True)
+        if proc.returncode != 0:
+            die(f"fallo al escribir en gv (no se ha aplicado nada):\n{proc.stderr.strip()}")
+        cambios = [l for l in proc.stdout.splitlines() if l.startswith(("INSERT", "UPDATE"))]
+        hechos = sum(int(l.split()[-1]) for l in cambios)
+        print(f"Aplicado en gv: {hechos} filas creadas o con fecha nueva.", file=sys.stderr)
+
+
+def main(argv):
+    hoy = dt.date.today()
+    if "--hoy" in argv:
+        i = argv.index("--hoy")
+        hoy = dt.date.fromisoformat(argv[i + 1])
+        del argv[i : i + 2]
+    salida = None
+    if "-o" in argv:
+        i = argv.index("-o")
+        salida = argv[i + 1]
+        del argv[i : i + 2]
+    aplicar = "--aplicar" in argv
+    argv = [a for a in argv if a != "--aplicar"]
+    if len(argv) >= 1 and argv[0] == "proyectos":
+        cmd_proyectos()
+    elif len(argv) == 2 and argv[0] == "estado":
+        cmd_estado(argv[1], hoy)
+    elif len(argv) == 2 and argv[0] == "plan":
+        cmd_plan(argv[1], hoy, salida, aplicar)
+    else:
+        sys.exit(__doc__)
+
+
+if __name__ == "__main__":
+    try:
+        main(sys.argv[1:])
+    except Error as e:
+        sys.exit(f"estudio-plan: {e}")
+    except (KeyError, ValueError, TypeError, IndexError, AttributeError) as e:
+        sys.exit(f"estudio-plan: entrada no válida ({type(e).__name__}: {e})")
