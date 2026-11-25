@@ -266,7 +266,7 @@ if [ "${1:-}" = "--check" ]; then
     section "Scripts in ~/.local/bin"
     missing=0
     for script in "$DOTFILES_DIR/scripts"/*; do
-        [ -e "$script" ] || continue
+        [ -f "$script" ] || continue
         target="$HOME/.local/bin/$(basename "$script")"
         if [ ! -L "$target" ] || [ "$(readlink "$target")" != "$script" ]; then
             bad "$(basename "$script") not linked into ~/.local/bin"
@@ -636,6 +636,8 @@ for script in "$SCRIPTS_DIR"/*; do
         echo " Skipping $(basename "$script"): broken symlink ($(readlink "$script"))"
         continue
     fi
+    # Only files are executables; skip dirs like a python __pycache__.
+    [ -d "$script" ] && continue
     script_name=$(basename "$script")
     link_file "$script" "$LOCAL_BIN/$script_name"
 done
