@@ -12,7 +12,7 @@ Con el PDF cerrado, tras cada trozo; se dan juntas como guion del volcado y pala
 
 ## Práctica mínima por tipo de tarea
 
-| Tipo | En el bloque (10-20 min) | En repasos y test |
+| Tipo | En el bloque (duración según la importancia) | En repasos y test |
 |---|---|---|
 | Procedimental (cálculo, métodos) | un ejercicio completo nuevo; si falla: ejemplo resuelto → con huecos → completo; con 2 o más métodos vistos, «elige el método» | problema nuevo con chuleta; elegir método; detectar el error en una solución con un fallo plantado |
 | Estadística con salidas de R | interpretar una salida nueva: coeficientes, p, IC, supuestos y conclusión en contexto, sin lenguaje causal | salida → conclusión; dos salidas que difieren en una cosa; criticar una interpretación mal hecha |
