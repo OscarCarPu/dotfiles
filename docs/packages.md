@@ -344,7 +344,7 @@ echo 'test' | pandoc -o /tmp/t.pdf   # exits 0 and writes a PDF, or names the mi
 
 ## Apps (AUR unless noted)
 
-- `librewolf-bin` — daily browser, opened by `startup_apps.sh`
+- `librewolf` — daily browser, opened by `startup_apps.sh` (Arch `[extra]`; replaced the AUR `librewolf-bin`, which was removed and stopped updating at 153)
 - Violentmonkey (LibreWolf add-on) — userscript manager; hosts `configs/uoc-aula-autosubmit.user.js` (submits the UOC Shibboleth login form on `id-provider.uoc.edu` once LibreWolf autofills it)
 - `chromium` — lightweight Chromium for checking web rendering
 - `firefox` — kept alongside LibreWolf as the stock-behaviour reference: when a
