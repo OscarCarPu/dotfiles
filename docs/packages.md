@@ -441,6 +441,13 @@ echo 'test' | pandoc -o /tmp/t.pdf   # exits 0 and writes a PDF, or names the mi
 - `dolphin-emu` — GameCube/Wii emulator; emulates the Skylanders Portal of
   Power (Controllers → USB Emulation), so the Wii Skylanders games run
   without the physical portal
+- `melonds` (AUR) — Nintendo DS emulator; built-in FreeBIOS boots DS games
+  without dumped BIOS/firmware (DSi mode still needs real dumps). ROMs in
+  `~/Games/ds`
+- `azahar` (AUR) — Nintendo 3DS emulator, the maintained Citra successor
+  (Citra and Lime3DS merged into it). Only runs decrypted dumps
+  (`.3ds`/`.cci`/`.cxi`/`.cia`); encrypted ROMs fail to load. ROMs in
+  `~/Games/3ds`
 
 ## AUR helper
 
