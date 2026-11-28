@@ -20,17 +20,20 @@ corrección, que solo se usan cuando el usuario lo pide expresamente.
   estudio-plan proyectos                     lista proyectos (para saber el id de la asignatura)
   estudio-plan estado <proyecto_id>          estado del proyecto en gv (solo lectura)
   estudio-plan plan <plan.json> [--hoy AAAA-MM-DD] [-o fichero.sql] [--aplicar]
+                    [--como-borradas id,id,...]   (solo en seco: calcula como si esas tareas no existieran;
+                                                   para replanificar antes de borrarlas)
 Corrección (sin --aplicar solo muestran el cambio):
   estudio-plan mover <tarea> <AAAA-MM-DD> [--aplicar]   cambia el due_at de una tarea abierta
   estudio-plan dep <tarea> <de> [--aplicar]             <tarea> pasa a depender de <de>
   estudio-plan quitar-dep <tarea> <de> [--aplicar]      quita esa dependencia
-  estudio-plan borrar <tarea> [--aplicar]               borra una tarea abierta sin tiempo registrado
+  estudio-plan borrar <tarea>... [--aplicar]            borra tareas abiertas sin tiempo registrado
+  estudio-plan horas <tarea> <h> [<tarea> <h>...] [--aplicar]  cambia las horas estimadas
   estudio-plan repasos <proyecto> <importancia> [--aplicar]  ajusta horas y minutos de sus repasos a la importancia
 
 plan.json:
   {
     "proyecto": 23, "tema": "R3", "abrev": "MN",           # abrev opcional
-    "importancia": 3,               # 1-3, de <asignatura>/estudio-asignatura.md (defecto 2)
+    "importancia": 3,               # 1-3, de <asignatura>/estudio-asignatura.md (defecto 2; en 1 no hay repasos)
     "entregas": [                   # en orden de fecha; cada una es un id o un objeto:
       323,                          #   tarea existente
       {"id": 340, "due_at": "2026-12-09"},                  # pone due_at si no tiene
@@ -39,14 +42,14 @@ plan.json:
     "dias_entrega": 3,              # días reservados antes de cada entrega (defecto 2; "dias" por entrega)
     "fin_asignatura": "2027-01-15", # solo si el proyecto no tiene due_at
     "inicio": "2026-11-26",         # opcional; por defecto, hoy
-    "fin": "2026-12-30",            # opcional: último día de los bloques (defecto: fin de la asignatura
-                                    #   menos el margen de la importancia); manda sobre el margen, con aviso
+    "fin": "2026-12-30",            # opcional: último día de los bloques de deuda ("despues"); defecto y
+                                    #   tope: el fin de la asignatura
     "max_por_dia": 1,               # bloques por día (sube a 2 solo si no caben)
     "bloques": [                    # en orden; cada bloque va al tramo de su entrega
       {"id": 312},                                          # existente, sin fecha propia (tramo de la entrega 1)
       {"id": 313, "hito": true},                            # hito: lleva due_at
       {"nombre": "PCA (I)", "descripcion": "...", "horas": 1.5, "entrega": 2},  # nuevo, antes de la entrega 2
-      {"id": 318, "despues": true, "hito": true}            # tras la última entrega
+      {"id": 318, "despues": true, "hito": true}            # deuda: tras la última entrega
     ]                               # sin "entrega" ni "despues", un bloque va al tramo del anterior
   }
 """
@@ -65,11 +68,10 @@ DIAS = ["lun", "mar", "mié", "jue", "vie", "sáb", "dom"]
 SEMANAL = "ea:repaso-semanal"
 FINAL = "ea:repaso-final"
 MARGEN_FINAL = 7  # el repaso final va 7 días antes del fin de la asignatura
-# Por importancia de la asignatura (1-3): días entre el último bloque y el fin de la asignatura
-# (para que pase por repasos semanales) y horas estimadas del repaso semanal y del final.
-MARGEN_BLOQUES = {1: 7, 2: 10, 3: 14}
-HORAS_SEMANAL = {1: 0.33, 2: 0.42, 3: 0.67}
-HORAS_FINAL = {1: 0.50, 2: 0.67, 3: 1.00}
+# Horas del repaso semanal y del final por importancia de la asignatura (1-3, decididas por el
+# usuario). En importancia 1 no hay repasos.
+HORAS_SEMANAL = {1: None, 2: 0.33, 3: 1.00}
+HORAS_FINAL = {1: None, 2: 1.00, 3: 2.00}
 
 
 class Error(Exception):
@@ -199,7 +201,11 @@ def repartir(n, ini, fin, max_por_dia, etiqueta):
     return [ini + dt.timedelta(days=math.floor((i + 0.5) * k / n)) for i in range(n)], avisos
 
 
-def cmd_plan(ruta, hoy, salida, aplicar):
+def cmd_plan(ruta, hoy, salida, aplicar, borradas=frozenset()):
+    if borradas:
+        print(f"(simulación: como si no existieran {', '.join(map(str, sorted(borradas)))})", file=sys.stderr)
+    if borradas and aplicar:
+        die("--como-borradas es solo para el dry-run: borra primero esas tareas y aplica sin la opción")
     try:
         with open(ruta) as fh:
             plan = json.load(fh)
@@ -231,20 +237,16 @@ def cmd_plan(ruta, hoy, salida, aplicar):
         die(f"la asignatura ya terminó ({fin_asig})")
     abrev = plan.get("abrev") or abrev_de(pnombre)
     importancia = int(plan.get("importancia", 2))
-    if importancia not in MARGEN_BLOQUES:
+    if importancia not in HORAS_SEMANAL:
         die("importancia debe ser 1, 2 o 3")
-    margen = MARGEN_BLOQUES[importancia]
-    ultimo_dia_bloques = fin_asig - dt.timedelta(days=margen)
+    ultimo_dia_bloques = fin_asig
     fin_plan = fecha(plan.get("fin"))
     avisos = []
     if fin_plan:
         if fin_plan < inicio:
             die(f"el fin {fin_plan} es anterior al inicio {inicio}")
-        if fin_plan >= fin_asig:
-            die(f"el fin {fin_plan} no es anterior al fin de la asignatura ({fin_asig})")
-        if fin_plan > ultimo_dia_bloques:
-            avisos.append(f"fin {fin_plan} pasa del margen de la importancia {importancia} ({ultimo_dia_bloques}, "
-                          f"{margen} días antes del fin de la asignatura): esos bloques tendrán menos repasos semanales")
+        if fin_plan > fin_asig:
+            die(f"el fin {fin_plan} es posterior al fin de la asignatura ({fin_asig})")
         ultimo_dia_bloques = fin_plan
 
     # Entregas, en orden de fecha: un id de tarea existente, {"id": N, "due_at": ...} para ponerle
@@ -263,14 +265,15 @@ def cmd_plan(ruta, hoy, salida, aplicar):
         ent_due = fecha(ent.get("due_at"))
         if "id" in ent:
             e = sql_query(sel + f"where id = {int(ent['id'])} and project_id = {pid};")
-            if not e:
+            if not e or int(ent["id"]) in borradas:
                 die(f"la entrega {ent['id']} no es una tarea del proyecto {pid}")
         else:
             nombre_e = str(ent.get("nombre") or "").strip()
             if not nombre_e or len(nombre_e) > 40 or not ent_due:
                 die('entrega nueva: hacen falta "nombre" (≤ 40 caracteres) y "due_at"')
             marca_e = f"ea:entrega:{pid}:{tema}:{slug(nombre_e)};"
-            e = sql_query(sel + f"where project_id = {pid} and strpos(description, {q(marca_e)}) > 0;")
+            e = [f for f in sql_query(sel + f"where project_id = {pid} and strpos(description, {q(marca_e)}) > 0;")
+                 if int(f["id"]) not in borradas]
         if e:
             en = e[0]
             en["ref"], en["nodo"] = en["id"], int(en["id"])
@@ -349,6 +352,8 @@ def cmd_plan(ruta, hoy, salida, aplicar):
         ):
             estado[int(f["id"])] = f
     for i in ids:
+        if i in borradas:
+            die(f"la tarea {i} está en el plan y en --como-borradas")
         if i not in estado or int(estado[i]["project_id"]) != pid:
             die(f"la tarea {i} no existe o no es del proyecto {pid}")
     marcas = [it["marca"] for it in items if "marca" in it]
@@ -356,6 +361,8 @@ def cmd_plan(ruta, hoy, salida, aplicar):
     if marcas:
         cond = " or ".join(f"strpos(description, {q(m)}) > 0" for m in marcas)
         for f in sql_query(f"select id, description from tasks where project_id = {pid} and ({cond});"):
+            if int(f["id"]) in borradas:
+                continue
             ya_creados.update({m: int(f["id"]) for m in marcas if m in f["description"]})
 
     # Qué bloques necesitan fecha, separados en antes/después de la entrega.
@@ -410,13 +417,17 @@ def cmd_plan(ruta, hoy, salida, aplicar):
 
     # gv muestra cada tarea con la fecha más temprana entre ella y lo que depende de ella
     # (task_effective_due): así se calcula qué fecha verá cada bloque tras aplicar el plan.
-    abiertas = {int(f["id"]): f for f in sql_query("select id, name, due_at from tasks where finished_at is null;")}
+    abiertas = {
+        int(f["id"]): f for f in sql_query("select id, name, due_at from tasks where finished_at is null;")
+        if int(f["id"]) not in borradas
+    }
     dependientes = {}
     for f in sql_query(
         "select d.task_id, d.depends_on from task_dependencies d join tasks t on t.id = d.task_id "
         "where t.finished_at is null;"
     ):
-        dependientes.setdefault(int(f["depends_on"]), []).append(int(f["task_id"]))
+        if int(f["task_id"]) not in borradas and int(f["depends_on"]) not in borradas:
+            dependientes.setdefault(int(f["depends_on"]), []).append(int(f["task_id"]))
     dependientes_bd = {k: list(v) for k, v in dependientes.items()}
     nodo = lambda it: it.get("id") or ya_creados.get(it["marca"]) or it["marca"]
     for prev, it in zip(items, items[1:]):
@@ -529,12 +540,17 @@ def cmd_plan(ruta, hoy, salida, aplicar):
         )
 
     # Repaso semanal recurrente y repaso final de la asignatura (uno de cada por proyecto).
-    marcas_rep = sql_query(
-        "select project_id, due_at, description from tasks where finished_at is null and ("
-        f"strpos(description, {q(SEMANAL + ':')}) > 0 or strpos(description, {q(FINAL + ':')}) > 0);"
-    )
+    marcas_rep = [
+        m for m in sql_query(
+            "select id, project_id, due_at, description from tasks where finished_at is null and ("
+            f"strpos(description, {q(SEMANAL + ':')}) > 0 or strpos(description, {q(FINAL + ':')}) > 0);"
+        )
+        if int(m["id"]) not in borradas
+    ]
     mia = lambda m, tipo: m["project_id"] == str(pid) and f"{tipo}:{pid};" in m["description"]
-    if not any(mia(m, SEMANAL) for m in marcas_rep):
+    if HORAS_SEMANAL[importancia] is None:
+        avisos.append("importancia 1: no se crean repasos semanal ni final")
+    elif not any(mia(m, SEMANAL) for m in marcas_rep):
         usados = {fecha(m["due_at"]).weekday() for m in marcas_rep if SEMANAL in m["description"] and m["due_at"]}
         dia = next((d for d in range(5) if d not in usados), 5)
         due = inicio + dt.timedelta(days=2)
@@ -554,7 +570,7 @@ def cmd_plan(ruta, hoy, salida, aplicar):
                 f"and strpos(description, {q(f'{SEMANAL}:{pid};')}) > 0);"
             )
             filas.append(["nuevo", nombre, due, f"recurrente cada 7 días (empieza en {DIAS[due.weekday()]})"])
-    if not any(mia(m, FINAL) for m in marcas_rep):
+    if HORAS_FINAL[importancia] is not None and not any(mia(m, FINAL) for m in marcas_rep):
         otros = {fecha(m["due_at"]) for m in marcas_rep if FINAL in m["description"] and m["due_at"]}
         due = fin_asig - dt.timedelta(days=MARGEN_FINAL)
         while due in otros and due > hoy + dt.timedelta(days=1):
@@ -666,7 +682,16 @@ def cmd_quitar_dep(tid, de, aplicar):
     )
 
 
-def cmd_borrar(tid, aplicar):
+def cmd_borrar(tids, aplicar):
+    sentencias, resumen = [], []
+    for tid in dict.fromkeys(tids):
+        sql, linea = borrado(tid)
+        sentencias.append(sql)
+        resumen.append(linea)
+    escribir("\n".join(sentencias), aplicar, "\n".join(resumen))
+
+
+def borrado(tid):
     t = tarea_abierta(tid)
     f = sql_query(
         f"select (select count(*) from time_entries where task_id = {t['id']}) as tiempo, "
@@ -677,16 +702,30 @@ def cmd_borrar(tid, aplicar):
     if int(f["tiempo"]) or int(f["todos"]) or int(f["compromisos"]):
         die(f"la tarea {t['id']} tiene tiempo registrado, todos o compromisos: bórrala tú en gv si de verdad sobra")
     aviso = f"; dejan de depender de ella: {f['dependen']}" if f["dependen"] else ""
-    escribir(
+    return (
         f"delete from tasks where id = {t['id']} and finished_at is null;",
-        aplicar, f"borrar «{t['name']}» ({t['id']}, {t['proyecto']}, due {t['due_at'] or '—'}){aviso}",
+        f"borrar «{t['name']}» ({t['id']}, {t['proyecto']}, due {t['due_at'] or '—'}){aviso}",
     )
+
+
+def cmd_horas(pares, aplicar):
+    if not pares or len(pares) % 2:
+        die("uso: estudio-plan horas <tarea> <h> [<tarea> <h>...]")
+    sentencias, resumen = [], []
+    for tid, h in zip(pares[::2], pares[1::2]):
+        t, horas = tarea_abierta(tid), horas_de(h)
+        actual = sql_query(f"select estimate_hours from tasks where id = {t['id']};")[0]["estimate_hours"]
+        sentencias.append(f"update tasks set estimate_hours = {horas} where id = {t['id']} and finished_at is null;")
+        resumen.append(f"«{t['name']}» ({t['id']}): {actual or '—'} h → {horas} h")
+    escribir("\n".join(sentencias), aplicar, "\n".join(resumen))
 
 
 def cmd_repasos(proyecto, importancia, aplicar):
     pid, imp = int(proyecto), int(importancia)
     if imp not in HORAS_SEMANAL:
         die("importancia debe ser 1, 2 o 3")
+    if HORAS_SEMANAL[imp] is None:
+        die("en importancia 1 no hay repasos: si el usuario lo pide, bórralos con `estudio-plan borrar`")
     filas = sql_query(
         "select id, name, description, estimate_hours from tasks where finished_at is null and "
         f"(strpos(description, {q(f'{SEMANAL}:{pid};')}) > 0 or strpos(description, {q(f'{FINAL}:{pid};')}) > 0);"
@@ -716,6 +755,11 @@ def main(argv):
         i = argv.index("-o")
         salida = argv[i + 1]
         del argv[i : i + 2]
+    borradas = frozenset()
+    if "--como-borradas" in argv:
+        i = argv.index("--como-borradas")
+        borradas = frozenset(int(x) for x in argv[i + 1].split(",") if x.strip())
+        del argv[i : i + 2]
     aplicar = "--aplicar" in argv
     argv = [a for a in argv if a != "--aplicar"]
     if len(argv) >= 1 and argv[0] == "proyectos":
@@ -723,7 +767,7 @@ def main(argv):
     elif len(argv) == 2 and argv[0] == "estado":
         cmd_estado(argv[1], hoy)
     elif len(argv) == 2 and argv[0] == "plan":
-        cmd_plan(argv[1], hoy, salida, aplicar)
+        cmd_plan(argv[1], hoy, salida, aplicar, borradas)
     elif len(argv) == 3 and argv[0] == "mover":
         cmd_mover(argv[1], argv[2], aplicar)
     elif len(argv) == 3 and argv[0] == "dep":
@@ -732,8 +776,10 @@ def main(argv):
         cmd_quitar_dep(argv[1], argv[2], aplicar)
     elif len(argv) == 3 and argv[0] == "repasos":
         cmd_repasos(argv[1], argv[2], aplicar)
-    elif len(argv) == 2 and argv[0] == "borrar":
-        cmd_borrar(argv[1], aplicar)
+    elif len(argv) >= 3 and argv[0] == "horas":
+        cmd_horas(argv[1:], aplicar)
+    elif len(argv) >= 2 and argv[0] == "borrar":
+        cmd_borrar(argv[1:], aplicar)
     else:
         sys.exit(__doc__)
 

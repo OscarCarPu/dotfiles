@@ -60,7 +60,7 @@ Scripts live in `scripts/` (symlinked to `~/.local/bin/`):
 - `scripts/git-finish-feature`
 - `scripts/git-deploy`
 - `scripts/gv-api-sql` — non-interactive SQL against the gv-api DB (read-only unless `--write`); used by the `gv-api-db` Claude skill
-- `scripts/estudio-plan` — study milestones in gv for the `estudio-asentar` skill: read-only status, plus a one-time `plan --aplicar` (one or more deliveries, subject importance 1-3) that dates a topic's milestone blocks (the rest inherit the next milestone through the dependency chain) and creates the subject's weekly (recurring) and final review tasks, plus preview-first correction subcommands (`mover`, `dep`, `quitar-dep`, `borrar`, `repasos`)
+- `scripts/estudio-plan` — study milestones in gv for the `estudio-asentar` skill: read-only status, plus a one-time `plan --aplicar` (one or more deliveries; subject importance 1-3 sets study depth and review dose) that dates a topic's milestone blocks (the rest inherit the next milestone through the dependency chain) and creates the subject's weekly (recurring) and final review tasks, plus preview-first correction subcommands (`mover`, `dep`, `quitar-dep`, multi-id `borrar`, `horas`, `repasos`) and a `--como-borradas` dry-run for replanning
 
 ## Personal Makefile (`~/Makefile`)
 
